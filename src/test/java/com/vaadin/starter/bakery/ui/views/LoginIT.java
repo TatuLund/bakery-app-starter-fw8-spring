@@ -21,5 +21,4 @@ public class LoginIT extends AbstractIT {
 		$(MenuElement.class).first().logout();
 		Assert.assertEquals("Email", findElement(By.id("login-label")).getText());
 	}
-
 }

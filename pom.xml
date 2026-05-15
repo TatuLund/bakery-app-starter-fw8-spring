@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.0.RELEASE</version>
+		<version>2.7.18</version>
 		<relativePath></relativePath>
 	</parent>
 
@@ -17,18 +17,18 @@
 	<name>###Bakery###</name>
 
 	<properties>
-		<vaadin.version>8.9.2</vaadin.version>
+		<vaadin.version>8.31.1</vaadin.version>
 		<vaadin-spring.version>3.2.1</vaadin-spring.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<org.vaadin.spring.version>0.0.7.RELEASE</org.vaadin.spring.version>
 
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<vaadin.widgetset.mode>fetch</vaadin.widgetset.mode>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
+		<vaadin.widgetset.mode>local</vaadin.widgetset.mode>
 
 		<!-- Overrides for Spring Boot dependencies -->
-		<selenium.version>3.4.0</selenium.version>
-		<selenium-htmlunit.version>2.26</selenium-htmlunit.version>
+		<selenium.version>4.43.0</selenium.version>
+		<!-- <selenium-htmlunit.version>2.26</selenium-htmlunit.version> -->
 	</properties>
 
 	<repositories>
@@ -40,20 +40,12 @@
 			<id>vaadin-pre</id>
 			<url>https://maven.vaadin.com/vaadin-prereleases</url>
 		</repository>
-		<repository>
-			<id>vaadin-snapshot</id>
-			<url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-		</repository>
 	</repositories>
 
 	<pluginRepositories>
 		<pluginRepository>
 			<id>vaadin-pre</id>
 			<url>https://maven.vaadin.com/vaadin-prereleases</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>vaadin-snapshot</id>
-			<url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
 		</pluginRepository>
 	</pluginRepositories>
 
@@ -94,7 +86,7 @@
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-charts</artifactId>
-			<version>4.0.4</version>
+			<version>4.3.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>
@@ -148,6 +140,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.vaadin.spring.addons</groupId>
 			<artifactId>vaadin-spring-addon-eventbus</artifactId>
@@ -187,7 +183,7 @@
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-testbench-core</artifactId>
-			<version>5.1.1</version><!--$NO-MVN-MAN-VER$ -->
+			<version>5.4.0</version><!--$NO-MVN-MAN-VER$ -->
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -282,7 +278,7 @@
 
 					<plugin>
 						<artifactId>maven-failsafe-plugin</artifactId>
-						<version>2.19.1</version>
+						<version>2.22.2</version>
 						<executions>
 							<execution>
 								<goals>
@@ -293,31 +289,7 @@
 						</executions>
 						<configuration>
 							<trimStackTrace>false</trimStackTrace>
-							<systemPropertyVariables>
-								<webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
-							</systemPropertyVariables>
 						</configuration>
-					</plugin>
-
-					<!-- Plugin for automatically download Chrome Driver for tests -->
-					<plugin>
-						<groupId>com.lazerycode.selenium</groupId>
-						<artifactId>driver-binary-downloader-maven-plugin</artifactId>
-						<version>1.0.12</version>
-						<configuration>
-							<!-- root directory that downloaded driver binaries will be stored
-								in -->
-							<onlyGetDriversForHostOperatingSystem>true</onlyGetDriversForHostOperatingSystem>
-							<rootStandaloneServerDirectory>.driver</rootStandaloneServerDirectory>
-							<customRepositoryMap>webdrivers.xml</customRepositoryMap>
-						</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>selenium</goal>
-								</goals>
-							</execution>
-						</executions>
 					</plugin>
 				</plugins>
 			</build>

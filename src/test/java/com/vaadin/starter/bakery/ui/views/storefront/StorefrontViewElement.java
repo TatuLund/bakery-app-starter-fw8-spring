@@ -1,6 +1,9 @@
 package com.vaadin.starter.bakery.ui.views.storefront;
 
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
 import com.vaadin.starter.bakery.ui.views.orderedit.OrderEditViewElement;
+import com.vaadin.testbench.By;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.elements.GridElement;
 import com.vaadin.testbench.elementsbase.ServerClass;
@@ -19,4 +22,7 @@ public class StorefrontViewElement extends StorefrontViewDesignElement {
 		return new ElementQuery<>(OrderEditViewElement.class).context(getDriver()).first();
 	}
 
+    protected void waitForElementPresent(final By by) {
+        waitUntil(ExpectedConditions.presenceOfElementLocated(by));
+    }	
 }

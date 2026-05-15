@@ -1,5 +1,7 @@
 package com.vaadin.starter.bakery.ui.views;
 
+import java.time.Duration;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -23,7 +25,7 @@ public class LoginViewElement extends TestBenchElement {
 	}
 
 	protected void waitUntilElementPresent(By by) {
-		new WebDriverWait(getDriver(), 30).until(ExpectedConditions.presenceOfElementLocated(by));
+		new WebDriverWait(getDriver(), Duration.ofSeconds(30)).until(ExpectedConditions.presenceOfElementLocated(by));
 	}
 
 	private WebElement getSubmit() {

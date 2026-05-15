@@ -1,7 +1,9 @@
 package com.vaadin.starter.bakery;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.junit.Assert;
@@ -56,8 +58,23 @@ public class AbstractIT extends TestBenchTestCase {
 
 	protected WebDriver createDriver() {
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless");
+		options.addArguments("--headless=bew");
 		options.addArguments("--disable-gpu");
+
+        // Disable password manager to avoid interference with tests
+        // IMHO: Can't understand why this is not the default in headless mode.
+        options.addArguments("--disable-save-password-bubble");
+        options.addArguments(
+                "--disable-features=PasswordManagerOnboarding,PasswordCheck,SafetyCheck");
+
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("credentials_enable_service", false);
+        prefs.put("profile.password_manager_enabled", false);
+        // Leak detection / compromised password warnings
+        prefs.put("profile.password_manager_leak_detection", false);
+        prefs.put("profile.password_manager_leak_detection_enabled", false);
+        options.setExperimentalOption("prefs", prefs);
+
 		return TestBench.createDriver(new ChromeDriver(options));
 	}
 
