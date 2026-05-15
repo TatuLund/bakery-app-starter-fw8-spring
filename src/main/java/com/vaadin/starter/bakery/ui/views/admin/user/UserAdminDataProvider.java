@@ -20,7 +20,7 @@ import com.vaadin.starter.bakery.backend.service.UserService;
 @PrototypeScope
 public class UserAdminDataProvider extends FilterablePageableDataProvider<User, Object> {
 
-	private final UserService userService;
+	private transient UserService userService;
 
 	@Autowired
 	public UserAdminDataProvider(UserService userService) {

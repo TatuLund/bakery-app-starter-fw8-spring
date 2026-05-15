@@ -45,7 +45,7 @@ public class OrderEditView extends OrderEditViewDesign implements View {
 
 	private boolean hasChanges;
 
-	private final BeanFactory beanFactory;
+	private transient BeanFactory beanFactory;
 
 	@Autowired
 	public OrderEditView(OrderEditPresenter presenter, BeanFactory beanFactory, DollarPriceConverter priceConverter) {
@@ -132,7 +132,7 @@ public class OrderEditView extends OrderEditViewDesign implements View {
 		getOrder().getItems().remove(orderItem);
 
 		for (Component c : productInfoContainer) {
-			if (c instanceof ProductInfo && ((ProductInfo) c).getItem() == orderItem) {
+			if (c instanceof ProductInfo productInfo && productInfo.getItem() == orderItem) {
 				productInfoContainer.removeComponent(c);
 				break;
 			}
@@ -177,8 +177,8 @@ public class OrderEditView extends OrderEditViewDesign implements View {
 		this.mode = mode;
 		binder.setReadOnly(mode != Mode.EDIT);
 		for (Component c : productInfoContainer) {
-			if (c instanceof ProductInfo) {
-				((ProductInfo) c).setReportMode(mode != Mode.EDIT);
+			if (c instanceof ProductInfo productInfo) {
+				productInfo.setReportMode(mode != Mode.EDIT);
 			}
 		}
 		addItems.setVisible(mode == Mode.EDIT);
@@ -219,11 +219,8 @@ public class OrderEditView extends OrderEditViewDesign implements View {
 				.map(BindingValidationStatus::getField);
 
 		for (Component c : productInfoContainer) {
-			if (c instanceof ProductInfo) {
-				ProductInfo productInfo = (ProductInfo) c;
-				if (!productInfo.isEmpty()) {
-					errorFields = Stream.concat(errorFields, productInfo.validate());
-				}
+			if (c instanceof ProductInfo productInfo && !productInfo.isEmpty()) {
+				errorFields = Stream.concat(errorFields, productInfo.validate());
 			}
 		}
 		return errorFields;

@@ -54,7 +54,7 @@ public class DashboardView extends DashboardViewDesign implements View {
 	private static final String BOARD_ROW_PANELS = "board-row-panels";
 
 	private final NavigationManager navigationManager;
-	private final OrderService orderService;
+	private transient OrderService orderService;
 
 	private final BoardLabel todayLabel = new BoardLabel("Today", "3/7", "today");
 	private final BoardLabel notAvailableLabel = new BoardLabel("N/A", "1", "na");
@@ -245,7 +245,7 @@ public class DashboardView extends DashboardViewDesign implements View {
 
 		public PlotOptionsLineWithZIndex(Number zIndex) {
 			this.zIndex = zIndex;
-		};
+		}
 	}
 
 	public void selectedOrder(Order order) {

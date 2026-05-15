@@ -21,7 +21,7 @@ import com.vaadin.starter.bakery.backend.service.PickupLocationService;
 @SpringComponent
 public class PickupLocationComboBoxDataProvider extends PageableDataProvider<PickupLocation, String> {
 
-	private final PickupLocationService pickupLocationService;
+	private transient PickupLocationService pickupLocationService;
 
 	@Autowired
 	public PickupLocationComboBoxDataProvider(PickupLocationService pickupLocationService) {

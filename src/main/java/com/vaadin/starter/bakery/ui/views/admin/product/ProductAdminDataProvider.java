@@ -20,7 +20,7 @@ import com.vaadin.starter.bakery.backend.service.ProductService;
 @PrototypeScope
 public class ProductAdminDataProvider extends FilterablePageableDataProvider<Product, Object> {
 
-	private final ProductService productService;
+	private transient ProductService productService;
 
 	@Autowired
 	public ProductAdminDataProvider(ProductService productService) {

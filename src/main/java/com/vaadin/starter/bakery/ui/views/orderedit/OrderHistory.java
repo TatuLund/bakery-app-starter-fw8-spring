@@ -34,13 +34,13 @@ public class OrderHistory extends OrderHistoryDesign {
 
 	private final DateTimeFormatter dateTimeFormatter;
 
-	private final ViewEventBus eventBus;
+	private transient ViewEventBus eventBus;
 
 	private Order order;
 
-	private final OrderService orderService;
+	private transient OrderService orderService;
 
-	private final UserService userService;
+	private transient UserService userService;
 
 	@Autowired
 	public OrderHistory(DateTimeFormatter dateTimeFormatter, ViewEventBus eventBus, OrderService orderService,

@@ -18,7 +18,7 @@ import com.vaadin.starter.bakery.backend.service.ProductService;
 @SpringComponent
 public class ProductComboBoxDataProvider extends PageableDataProvider<Product, String> {
 
-	private final ProductService productService;
+	private transient ProductService productService;
 
 	@Autowired
 	public ProductComboBoxDataProvider(ProductService productService) {
