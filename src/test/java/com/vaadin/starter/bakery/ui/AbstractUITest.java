@@ -15,6 +15,10 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,6 +26,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -161,6 +166,7 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
             context.setServletContext(currentServletContext);
             context.register(getConfigurationClasses());
             context.refresh();
+                runStartupRunners(context);
             currentServletContext.setAttribute(
                     WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
                     context);
@@ -178,7 +184,7 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
     }
 
     protected void configureSecurityContext() {
-        authenticate("admin@vaadin.com", Role.ADMIN);
+        authenticateAsAdmin();
     }
 
     protected void authenticate(String username, String... authorities) {
@@ -191,6 +197,18 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
                 principal, principal.getPassword(),
                 grantedAuthorities));
         SecurityContextHolder.setContext(context);
+    }
+
+    protected void authenticateAsAdmin() {
+        authenticate("admin@vaadin.com", Role.ADMIN);
+    }
+
+    protected void authenticateAsBaker() {
+        authenticate("baker@vaadin.com", Role.BAKER);
+    }
+
+    protected void authenticateAsBarista() {
+        authenticate("barista@vaadin.com", Role.BARISTA);
     }
 
     protected MockHttpSession getSession() {
@@ -264,6 +282,34 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
                 | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException e) {
             throw new RuntimeException("Failed to initialize UI", e);
+        }
+    }
+
+    private void runStartupRunners(
+            AnnotationConfigWebApplicationContext context) {
+        try {
+            var applicationArguments = new DefaultApplicationArguments(
+                    new String[0]);
+
+            var applicationRunners = context.getBeansOfType(ApplicationRunner.class)
+                    .values()
+                    .stream()
+                    .collect(Collectors.toList());
+            AnnotationAwareOrderComparator.sort(applicationRunners);
+            for (ApplicationRunner runner : applicationRunners) {
+                runner.run(applicationArguments);
+            }
+
+            var commandLineRunners = context.getBeansOfType(CommandLineRunner.class)
+                    .values()
+                    .stream()
+                    .collect(Collectors.toList());
+            AnnotationAwareOrderComparator.sort(commandLineRunners);
+            for (CommandLineRunner runner : commandLineRunners) {
+                runner.run(applicationArguments.getSourceArgs());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to run Spring Boot startup runners", e);
         }
     }
 
