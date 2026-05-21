@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +35,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import com.vaadin.annotations.Push;
 import com.vaadin.navigator.View;
 import com.vaadin.server.DeploymentConfiguration;
+import com.vaadin.server.RequestHandler;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.UIClassSelectionEvent;
 import com.vaadin.server.UICreateEvent;
@@ -166,7 +168,7 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
             context.setServletContext(currentServletContext);
             context.register(getConfigurationClasses());
             context.refresh();
-                runStartupRunners(context);
+            runStartupRunners(context);
             currentServletContext.setAttribute(
                     WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
                     context);
@@ -291,7 +293,8 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
             var applicationArguments = new DefaultApplicationArguments(
                     new String[0]);
 
-            var applicationRunners = context.getBeansOfType(ApplicationRunner.class)
+            var applicationRunners = context
+                    .getBeansOfType(ApplicationRunner.class)
                     .values()
                     .stream()
                     .collect(Collectors.toList());
@@ -300,7 +303,8 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
                 runner.run(applicationArguments);
             }
 
-            var commandLineRunners = context.getBeansOfType(CommandLineRunner.class)
+            var commandLineRunners = context
+                    .getBeansOfType(CommandLineRunner.class)
                     .values()
                     .stream()
                     .collect(Collectors.toList());
@@ -309,7 +313,8 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
                 runner.run(applicationArguments.getSourceArgs());
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to run Spring Boot startup runners", e);
+            throw new RuntimeException(
+                    "Failed to run Spring Boot startup runners", e);
         }
     }
 
@@ -357,6 +362,11 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
         public void removeAttribute(String name) {
             attributes.remove(name);
         }
+
+        @Override
+        public String getServerInfo() {
+            return "MockServletContext/1.0";
+        }
     }
 
     private static final class SpringMockServletConfig
@@ -403,6 +413,12 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        @Override
+        protected List<RequestHandler> createRequestHandlers()
+                throws ServiceException {
+            return Collections.emptyList();
         }
 
         @Override
