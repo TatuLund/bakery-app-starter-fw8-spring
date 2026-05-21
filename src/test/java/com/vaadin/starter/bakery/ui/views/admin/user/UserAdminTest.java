@@ -23,6 +23,7 @@ import com.vaadin.starter.bakery.ui.AbstractUITest;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.views.admin.AbstractCrudView;
 import com.vaadin.starter.bakery.ui.views.admin.RoleSelect;
+import com.vaadin.starter.bakery.ui.views.storefront.StorefrontView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Notification;
@@ -131,6 +132,28 @@ public class UserAdminTest extends AbstractUITest {
     }
 
     @Test
+    public void createUserButCancel_doesNotPersistChanges() {
+        String email = uniqueEmail("cancel-user");
+
+        test(addButton()).click();
+
+        test(emailField()).setValue(email);
+        test(nameField()).setValue("Cancel User");
+        test(passwordField()).setValue("secret1");
+        roleField().setValue(Role.BAKER);
+
+        assertTrue(updateButton().isEnabled());
+        assertTrue(cancelButton().isEnabled());
+
+        test(cancelButton()).click();
+
+        assertNull(findUser(email));
+        assertFalse(form().isEnabled());
+        assertEquals(0, grid().getSelectedItems().size());
+        assertEquals(viewId(), UI.getCurrent().getNavigator().getState());
+    }
+
+    @Test
     public void filterGrid_showsOnlyMatchingUsers() {
         String email = uniqueEmail("filter-user");
         User user = createUser(email, "Filter User", "secret1", Role.BARISTA);
@@ -149,9 +172,46 @@ public class UserAdminTest extends AbstractUITest {
     }
 
     @Test
-    public void navigateWithParameter_loadsExistingUserIntoForm() {
+    public void sortGrid_ordersByEmailAndNameAscendingAndDescending() {
+        String prefix = "sort-user-" + UUID.randomUUID();
+        User first = createUser(prefix + "-charlie@example.com", "Charlie", "secret1",
+                Role.BAKER);
+        User second = createUser(prefix + "-alpha@example.com", "Alpha", "secret1",
+                Role.BAKER);
+        User third = createUser(prefix + "-bravo@example.com", "Bravo", "secret1",
+                Role.BAKER);
+
+        try {
+            test(searchField()).setValue(prefix);
+            assertEquals(3, test(grid()).size());
+
+            test(grid()).toggleColumnSorting(0);
+            assertUsersSortedByEmail(true);
+
+            test(grid()).toggleColumnSorting(0);
+            assertUsersSortedByEmail(false);
+
+            view = navigate(UserAdminView.class);
+            test(searchField()).setValue(prefix);
+            assertEquals(3, test(grid()).size());
+
+            test(grid()).toggleColumnSorting(1);
+            assertUsersSortedByName(true);
+
+            test(grid()).toggleColumnSorting(1);
+            assertUsersSortedByName(false);
+        } finally {
+            userService.delete(first.getId());
+            userService.delete(second.getId());
+            userService.delete(third.getId());
+        }
+    }
+
+    @Test
+    public void navigateWithParameter_loadsExistingUserIntoFormAndAllowsSaving() {
         String email = uniqueEmail("parameter-user");
         User user = createUser(email, "Parameter User", "secret1", Role.BAKER);
+        String updatedName = "Parameter User Updated";
 
         try {
             view = navigate(viewId() + "/" + user.getId(), UserAdminView.class);
@@ -162,6 +222,15 @@ public class UserAdminTest extends AbstractUITest {
             assertEquals(Role.BAKER, roleField().getValue());
             assertTrue(deleteButton().isEnabled());
             assertEquals(String.valueOf(user.getId()), currentParameter());
+
+            test(nameField()).setValue(updatedName);
+            assertTrue(updateButton().isEnabled());
+            test(updateButton()).click();
+
+            User updated = findExistingUser(email);
+            assertEquals(user.getId(), updated.getId());
+            assertEquals(updatedName, updated.getName());
+            assertEquals(updatedName, nameField().getValue());
         } finally {
             userService.delete(user.getId());
         }
@@ -246,6 +315,79 @@ public class UserAdminTest extends AbstractUITest {
         assertNotNull(findUser(ADMIN_EMAIL));
     }
 
+    @Test
+    public void unsavedChanges_showConfirmationBeforeLeavingOrSwitchingSelection() {
+        String prefix = "confirm-user-" + UUID.randomUUID();
+        User first = createUser(prefix + "-one@example.com", "Confirm One", "secret1",
+                Role.ADMIN);
+        User second = createUser(prefix + "-two@example.com", "Confirm Two", "secret1",
+                Role.BAKER);
+
+        try {
+            test(searchField()).setValue(prefix);
+            test(grid()).click(0, 0);
+
+            Long selectedId = currentSelectionId();
+            assertNotNull(selectedId);
+
+            String dirtyName = nameField().getValue() + "-dirty";
+            test(nameField()).setValue(dirtyName);
+            assertTrue(updateButton().isEnabled());
+
+            test(storefrontButton()).click();
+            assertNotNull(confirmCancelButton());
+            test(confirmCancelButton()).click();
+            assertEquals(selectedId, currentSelectionId());
+            assertEquals(dirtyName, nameField().getValue());
+
+            test(logoutButton()).click();
+            assertNotNull(confirmCancelButton());
+            test(confirmCancelButton()).click();
+            assertEquals(selectedId, currentSelectionId());
+            assertEquals(dirtyName, nameField().getValue());
+
+            test(addButton()).click();
+            assertNotNull(confirmCancelButton());
+            test(confirmCancelButton()).click();
+            assertEquals(selectedId, currentSelectionId());
+            assertEquals(dirtyName, nameField().getValue());
+
+            test(grid()).click(0, 1);
+            assertNotNull(confirmCancelButton());
+            test(confirmCancelButton()).click();
+            assertEquals(selectedId, currentSelectionId());
+            assertEquals(dirtyName, nameField().getValue());
+        } finally {
+            if (form().isEnabled() && cancelButton().isEnabled()) {
+                test(cancelButton()).click();
+            }
+            userService.delete(first.getId());
+            userService.delete(second.getId());
+        }
+    }
+
+    @Test
+    public void confirmationDialogCanDiscardChangesAndNavigateAway() {
+        String email = uniqueEmail("discard-user");
+        User user = createUser(email, "Discard User", "secret1", Role.BARISTA);
+
+        try {
+            test(searchField()).setValue(email);
+            test(grid()).click(0, 0);
+            test(nameField()).setValue("Discard User Dirty");
+
+            test(storefrontButton()).click();
+            assertNotNull(discardChangesButton());
+            test(discardChangesButton()).click();
+
+            assertTrue(UI.getCurrent().getNavigator().getCurrentView() instanceof StorefrontView);
+            assertEquals(navigationManager.getViewId(StorefrontView.class),
+                    UI.getCurrent().getNavigator().getState());
+        } finally {
+            userService.delete(user.getId());
+        }
+    }
+
     private Grid<User> grid() {
         return $(view.getViewComponent(), Grid.class).id("list");
     }
@@ -290,6 +432,22 @@ public class UserAdminTest extends AbstractUITest {
         return $(view.getViewComponent(), Button.class).id("delete");
     }
 
+    private Button storefrontButton() {
+        return $(Button.class).id("storefront");
+    }
+
+    private Button logoutButton() {
+        return $(Button.class).id("logout");
+    }
+
+    private Button confirmCancelButton() {
+        return $(Button.class).id("confirmdialog-cancel-button");
+    }
+
+    private Button discardChangesButton() {
+        return $(Button.class).id("confirmdialog-ok-button");
+    }
+
     private Notification lastNotification() {
         return $(Notification.class).last();
     }
@@ -302,6 +460,28 @@ public class UserAdminTest extends AbstractUITest {
         String state = UI.getCurrent().getNavigator().getState();
         int separator = state.indexOf('/');
         return separator < 0 ? "" : state.substring(separator + 1);
+    }
+
+    private Long currentSelectionId() {
+        return grid().getSelectedItems().stream().findFirst()
+                .map(User::getId)
+                .orElse(null);
+    }
+
+    private void assertUsersSortedByEmail(boolean ascending) {
+        for (int row = 1; row < test(grid()).size(); row++) {
+            int comparison = test(grid()).item(row - 1).getEmail()
+                    .compareToIgnoreCase(test(grid()).item(row).getEmail());
+            assertTrue(ascending ? comparison <= 0 : comparison >= 0);
+        }
+    }
+
+    private void assertUsersSortedByName(boolean ascending) {
+        for (int row = 1; row < test(grid()).size(); row++) {
+            int comparison = test(grid()).item(row - 1).getName()
+                    .compareToIgnoreCase(test(grid()).item(row).getName());
+            assertTrue(ascending ? comparison <= 0 : comparison >= 0);
+        }
     }
 
     private User createUser(String email, String name, String rawPassword,

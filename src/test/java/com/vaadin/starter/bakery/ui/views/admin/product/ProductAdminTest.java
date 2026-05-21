@@ -26,6 +26,7 @@ import com.vaadin.starter.bakery.backend.service.ProductService;
 import com.vaadin.starter.bakery.ui.AbstractUITest;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.views.admin.AbstractCrudView;
+import com.vaadin.starter.bakery.ui.views.storefront.StorefrontView;
 
 public class ProductAdminTest extends AbstractUITest {
 
@@ -103,6 +104,26 @@ public class ProductAdminTest extends AbstractUITest {
     }
 
     @Test
+    public void createProductButCancel_doesNotPersistChanges() {
+        String name = uniqueName("cancel-product");
+
+        test(addButton()).click();
+
+        test(nameField()).setValue(name);
+        test(priceField()).setValue("$98.76");
+
+        assertTrue(updateButton().isEnabled());
+        assertTrue(cancelButton().isEnabled());
+
+        test(cancelButton()).click();
+
+        assertNull(findProduct(name));
+        assertFalse(form().isEnabled());
+        assertEquals(0, grid().getSelectedItems().size());
+        assertEquals(viewId(), UI.getCurrent().getNavigator().getState());
+    }
+
+    @Test
     public void filterGrid_showsOnlyMatchingProducts() {
         Product product = createProduct(uniqueName("filter-product"), 1234);
 
@@ -120,8 +141,42 @@ public class ProductAdminTest extends AbstractUITest {
     }
 
     @Test
-    public void navigateWithParameter_loadsExistingProductIntoForm() {
+    public void sortGrid_ordersByNameAndPriceAscendingAndDescending() {
+        String prefix = uniqueName("sort-product");
+        Product first = createProduct(prefix + "-charlie", 300);
+        Product second = createProduct(prefix + "-alpha", 100);
+        Product third = createProduct(prefix + "-bravo", 200);
+
+        try {
+            test(searchField()).setValue(prefix);
+            assertEquals(3, test(grid()).size());
+
+            test(grid()).toggleColumnSorting(0);
+            assertProductsSortedByName(true);
+
+            test(grid()).toggleColumnSorting(0);
+            assertProductsSortedByName(false);
+
+            view = navigate(ProductAdminView.class);
+            test(searchField()).setValue(prefix);
+            assertEquals(3, test(grid()).size());
+
+            test(grid()).toggleColumnSorting(1);
+            assertProductsSortedByPrice(true);
+
+            test(grid()).toggleColumnSorting(1);
+            assertProductsSortedByPrice(false);
+        } finally {
+            productService.delete(first.getId());
+            productService.delete(second.getId());
+            productService.delete(third.getId());
+        }
+    }
+
+    @Test
+    public void navigateWithParameter_loadsExistingProductIntoFormAndAllowsSaving() {
         Product product = createProduct(uniqueName("parameter-product"), 4321);
+        String updatedName = product.getName() + "-updated";
 
         try {
             view = navigate(viewId() + "/" + product.getId(), ProductAdminView.class);
@@ -130,6 +185,85 @@ public class ProductAdminTest extends AbstractUITest {
             assertEquals("$43.21", priceField().getValue());
             assertTrue(deleteButton().isEnabled());
             assertEquals(String.valueOf(product.getId()), currentParameter());
+
+            test(nameField()).setValue(updatedName);
+            assertTrue(updateButton().isEnabled());
+            test(updateButton()).click();
+
+            Product updated = findProduct(updatedName);
+            assertNotNull(updated);
+            assertEquals(product.getId(), updated.getId());
+            assertEquals(updatedName, nameField().getValue());
+        } finally {
+            productService.delete(product.getId());
+        }
+    }
+
+    @Test
+    public void unsavedChanges_showConfirmationBeforeLeavingOrSwitchingSelection() {
+        String prefix = uniqueName("confirm-product");
+        Product first = createProduct(prefix + "-one", 100);
+        Product second = createProduct(prefix + "-two", 200);
+
+        try {
+            test(searchField()).setValue(prefix);
+            test(grid()).click(0, 0);
+
+            Long selectedId = currentSelectionId();
+            assertNotNull(selectedId);
+
+            String dirtyName = nameField().getValue() + "-dirty";
+            test(nameField()).setValue(dirtyName);
+            assertTrue(updateButton().isEnabled());
+
+            test(storefrontButton()).click();
+            assertNotNull(confirmCancelButton());
+            test(confirmCancelButton()).click();
+            assertEquals(selectedId, currentSelectionId());
+            assertEquals(dirtyName, nameField().getValue());
+
+            test(logoutButton()).click();
+            assertNotNull(confirmCancelButton());
+            test(confirmCancelButton()).click();
+            assertEquals(selectedId, currentSelectionId());
+            assertEquals(dirtyName, nameField().getValue());
+
+            test(addButton()).click();
+            assertNotNull(confirmCancelButton());
+            test(confirmCancelButton()).click();
+            assertEquals(selectedId, currentSelectionId());
+            assertEquals(dirtyName, nameField().getValue());
+
+            test(grid()).click(0, 1);
+            assertNotNull(confirmCancelButton());
+            test(confirmCancelButton()).click();
+            assertEquals(selectedId, currentSelectionId());
+            assertEquals(dirtyName, nameField().getValue());
+        } finally {
+            if (form().isEnabled() && cancelButton().isEnabled()) {
+                test(cancelButton()).click();
+            }
+            productService.delete(first.getId());
+            productService.delete(second.getId());
+        }
+    }
+
+    @Test
+    public void confirmationDialogCanDiscardChangesAndNavigateAway() {
+        Product product = createProduct(uniqueName("discard-product"), 555);
+
+        try {
+            test(searchField()).setValue(product.getName());
+            test(grid()).click(0, 0);
+            test(nameField()).setValue(product.getName() + "-dirty");
+
+            test(storefrontButton()).click();
+            assertNotNull(discardChangesButton());
+            test(discardChangesButton()).click();
+
+            assertTrue(UI.getCurrent().getNavigator().getCurrentView() instanceof StorefrontView);
+            assertEquals(navigationManager.getViewId(StorefrontView.class),
+                    UI.getCurrent().getNavigator().getState());
         } finally {
             productService.delete(product.getId());
         }
@@ -171,6 +305,22 @@ public class ProductAdminTest extends AbstractUITest {
         return $(view.getViewComponent(), Button.class).id("delete");
     }
 
+    private Button storefrontButton() {
+        return $(Button.class).id("storefront");
+    }
+
+    private Button logoutButton() {
+        return $(Button.class).id("logout");
+    }
+
+    private Button confirmCancelButton() {
+        return $(Button.class).id("confirmdialog-cancel-button");
+    }
+
+    private Button discardChangesButton() {
+        return $(Button.class).id("confirmdialog-ok-button");
+    }
+
     private String viewId() {
         return navigationManager.getViewId(ProductAdminView.class);
     }
@@ -179,6 +329,28 @@ public class ProductAdminTest extends AbstractUITest {
         String state = UI.getCurrent().getNavigator().getState();
         int separator = state.indexOf('/');
         return separator < 0 ? "" : state.substring(separator + 1);
+    }
+
+    private Long currentSelectionId() {
+        return grid().getSelectedItems().stream().findFirst()
+                .map(Product::getId)
+                .orElse(null);
+    }
+
+    private void assertProductsSortedByName(boolean ascending) {
+        for (int row = 1; row < test(grid()).size(); row++) {
+            int comparison = test(grid()).item(row - 1).getName()
+                    .compareToIgnoreCase(test(grid()).item(row).getName());
+            assertTrue(ascending ? comparison <= 0 : comparison >= 0);
+        }
+    }
+
+    private void assertProductsSortedByPrice(boolean ascending) {
+        for (int row = 1; row < test(grid()).size(); row++) {
+            int comparison = Integer.compare(test(grid()).item(row - 1).getPrice(),
+                    test(grid()).item(row).getPrice());
+            assertTrue(ascending ? comparison <= 0 : comparison >= 0);
+        }
     }
 
     private Product createProduct(String name, int price) {
