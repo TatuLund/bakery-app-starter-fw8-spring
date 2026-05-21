@@ -3,9 +3,7 @@ package com.vaadin.starter.bakery.ui.views.dashboard;
 import java.util.List;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
-import com.vaadin.testbench.elements.AbstractComponentElement;
 import com.vaadin.testbench.elements.CssLayoutElement;
 import com.vaadin.testbench.elements.GridElement;
 import com.vaadin.testbench.elementsbase.ServerClass;
@@ -25,18 +23,10 @@ public class DashboardViewElement extends DashboardViewDesignElement {
 	}
 
 	@ServerClass("com.vaadin.addon.charts.Chart")
-	public static class ChartElement extends AbstractComponentElement {
-
-		public String getTitle() {
-			return findElement(By.className("highcharts-title")).getText();
-		}
+	public static class ChartElement extends com.vaadin.testbench.elements.ChartElement {
 
 		public boolean hasData() {
 			return findElements(By.className("highcharts-no-data")).isEmpty();
-		}
-
-		public List<WebElement> getSeries() {
-			return findElements(By.className("highcharts-series"));
 		}
 	}
 

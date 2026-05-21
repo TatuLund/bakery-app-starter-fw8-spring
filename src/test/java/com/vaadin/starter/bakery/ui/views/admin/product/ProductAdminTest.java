@@ -58,8 +58,10 @@ public class ProductAdminTest extends AbstractUITest {
         assertFalse(cancelButton().isEnabled());
         assertEquals("", nameField().getValue());
         assertEquals("", priceField().getValue());
-        assertEquals(AbstractCrudView.CAPTION_UPDATE, updateButton().getCaption());
-        assertEquals(AbstractCrudView.CAPTION_DISCARD, cancelButton().getCaption());
+        assertEquals(AbstractCrudView.CAPTION_UPDATE,
+                updateButton().getCaption());
+        assertEquals(AbstractCrudView.CAPTION_DISCARD,
+                cancelButton().getCaption());
         assertEquals(viewId(), UI.getCurrent().getNavigator().getState());
     }
 
@@ -73,8 +75,10 @@ public class ProductAdminTest extends AbstractUITest {
         assertTrue(form().isEnabled());
         assertFalse(deleteButton().isEnabled());
         assertEquals(AbstractCrudView.CAPTION_ADD, updateButton().getCaption());
-        assertEquals(AbstractCrudView.CAPTION_CANCEL, cancelButton().getCaption());
-        assertEquals(viewId() + "/new", UI.getCurrent().getNavigator().getState());
+        assertEquals(AbstractCrudView.CAPTION_CANCEL,
+                cancelButton().getCaption());
+        assertEquals(viewId() + "/new",
+                UI.getCurrent().getNavigator().getState());
 
         test(nameField()).setValue(name);
         test(priceField()).setValue("$12.34");
@@ -179,7 +183,8 @@ public class ProductAdminTest extends AbstractUITest {
         String updatedName = product.getName() + "-updated";
 
         try {
-            view = navigate(viewId() + "/" + product.getId(), ProductAdminView.class);
+            view = navigate(viewId() + "/" + product.getId(),
+                    ProductAdminView.class);
 
             assertEquals(product.getName(), nameField().getValue());
             assertEquals("$43.21", priceField().getValue());
@@ -261,7 +266,8 @@ public class ProductAdminTest extends AbstractUITest {
             assertNotNull(discardChangesButton());
             test(discardChangesButton()).click();
 
-            assertTrue(UI.getCurrent().getNavigator().getCurrentView() instanceof StorefrontView);
+            assertTrue(UI.getCurrent().getNavigator()
+                    .getCurrentView() instanceof StorefrontView);
             assertEquals(navigationManager.getViewId(StorefrontView.class),
                     UI.getCurrent().getNavigator().getState());
         } finally {
@@ -269,6 +275,7 @@ public class ProductAdminTest extends AbstractUITest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Grid<Product> grid() {
         return $(view.getViewComponent(), Grid.class).id("list");
     }
@@ -347,7 +354,8 @@ public class ProductAdminTest extends AbstractUITest {
 
     private void assertProductsSortedByPrice(boolean ascending) {
         for (int row = 1; row < test(grid()).size(); row++) {
-            int comparison = Integer.compare(test(grid()).item(row - 1).getPrice(),
+            int comparison = Integer.compare(
+                    test(grid()).item(row - 1).getPrice(),
                     test(grid()).item(row).getPrice());
             assertTrue(ascending ? comparison <= 0 : comparison >= 0);
         }

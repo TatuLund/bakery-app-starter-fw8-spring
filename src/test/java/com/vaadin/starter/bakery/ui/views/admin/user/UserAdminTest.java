@@ -50,7 +50,8 @@ public class UserAdminTest extends AbstractUITest {
         userService = getApplicationContext().getBean(UserService.class);
         navigationManager = getApplicationContext()
                 .getBean(NavigationManager.class);
-        passwordEncoder = getApplicationContext().getBean(PasswordEncoder.class);
+        passwordEncoder = getApplicationContext()
+                .getBean(PasswordEncoder.class);
         view = navigate(UserAdminView.class);
     }
 
@@ -71,8 +72,10 @@ public class UserAdminTest extends AbstractUITest {
         assertEquals("", nameField().getValue());
         assertEquals("", passwordField().getValue());
         assertNull(roleField().getValue());
-        assertEquals(AbstractCrudView.CAPTION_UPDATE, updateButton().getCaption());
-        assertEquals(AbstractCrudView.CAPTION_DISCARD, cancelButton().getCaption());
+        assertEquals(AbstractCrudView.CAPTION_UPDATE,
+                updateButton().getCaption());
+        assertEquals(AbstractCrudView.CAPTION_DISCARD,
+                cancelButton().getCaption());
         assertEquals(viewId(), UI.getCurrent().getNavigator().getState());
     }
 
@@ -87,9 +90,12 @@ public class UserAdminTest extends AbstractUITest {
 
             assertTrue(form().isEnabled());
             assertFalse(deleteButton().isEnabled());
-            assertEquals(AbstractCrudView.CAPTION_ADD, updateButton().getCaption());
-            assertEquals(AbstractCrudView.CAPTION_CANCEL, cancelButton().getCaption());
-            assertEquals(viewId() + "/new", UI.getCurrent().getNavigator().getState());
+            assertEquals(AbstractCrudView.CAPTION_ADD,
+                    updateButton().getCaption());
+            assertEquals(AbstractCrudView.CAPTION_CANCEL,
+                    cancelButton().getCaption());
+            assertEquals(viewId() + "/new",
+                    UI.getCurrent().getNavigator().getState());
 
             test(emailField()).setValue(email);
             test(nameField()).setValue(name);
@@ -174,11 +180,14 @@ public class UserAdminTest extends AbstractUITest {
     @Test
     public void sortGrid_ordersByEmailAndNameAscendingAndDescending() {
         String prefix = "sort-user-" + UUID.randomUUID();
-        User first = createUser(prefix + "-charlie@example.com", "Charlie", "secret1",
+        User first = createUser(prefix + "-charlie@example.com", "Charlie",
+                "secret1",
                 Role.BAKER);
-        User second = createUser(prefix + "-alpha@example.com", "Alpha", "secret1",
+        User second = createUser(prefix + "-alpha@example.com", "Alpha",
+                "secret1",
                 Role.BAKER);
-        User third = createUser(prefix + "-bravo@example.com", "Bravo", "secret1",
+        User third = createUser(prefix + "-bravo@example.com", "Bravo",
+                "secret1",
                 Role.BAKER);
 
         try {
@@ -318,9 +327,11 @@ public class UserAdminTest extends AbstractUITest {
     @Test
     public void unsavedChanges_showConfirmationBeforeLeavingOrSwitchingSelection() {
         String prefix = "confirm-user-" + UUID.randomUUID();
-        User first = createUser(prefix + "-one@example.com", "Confirm One", "secret1",
+        User first = createUser(prefix + "-one@example.com", "Confirm One",
+                "secret1",
                 Role.ADMIN);
-        User second = createUser(prefix + "-two@example.com", "Confirm Two", "secret1",
+        User second = createUser(prefix + "-two@example.com", "Confirm Two",
+                "secret1",
                 Role.BAKER);
 
         try {
@@ -380,7 +391,8 @@ public class UserAdminTest extends AbstractUITest {
             assertNotNull(discardChangesButton());
             test(discardChangesButton()).click();
 
-            assertTrue(UI.getCurrent().getNavigator().getCurrentView() instanceof StorefrontView);
+            assertTrue(UI.getCurrent().getNavigator()
+                    .getCurrentView() instanceof StorefrontView);
             assertEquals(navigationManager.getViewId(StorefrontView.class),
                     UI.getCurrent().getNavigator().getState());
         } finally {
@@ -388,6 +400,7 @@ public class UserAdminTest extends AbstractUITest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Grid<User> grid() {
         return $(view.getViewComponent(), Grid.class).id("list");
     }
@@ -495,7 +508,8 @@ public class UserAdminTest extends AbstractUITest {
     }
 
     private User findUser(String email) {
-        return userService.findAnyMatching(Optional.of(email), PageRequest.of(0, 20))
+        return userService
+                .findAnyMatching(Optional.of(email), PageRequest.of(0, 20))
                 .getContent().stream()
                 .filter(user -> email.equals(user.getEmail()))
                 .findFirst()
