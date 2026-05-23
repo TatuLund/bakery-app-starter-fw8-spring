@@ -15,15 +15,34 @@ import com.vaadin.data.BindingValidationStatus;
 import com.vaadin.data.HasValue;
 import com.vaadin.data.ValueContext;
 import com.vaadin.data.converter.StringToIntegerConverter;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.starter.bakery.backend.data.entity.OrderItem;
 import com.vaadin.starter.bakery.backend.data.entity.Product;
 import com.vaadin.starter.bakery.ui.utils.DollarPriceConverter;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 
 @SpringComponent
 @PrototypeScope
-public class ProductInfo extends ProductInfoDesign {
+public class ProductInfo extends CssLayout {
+
+	protected Button delete;
+
+	@Autowired
+	private ProductComboBox product;
+
+	protected TextField quantity;
+
+	protected Label price;
+
+	protected TextArea comment;
 
 	private final DollarPriceConverter priceFormatter;
 
@@ -37,17 +56,21 @@ public class ProductInfo extends ProductInfoDesign {
 	private boolean reportMode = false;
 
 	@Autowired
-	public ProductInfo(DollarPriceConverter priceFormatter, ViewEventBus viewEventBus) {
+	public ProductInfo(DollarPriceConverter priceFormatter,
+			ViewEventBus viewEventBus) {
 		this.priceFormatter = priceFormatter;
 		this.viewEventBus = viewEventBus;
 
 	}
 
 	@PostConstruct
-	public void init() {
+	public void setup() {
+		initLayout();
 		binder = new BeanValidationBinder<>(OrderItem.class);
 		binder.setRequiredConfigurator(null);
-		binder.forField(quantity).withConverter(new StringToIntegerConverter(-1, "Please enter a number"))
+		binder.forField(quantity)
+				.withConverter(new StringToIntegerConverter(-1,
+						"Please enter a number"))
 				.bind("quantity");
 		binder.bindInstanceFields(this);
 		binder.addValueChangeListener(e -> fireProductInfoChanged());
@@ -65,8 +88,79 @@ public class ProductInfo extends ProductInfoDesign {
 		delete.addClickListener(e -> fireOrderItemDeleted());
 	}
 
+	private void initLayout() {
+		setStyleName("product-row responsive");
+		setResponsive(true);
+		setWidth("100%");
+
+		HorizontalLayout productComboBoxWrapper = new HorizontalLayout();
+		productComboBoxWrapper.setStyleName("long");
+		productComboBoxWrapper.setSpacing(false);
+		productComboBoxWrapper.setWidth("100%");
+		productComboBoxWrapper.setMargin(false);
+
+		delete = new Button();
+		delete.setIcon(VaadinIcons.TRASH);
+		delete.setStyleName("delete");
+		delete.setCaption("");
+		delete.setId("delete");
+		productComboBoxWrapper.addComponent(delete);
+		productComboBoxWrapper.setComponentAlignment(delete,
+				Alignment.MIDDLE_LEFT);
+
+		product.setStyleName("product");
+		product.setId("product");
+		product.setWidth("100%");
+		productComboBoxWrapper.addComponent(product);
+		productComboBoxWrapper.setComponentAlignment(product,
+				Alignment.MIDDLE_LEFT);
+		productComboBoxWrapper.setExpandRatio(product, 1.0F);
+		addComponent(productComboBoxWrapper);
+
+		HorizontalLayout quantityLayout = new HorizontalLayout();
+		quantityLayout.setStyleName("short");
+		quantityLayout.setSpacing(false);
+		quantityLayout.setWidth("150px");
+		quantityLayout.setHeight("37px");
+		quantityLayout.setMargin(false);
+
+		quantity = new TextField();
+		quantity.setStyleName("quantity");
+		quantity.setId("quantity");
+		quantity.setWidth("4em");
+		quantityLayout.addComponent(quantity);
+		quantityLayout.setComponentAlignment(quantity, Alignment.TOP_LEFT);
+
+		Label times = new Label();
+		times.setStyleName("times");
+		times.setWidth("100%");
+		times.setContentMode(ContentMode.TEXT);
+		times.setValue("x");
+		quantityLayout.addComponent(times);
+		quantityLayout.setComponentAlignment(times, Alignment.MIDDLE_CENTER);
+		quantityLayout.setExpandRatio(times, 1.0F);
+
+		price = new Label();
+		price.setStyleName("price");
+		price.setId("price");
+		price.setContentMode(ContentMode.TEXT);
+		price.setValue("0.00");
+		quantityLayout.addComponent(price);
+		quantityLayout.setComponentAlignment(price, Alignment.MIDDLE_RIGHT);
+		addComponent(quantityLayout);
+
+		comment = new TextArea();
+		comment.setRows(2);
+		comment.setStyleName("comment long");
+		comment.setId("comment");
+		comment.setPlaceholder("Details");
+		comment.setWidth("100%");
+		addComponent(comment);
+	}
+
 	private void updatePrice(int productPrice) {
-		price.setValue(priceFormatter.convertToPresentation(productPrice, new ValueContext(Locale.US)));
+		price.setValue(priceFormatter.convertToPresentation(productPrice,
+				new ValueContext(Locale.US)));
 	}
 
 	private void fireProductInfoChanged() {
@@ -120,7 +214,8 @@ public class ProductInfo extends ProductInfoDesign {
 	}
 
 	public Stream<HasValue<?>> validate() {
-		return binder.validate().getFieldValidationErrors().stream().map(BindingValidationStatus::getField);
+		return binder.validate().getFieldValidationErrors().stream()
+				.map(BindingValidationStatus::getField);
 	}
 
 	@Override

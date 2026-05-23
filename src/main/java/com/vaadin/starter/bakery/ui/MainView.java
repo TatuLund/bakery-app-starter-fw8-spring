@@ -44,7 +44,8 @@ public class MainView extends MainViewDesign implements ViewDisplay {
 	}
 
 	@PostConstruct
-	public void init() {
+	public void setup() {
+		init();
 		attachNavigation(storefront, StorefrontView.class);
 		attachNavigation(dashboard, DashboardView.class);
 		attachNavigation(users, UserAdminView.class);

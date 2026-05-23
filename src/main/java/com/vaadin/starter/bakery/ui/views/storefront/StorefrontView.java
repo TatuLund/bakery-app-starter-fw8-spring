@@ -10,12 +10,21 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.starter.bakery.backend.data.entity.Order;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
+import com.vaadin.starter.bakery.ui.components.OrdersGrid;
 import com.vaadin.starter.bakery.ui.views.orderedit.OrderEditView;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickShortcut;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * The storefront view showing upcoming orders.
@@ -25,11 +34,24 @@ import com.vaadin.ui.Button.ClickShortcut;
  * is added to the class, you should consider splitting out a presenter.
  */
 @SpringView
-public class StorefrontView extends StorefrontViewDesign implements View {
+public class StorefrontView extends VerticalLayout implements View {
 
 	private static final String PARAMETER_SEARCH = "search";
 
 	private static final String PARAMETER_INCLUDE_PAST = "includePast";
+
+	protected Panel searchPanel;
+
+	protected TextField searchField;
+
+	protected Button searchButton;
+
+	protected CheckBox includePast;
+
+	protected Button newOrder;
+
+	@Autowired
+	private OrdersGrid list;
 
 	private final NavigationManager navigationManager;
 
@@ -51,13 +73,79 @@ public class StorefrontView extends StorefrontViewDesign implements View {
 	 * configure the components for the parts which only need to be done once.
 	 */
 	@PostConstruct
-	public void init() {
+	public void setup() {
+		initLayout();
 		list.addSelectionListener(e -> selectedOrder(e.getFirstSelectedItem().get()));
 		newOrder.addClickListener(e -> newOrder());
 		searchButton.addClickListener(e -> search(searchField.getValue(), includePast.getValue()));
 
 		// We don't want a global shortcut for enter, scope it to the panel
 		searchPanel.addAction(new ClickShortcut(searchButton, KeyCode.ENTER, null));
+	}
+
+	private void initLayout() {
+		setStyleName("storefront");
+		setSpacing(false);
+		setWidth("100%");
+		setHeight("100%");
+		setMargin(false);
+
+		searchPanel = new Panel();
+		searchPanel.setStyleName("borderless");
+
+		HorizontalLayout toolbar = new HorizontalLayout();
+		toolbar.setSpacing(false);
+		toolbar.setWidth("100%");
+		toolbar.setMargin(new MarginInfo(true, true, false, true));
+
+		CssLayout filterLayout = createFilterLayout();
+
+		toolbar.addComponent(filterLayout);
+		toolbar.setComponentAlignment(filterLayout, Alignment.TOP_LEFT);
+		toolbar.setExpandRatio(filterLayout, 1.0F);
+
+		newOrder = new Button();
+		newOrder.setIcon(VaadinIcons.PLUS);
+		newOrder.setStyleName("friendly");
+		newOrder.setId("newOrder");
+		newOrder.setCaption("New");
+		toolbar.addComponent(newOrder);
+		toolbar.setComponentAlignment(newOrder, Alignment.TOP_LEFT);
+
+		searchPanel.setContent(toolbar);
+		addComponent(searchPanel);
+		setComponentAlignment(searchPanel, Alignment.TOP_LEFT);
+
+		list.setId("list");
+		list.setWidth("100%");
+		list.setHeight("100%");
+		addComponent(list);
+		setComponentAlignment(list, Alignment.TOP_LEFT);
+		setExpandRatio(list, 1.0F);
+	}
+
+	private CssLayout createFilterLayout() {
+		CssLayout filterLayout = new CssLayout();
+		filterLayout.setStyleName("list-filters");
+		filterLayout.setWidth("100%");
+
+		searchField = new TextField();
+		searchField.setId("searchField");
+		searchField.setPlaceholder("Search");
+		filterLayout.addComponent(searchField);
+
+		searchButton = new Button();
+		searchButton.setIcon(VaadinIcons.SEARCH);
+		searchButton.setId("searchButton");
+		searchButton.setCaption("");
+		filterLayout.addComponent(searchButton);
+
+		includePast = new CheckBox();
+		includePast.setCaption("Include past");
+		includePast.setStyleName("small");
+		filterLayout.addComponent(includePast);
+
+		return filterLayout;
 	}
 
 	public void selectedOrder(Order order) {

@@ -32,6 +32,7 @@ public class ProductAdminView extends AbstractCrudView<Product> {
 		this.presenter = presenter;
 		this.priceToStringConverter = priceToStringConverter;
 		userAdminViewDesign = new ProductAdminViewDesign();
+		userAdminViewDesign.init();
 	}
 
 	@PostConstruct

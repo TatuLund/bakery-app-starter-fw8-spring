@@ -52,7 +52,8 @@ public class OrderHistory extends OrderHistoryDesign {
 	}
 
 	@PostConstruct
-	public void init() {
+	public void setup() {
+		init();
 		// Uses binder to get bean validation for the message
 		BeanValidationBinder<HistoryItem> binder = new BeanValidationBinder<>(HistoryItem.class);
 		binder.setRequiredConfigurator(null); // Don't show a *

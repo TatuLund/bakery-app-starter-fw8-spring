@@ -53,6 +53,7 @@ public class UserAdminView extends AbstractCrudView<User> {
 	public UserAdminView(UserAdminPresenter presenter) {
 		this.presenter = presenter;
 		userAdminViewDesign = new UserAdminViewDesign();
+		userAdminViewDesign.init();
 	}
 
 	@PostConstruct

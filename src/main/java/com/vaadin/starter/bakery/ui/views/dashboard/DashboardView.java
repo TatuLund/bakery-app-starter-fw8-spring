@@ -82,7 +82,8 @@ public class DashboardView extends DashboardViewDesign implements View {
 	}
 
 	@PostConstruct
-	public void init() {
+	public void setup() {
+		init();
 		setResponsive(true);
 
 		Row row = board.addRow(new BoardBox(todayLabel), notAvailableBox, new BoardBox(newLabel),
