@@ -47,6 +47,7 @@ import com.vaadin.starter.bakery.ui.views.orderedit.OrderEditView;
  * is added to the class, you should consider splitting out a presenter.
  */
 @SpringView
+@SuppressWarnings({ "java:S2160", "java:S110" })
 public class DashboardView extends DashboardViewDesign implements View {
 
 	private static final String DELIVERIES = "Deliveries";

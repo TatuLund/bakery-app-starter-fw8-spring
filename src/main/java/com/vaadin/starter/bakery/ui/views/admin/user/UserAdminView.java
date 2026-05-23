@@ -34,7 +34,8 @@ public class UserAdminView extends AbstractCrudView<User> {
 	 */
 	private Validator<String> passwordValidator = new Validator<String>() {
 
-		BeanValidator passwordBeanValidator = new BeanValidator(User.class, "passwordHash");
+		BeanValidator passwordBeanValidator = new BeanValidator(User.class,
+				"passwordHash");
 
 		@Override
 		public ValidationResult apply(String value, ValueContext context) {
@@ -64,21 +65,24 @@ public class UserAdminView extends AbstractCrudView<User> {
 
 	@Override
 	public void bindFormFields(BeanValidationBinder<User> binder) {
-		binder.forField(getViewComponent().password).withValidator(passwordValidator).bind(bean -> "",
-				(bean, value) -> {
-					if (value.isEmpty()) {
-						// If nothing is entered in the password field, do
-						// nothing
-					} else {
-						bean.setPasswordHash(presenter.encodePassword(value));
-					}
-				});
+		binder.forField(getViewComponent().password)
+				.withValidator(passwordValidator).bind(bean -> "",
+						(bean, value) -> {
+							if (value.isEmpty()) {
+								// If nothing is entered in the password field,
+								// do nothing
+							} else {
+								bean.setPasswordHash(
+										presenter.encodePassword(value));
+							}
+						});
 		binder.bindInstanceFields(getViewComponent());
 	}
 
 	public void setPasswordRequired(boolean passwordRequired) {
 		this.passwordRequired = passwordRequired;
-		getViewComponent().password.setRequiredIndicatorVisible(passwordRequired);
+		getViewComponent().password
+				.setRequiredIndicatorVisible(passwordRequired);
 	}
 
 	@Override

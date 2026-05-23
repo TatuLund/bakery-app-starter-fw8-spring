@@ -19,6 +19,7 @@ import com.vaadin.ui.UI;
 @SpringUI
 @Viewport("width=device-width,initial-scale=1.0,user-scalable=no")
 @Title("###Bakery###")
+@SuppressWarnings("java:S2160")
 public class AppUI extends UI implements HasLogger {
 
 	private final SpringViewProvider viewProvider;

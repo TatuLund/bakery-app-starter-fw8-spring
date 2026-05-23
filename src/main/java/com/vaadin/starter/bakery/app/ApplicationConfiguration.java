@@ -18,8 +18,7 @@ public class ApplicationConfiguration {
 	}
 
 	@Bean
-	SecuredViewAccessControl securedViewAccessControl()
-	{
+	SecuredViewAccessControl securedViewAccessControl() {
 		return new SecuredViewAccessControl();
 	}
 }

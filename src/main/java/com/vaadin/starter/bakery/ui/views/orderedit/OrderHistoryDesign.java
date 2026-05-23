@@ -9,7 +9,9 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
+@SuppressWarnings("java:S2160")
 public class OrderHistoryDesign extends Panel {
 
     protected CssLayout items;
@@ -18,7 +20,7 @@ public class OrderHistoryDesign extends Panel {
 
     public final void init() {
         setCaption("History");
-        setStyleName("well");
+        setStyleName(ValoTheme.PANEL_WELL);
         VerticalLayout historyLayout = new VerticalLayout();
         historyLayout.setStyleName("history");
         historyLayout.setMargin(true);
@@ -53,7 +55,7 @@ public class OrderHistoryDesign extends Panel {
 
         commitNewComment = new Button();
         commitNewComment.setIcon(VaadinIcons.ENTER_ARROW);
-        commitNewComment.setStyleName("quiet");
+        commitNewComment.setStyleName(ValoTheme.BUTTON_QUIET);
         commitNewComment.setId("commitNewComment");
         commitNewComment.setCaption("");
         commitNewComment.setId("commitNewComment");

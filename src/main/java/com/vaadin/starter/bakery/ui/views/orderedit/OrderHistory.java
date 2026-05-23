@@ -30,6 +30,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 @SpringComponent
 @PrototypeScope
+@SuppressWarnings({ "java:S2160", "java:S110" })
 public class OrderHistory extends OrderHistoryDesign {
 
 	private final DateTimeFormatter dateTimeFormatter;

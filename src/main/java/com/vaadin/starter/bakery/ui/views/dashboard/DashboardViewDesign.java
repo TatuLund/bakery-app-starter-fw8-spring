@@ -5,6 +5,7 @@ import com.vaadin.board.Board;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.VerticalLayout;
 
+@SuppressWarnings({ "java:S2160", "java:S110" })
 public class DashboardViewDesign extends VerticalLayout {
 
     protected Board board;

@@ -28,7 +28,8 @@ public class ProductAdminView extends AbstractCrudView<Product> {
 	private static final String PRICE_PROPERTY = "price";
 
 	@Autowired
-	public ProductAdminView(ProductAdminPresenter presenter, DollarPriceConverter priceToStringConverter) {
+	public ProductAdminView(ProductAdminPresenter presenter,
+			DollarPriceConverter priceToStringConverter) {
 		this.presenter = presenter;
 		this.priceToStringConverter = priceToStringConverter;
 		userAdminViewDesign = new ProductAdminViewDesign();
@@ -44,13 +45,17 @@ public class ProductAdminView extends AbstractCrudView<Product> {
 		// we want a custom converter, we remove the column and configure it
 		// manually.
 		getGrid().removeColumn(PRICE_PROPERTY);
-		getGrid().addColumn(product -> priceToStringConverter.convertToPresentation(product.getPrice(),
-				new ValueContext(getGrid()))).setSortProperty(PRICE_PROPERTY).setCaption("Price");
+		getGrid()
+				.addColumn(product -> priceToStringConverter
+						.convertToPresentation(product.getPrice(),
+								new ValueContext(getGrid())))
+				.setSortProperty(PRICE_PROPERTY).setCaption("Price");
 	}
 
 	@Override
 	public void bindFormFields(BeanValidationBinder<Product> binder) {
-		binder.forField(getViewComponent().price).withConverter(priceToStringConverter).bind(PRICE_PROPERTY);
+		binder.forField(getViewComponent().price)
+				.withConverter(priceToStringConverter).bind(PRICE_PROPERTY);
 		binder.bindInstanceFields(getViewComponent());
 	}
 

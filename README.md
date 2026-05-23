@@ -19,7 +19,7 @@ java -jar target/###artifactId###-1.0-SNAPSHOT.war
 
 If you want to produce a `jar` file instead of a `war` file, change the packaging type in `pom.xml` to `<packaging>jar</packaging>`.
 
-You also need to configure Vaadin resources and Designer templates to be included into the jar:
+You also need to configure Vaadin resources to be included into the jar:
 
 ```xml
 <build>
@@ -38,13 +38,31 @@ You also need to configure Vaadin resources and Designer templates to be include
 </build>
 ```
 
+# Running browserless UI tests with UIUnitTest
+
+The project also contains fast browserless UI tests built on top of TestBench `UIUnitTest`. These tests run entirely in the JVM, so they are useful for verifying Vaadin view logic, navigation, component state and Spring wiring without starting a browser.
+
+The shared setup lives in `src/test/java/com/vaadin/starter/bakery/ui/AbstractUITest.java`. It boots a Spring-backed mock Vaadin environment, creates the UI through `SpringUIProvider`, exposes the `WebApplicationContext` for Spring navigation, and runs Spring Boot startup runners so the test data matches normal application startup.
+
+Examples:
+
+- `src/test/java/com/vaadin/starter/bakery/ui/SpringNavigationTest.java` verifies that navigation resolves Spring-managed views and injected dependencies.
+- `src/test/java/com/vaadin/starter/bakery/ui/views/storefront/StorefrontTest.java` verifies filtering and grid contents without a browser.
+- `src/test/java/com/vaadin/starter/bakery/ui/views/orderedit/*.java` contains browserless order editing tests.
+
+Run all unit and browserless UI tests:
+
+`mvn verify`
+
+and make sure you have a valid license key installed.
+
 # Running integration tests
 
 Integration tests are implemented using TestBench. The tests take tens of minutes to run and are therefore included in a separate profile. To run the tests, execute
 
 `mvn verify -Pit`
 
-and make sure you have a valid TestBench license installed.
+and make sure you have a valid license key installed.
 
 # Running scalability tests
 
@@ -70,16 +88,7 @@ Scalability tests can be run as follows
 
 The project can be imported into the IDE of your choice as a Maven project
 
-The views are created using Vaadin Designer. To edit the views visually,
-you need to install the Vaadin Designer plug-in.
-
-In Eclipse, open Marketplace, search for "vaadin" and install Vaadin
-Designer 2.x
-
-In IntelliJ, go to "Preferences" -> "Plugins" -> "Browse Repositories",
-search for "Vaadin Designer 2" and install "Vaadin Designer"
-
 # License
-A paid Pro or Prime subscription is required for creating a new software project from this starter. After its creation, results can be used, developed and distributed freely, but licenses for the used commercial components are required during development. The starter or its parts cannot be redistributed as a code example or template.
+A paid a subscription with Vaadin 8 Extended Maintenance option included is required for creating a new software project from this starter. After its creation, results can be used, developed and distributed freely, but licenses for the used commercial components are required during development. The starter or its parts cannot be redistributed as a code example or template.
 
 For full terms, see LICENSE

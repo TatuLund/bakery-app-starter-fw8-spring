@@ -9,6 +9,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 
 @SpringComponent
 @PrototypeScope
+@SuppressWarnings("java:S6813")
 public class ConfirmPopup {
 
 	@Autowired
@@ -46,9 +47,11 @@ public class ConfirmPopup {
 	 *            the runnable to execute if the user presses {@literal cancel}
 	 *            in the dialog
 	 */
-	public void showLeaveViewConfirmDialog(View view, Runnable runOnConfirm, Runnable runOnCancel) {
+	public void showLeaveViewConfirmDialog(View view, Runnable runOnConfirm,
+			Runnable runOnCancel) {
 		ConfirmDialog dialog = confirmDialogFactory.create("Please confirm",
-				"You have unsaved changes that will be discarded if you navigate away.", "Discard Changes", "Cancel",
+				"You have unsaved changes that will be discarded if you navigate away.",
+				"Discard Changes", "Cancel",
 				null);
 		dialog.show(view.getViewComponent().getUI(), event -> {
 			if (event.isConfirmed()) {

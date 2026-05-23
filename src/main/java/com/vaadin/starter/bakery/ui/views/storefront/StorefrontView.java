@@ -25,6 +25,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * The storefront view showing upcoming orders.
@@ -34,6 +35,7 @@ import com.vaadin.ui.VerticalLayout;
  * is added to the class, you should consider splitting out a presenter.
  */
 @SpringView
+@SuppressWarnings({ "java:S110", "java:S2160", "java:S6813" })
 public class StorefrontView extends VerticalLayout implements View {
 
 	private static final String PARAMETER_SEARCH = "search";
@@ -75,12 +77,15 @@ public class StorefrontView extends VerticalLayout implements View {
 	@PostConstruct
 	public void setup() {
 		initLayout();
-		list.addSelectionListener(e -> selectedOrder(e.getFirstSelectedItem().get()));
+		list.addSelectionListener(
+				e -> selectedOrder(e.getFirstSelectedItem().get()));
 		newOrder.addClickListener(e -> newOrder());
-		searchButton.addClickListener(e -> search(searchField.getValue(), includePast.getValue()));
+		searchButton.addClickListener(
+				e -> search(searchField.getValue(), includePast.getValue()));
 
 		// We don't want a global shortcut for enter, scope it to the panel
-		searchPanel.addAction(new ClickShortcut(searchButton, KeyCode.ENTER, null));
+		searchPanel.addAction(
+				new ClickShortcut(searchButton, KeyCode.ENTER, null));
 	}
 
 	private void initLayout() {
@@ -91,7 +96,7 @@ public class StorefrontView extends VerticalLayout implements View {
 		setMargin(false);
 
 		searchPanel = new Panel();
-		searchPanel.setStyleName("borderless");
+		searchPanel.setStyleName(ValoTheme.PANEL_BORDERLESS);
 
 		HorizontalLayout toolbar = new HorizontalLayout();
 		toolbar.setSpacing(false);
@@ -106,7 +111,7 @@ public class StorefrontView extends VerticalLayout implements View {
 
 		newOrder = new Button();
 		newOrder.setIcon(VaadinIcons.PLUS);
-		newOrder.setStyleName("friendly");
+		newOrder.setStyleName(ValoTheme.BUTTON_FRIENDLY);
 		newOrder.setId("newOrder");
 		newOrder.setCaption("New");
 		toolbar.addComponent(newOrder);
@@ -142,7 +147,7 @@ public class StorefrontView extends VerticalLayout implements View {
 
 		includePast = new CheckBox();
 		includePast.setCaption("Include past");
-		includePast.setStyleName("small");
+		includePast.setStyleName(ValoTheme.CHECKBOX_SMALL);
 		filterLayout.addComponent(includePast);
 
 		return filterLayout;

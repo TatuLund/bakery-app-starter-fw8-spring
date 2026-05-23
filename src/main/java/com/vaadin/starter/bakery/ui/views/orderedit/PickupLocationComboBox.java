@@ -11,12 +11,14 @@ import com.vaadin.ui.ComboBox;
 
 @SpringComponent
 @PrototypeScope
+@SuppressWarnings({ "java:S110", "java:S2160" })
 public class PickupLocationComboBox extends ComboBox<PickupLocation> {
 
 	private final PickupLocationComboBoxDataProvider dataProvider;
 
 	@Autowired
-	public PickupLocationComboBox(PickupLocationComboBoxDataProvider dataProvider) {
+	public PickupLocationComboBox(
+			PickupLocationComboBoxDataProvider dataProvider) {
 		this.dataProvider = dataProvider;
 		setEmptySelectionAllowed(false);
 		setTextInputAllowed(false);

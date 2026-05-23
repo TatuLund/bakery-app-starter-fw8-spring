@@ -31,6 +31,7 @@ import com.vaadin.ui.UI;
  */
 @SpringViewDisplay
 @UIScope
+@SuppressWarnings({ "java:S2160", "java:S110" })
 public class MainView extends MainViewDesign implements ViewDisplay {
 
 	private final Map<Class<? extends View>, Button> navigationButtons = new HashMap<>();

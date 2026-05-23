@@ -2,7 +2,6 @@
 package com.vaadin.starter.bakery.ui;
 
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -10,7 +9,9 @@ import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
+@SuppressWarnings({ "java:S2160", "java:S110" })
 public class MainViewDesign extends HorizontalLayout {
 
     protected Label activeViewName;
@@ -40,7 +41,6 @@ public class MainViewDesign extends HorizontalLayout {
         setComponentAlignment(navigationContainer, Alignment.TOP_LEFT);
         content = new VerticalLayout();
         content.setStyleName("content-container v-scrollable");
-        content.setId("content");
         content.setWidth("100%");
         content.setHeight("100%");
         content.setMargin(false);
@@ -70,9 +70,8 @@ public class MainViewDesign extends HorizontalLayout {
         navigationBar.addComponent(activeViewName);
 
         menuButton = new Button();
-        menuButton.setIcon(FontAwesome.BARS);
-        menuButton.setStyleName("menu borderless");
-        menuButton.setId("menuButton");
+        menuButton.setIcon(VaadinIcons.MENU);
+        menuButton.setStyleName("menu " + ValoTheme.BUTTON_BORDERLESS);
         menuButton.setCaption("Menu");
         menuButton.setId("menuButton");
         navigationBar.addComponent(menuButton);
@@ -118,7 +117,7 @@ public class MainViewDesign extends HorizontalLayout {
     }
 
     private void addMenuButton(Button button) {
-        button.setStyleName("borderless");
+        button.setStyleName(ValoTheme.BUTTON_BORDERLESS);
         button.setWidth("100%");
         button.setHeight("80px");
         menu.addComponent(button);

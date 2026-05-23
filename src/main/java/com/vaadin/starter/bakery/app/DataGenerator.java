@@ -30,17 +30,25 @@ import com.vaadin.starter.bakery.backend.data.entity.User;
 @SpringComponent
 public class DataGenerator implements HasLogger {
 
-	private static final String[] FILLING = new String[] { "Strawberry", "Chocolate", "Blueberry", "Raspberry",
+	private static final String[] FILLING = new String[] { "Strawberry",
+			"Chocolate", "Blueberry", "Raspberry",
 			"Vanilla" };
-	private static final String[] TYPE = new String[] { "Cake", "Pastry", "Tart", "Muffin", "Biscuit", "Bread", "Bagel",
+	private static final String[] TYPE = new String[] { "Cake", "Pastry",
+			"Tart", "Muffin", "Biscuit", "Bread", "Bagel",
 			"Bun", "Brownie", "Cookie", "Cracker", "Cheese Cake" };
-	private static final String[] FIRST_NAME = new String[] { "Ori", "Amanda", "Octavia", "Laurel", "Lael", "Delilah",
-			"Jason", "Skyler", "Arsenio", "Haley", "Lionel", "Sylvia", "Jessica", "Lester", "Ferdinand", "Elaine",
+	private static final String[] FIRST_NAME = new String[] { "Ori", "Amanda",
+			"Octavia", "Laurel", "Lael", "Delilah",
+			"Jason", "Skyler", "Arsenio", "Haley", "Lionel", "Sylvia",
+			"Jessica", "Lester", "Ferdinand", "Elaine",
 			"Griffin", "Kerry", "Dominique" };
-	private static final String[] LAST_NAME = new String[] { "Carter", "Castro", "Rich", "Irwin", "Moore", "Hendricks",
-			"Huber", "Patton", "Wilkinson", "Thornton", "Nunez", "Macias", "Gallegos", "Blevins", "Mejia", "Pickett",
-			"Whitney", "Farmer", "Henry", "Chen", "Macias", "Rowland", "Pierce", "Cortez", "Noble", "Howard", "Nixon",
-			"Mcbride", "Leblanc", "Russell", "Carver", "Benton", "Maldonado", "Lyons" };
+	private static final String[] LAST_NAME = new String[] { "Carter", "Castro",
+			"Rich", "Irwin", "Moore", "Hendricks",
+			"Huber", "Patton", "Wilkinson", "Thornton", "Nunez", "Macias",
+			"Gallegos", "Blevins", "Mejia", "Pickett",
+			"Whitney", "Farmer", "Henry", "Chen", "Macias", "Rowland", "Pierce",
+			"Cortez", "Noble", "Howard", "Nixon",
+			"Mcbride", "Leblanc", "Russell", "Carver", "Benton", "Maldonado",
+			"Lyons" };
 
 	private final Random random = new Random(1L);
 
@@ -50,8 +58,10 @@ public class DataGenerator implements HasLogger {
 	private User barista;
 
 	@Bean
-	public CommandLineRunner loadData(OrderRepository orderRepository, UserRepository userRepository,
-			ProductRepository productRepository, PickupLocationRepository pickupLocationRepository,
+	public CommandLineRunner loadData(OrderRepository orderRepository,
+			UserRepository userRepository,
+			ProductRepository productRepository,
+			PickupLocationRepository pickupLocationRepository,
 			PasswordEncoder passwordEncoder) {
 		return args -> {
 			if (hasData(userRepository)) {
@@ -98,13 +108,16 @@ public class DataGenerator implements HasLogger {
 		List<Order> orders = new ArrayList<>();
 
 		LocalDate now = LocalDate.now();
-		LocalDate oldestDate = LocalDate.of(now.getYear() - yearsToInclude, 1, 1);
+		LocalDate oldestDate = LocalDate.of(now.getYear() - yearsToInclude, 1,
+				1);
 		LocalDate newestDate = now.plusMonths(1L);
 
-		for (LocalDate dueDate = oldestDate; dueDate.isBefore(newestDate); dueDate = dueDate.plusDays(1)) {
+		for (LocalDate dueDate = oldestDate; dueDate
+				.isBefore(newestDate); dueDate = dueDate.plusDays(1)) {
 			// Create a slightly upwards trend - everybody wants to be
 			// successful
-			int relativeYear = dueDate.getYear() - now.getYear() + yearsToInclude;
+			int relativeYear = dueDate.getYear() - now.getYear()
+					+ yearsToInclude;
 			int relativeMonth = relativeYear * 12 + dueDate.getMonthValue();
 			double multiplier = 1.0 + 0.03 * relativeMonth;
 			int ordersThisDay = (int) (random.nextInt(10) + 1 * multiplier);
@@ -154,37 +167,49 @@ public class DataGenerator implements HasLogger {
 		ArrayList<HistoryItem> history = new ArrayList<>();
 		HistoryItem item = new HistoryItem(getBarista(), "Order placed");
 		item.setNewState(OrderState.NEW);
-		LocalDateTime orderPlaced = order.getDueDate().minusDays(random.nextInt(5) + 2L).atTime(random.nextInt(10) + 7,
-				00);
+		LocalDateTime orderPlaced = order.getDueDate()
+				.minusDays(random.nextInt(5) + 2L)
+				.atTime(random.nextInt(10) + 7,
+						00);
 		item.setTimestamp(orderPlaced);
 		history.add(item);
 		if (order.getState() == OrderState.CANCELLED) {
 			item = new HistoryItem(getBarista(), "Order cancelled");
 			item.setNewState(OrderState.CANCELLED);
 			item.setTimestamp(orderPlaced.plusDays(random
-					.nextInt((int) orderPlaced.until(order.getDueDate().atTime(order.getDueTime()), ChronoUnit.DAYS))));
+					.nextInt((int) orderPlaced.until(
+							order.getDueDate().atTime(order.getDueTime()),
+							ChronoUnit.DAYS))));
 			history.add(item);
-		} else if (order.getState() == OrderState.CONFIRMED || order.getState() == OrderState.DELIVERED
-				|| order.getState() == OrderState.PROBLEM || order.getState() == OrderState.READY) {
+		} else if (order.getState() == OrderState.CONFIRMED
+				|| order.getState() == OrderState.DELIVERED
+				|| order.getState() == OrderState.PROBLEM
+				|| order.getState() == OrderState.READY) {
 			item = new HistoryItem(getBaker(), "Order confirmed");
 			item.setNewState(OrderState.CONFIRMED);
-			item.setTimestamp(orderPlaced.plusDays(random.nextInt(2)).plusHours(random.nextInt(5)));
+			item.setTimestamp(orderPlaced.plusDays(random.nextInt(2))
+					.plusHours(random.nextInt(5)));
 			history.add(item);
 
 			if (order.getState() == OrderState.PROBLEM) {
-				item = new HistoryItem(getBaker(), "Can't make it. Did not get any ingredients this morning");
+				item = new HistoryItem(getBaker(),
+						"Can't make it. Did not get any ingredients this morning");
 				item.setNewState(OrderState.PROBLEM);
-				item.setTimestamp(order.getDueDate().atTime(random.nextInt(4) + 4, 0));
+				item.setTimestamp(
+						order.getDueDate().atTime(random.nextInt(4) + 4, 0));
 				history.add(item);
-			} else if (order.getState() == OrderState.READY || order.getState() == OrderState.DELIVERED) {
+			} else if (order.getState() == OrderState.READY
+					|| order.getState() == OrderState.DELIVERED) {
 				item = new HistoryItem(getBaker(), "Order ready for pickup");
 				item.setNewState(OrderState.READY);
-				item.setTimestamp(order.getDueDate().atTime(random.nextInt(2) + 8, random.nextBoolean() ? 0 : 30));
+				item.setTimestamp(order.getDueDate().atTime(
+						random.nextInt(2) + 8, random.nextBoolean() ? 0 : 30));
 				history.add(item);
 				if (order.getState() == OrderState.DELIVERED) {
 					item = new HistoryItem(getBaker(), "Order delivered");
 					item.setNewState(OrderState.DELIVERED);
-					item.setTimestamp(order.getDueDate().atTime(order.getDueTime().minusMinutes(random.nextInt(120))));
+					item.setTimestamp(order.getDueDate().atTime(order
+							.getDueTime().minusMinutes(random.nextInt(120))));
 					history.add(item);
 				}
 			}
@@ -279,7 +304,8 @@ public class DataGenerator implements HasLogger {
 		return array[random.nextInt(array.length)];
 	}
 
-	private void createPickupLocations(PickupLocationRepository pickupLocationRepository) {
+	private void createPickupLocations(
+			PickupLocationRepository pickupLocationRepository) {
 		PickupLocation store = new PickupLocation();
 		store.setName("Store");
 		pickupLocations.add(pickupLocationRepository.save(store));
@@ -316,12 +342,16 @@ public class DataGenerator implements HasLogger {
 		return name;
 	}
 
-	private void createUsers(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-		baker = userRepository.save(new User("baker@vaadin.com", "Heidi", passwordEncoder.encode("baker"), Role.BAKER));
-		User user = new User("barista@vaadin.com", "Malin", passwordEncoder.encode("barista"), Role.BARISTA);
+	private void createUsers(UserRepository userRepository,
+			PasswordEncoder passwordEncoder) {
+		baker = userRepository.save(new User("baker@vaadin.com", "Heidi",
+				passwordEncoder.encode("baker"), Role.BAKER));
+		User user = new User("barista@vaadin.com", "Malin",
+				passwordEncoder.encode("barista"), Role.BARISTA);
 		user.setLocked(true);
 		barista = userRepository.save(user);
-		user = new User("admin@vaadin.com", "Göran", passwordEncoder.encode("admin"), Role.ADMIN);
+		user = new User("admin@vaadin.com", "Göran",
+				passwordEncoder.encode("admin"), Role.ADMIN);
 		user.setLocked(true);
 		userRepository.save(user);
 	}

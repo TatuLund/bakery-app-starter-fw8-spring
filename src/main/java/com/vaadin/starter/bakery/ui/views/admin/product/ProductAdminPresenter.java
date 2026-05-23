@@ -12,11 +12,15 @@ import com.vaadin.starter.bakery.ui.views.admin.AbstractCrudPresenter;
 
 @SpringComponent
 @ViewScope
-public class ProductAdminPresenter extends AbstractCrudPresenter<Product, ProductService, ProductAdminView> {
+public class ProductAdminPresenter extends
+		AbstractCrudPresenter<Product, ProductService, ProductAdminView> {
 
 	@Autowired
-	public ProductAdminPresenter(ProductAdminDataProvider productAdminDataProvider, NavigationManager navigationManager,
+	public ProductAdminPresenter(
+			ProductAdminDataProvider productAdminDataProvider,
+			NavigationManager navigationManager,
 			ProductService service, BeanFactory beanFactory) {
-		super(navigationManager, service, Product.class, productAdminDataProvider, beanFactory);
+		super(navigationManager, service, Product.class,
+				productAdminDataProvider, beanFactory);
 	}
 }

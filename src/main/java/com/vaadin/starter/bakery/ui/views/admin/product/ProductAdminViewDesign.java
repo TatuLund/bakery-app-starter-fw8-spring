@@ -1,7 +1,7 @@
 
 package com.vaadin.starter.bakery.ui.views.admin.product;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.starter.bakery.backend.data.entity.Product;
 import com.vaadin.starter.bakery.ui.components.Form;
 import com.vaadin.ui.Alignment;
@@ -11,12 +11,13 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
+@SuppressWarnings({ "java:S2160", "java:S110" })
 public class ProductAdminViewDesign extends VerticalLayout {
 
     protected TextField search;
     protected Button add;
-    protected CssLayout listParent;
     protected Grid<Product> list;
     protected Form form;
     protected TextField name;
@@ -26,25 +27,25 @@ public class ProductAdminViewDesign extends VerticalLayout {
     protected Button delete;
 
     public final void init() {
-        this.setStyleName("crud-template");
-        this.setSpacing(false);
-        this.setResponsive(true);
-        this.setWidth("100%");
-        this.setHeight("100%");
-        this.setMargin(false);
+        setStyleName("crud-template");
+        setSpacing(false);
+        setResponsive(true);
+        setWidth("100%");
+        setHeight("100%");
+        setMargin(false);
         HorizontalLayout topBar = createTopBar();
-        this.addComponent(topBar);
-        this.setComponentAlignment(topBar, Alignment.TOP_LEFT);
+        addComponent(topBar);
+        setComponentAlignment(topBar, Alignment.TOP_LEFT);
         CssLayout contentWrapper = new CssLayout();
         contentWrapper.setStyleName("content");
         contentWrapper.setWidth("100%");
         contentWrapper.setHeight("100%");
-        this.listParent = createListParent();
-        this.form = createForm();
+        CssLayout listParent = createListParent();
+        form = createForm();
         contentWrapper.addComponents(listParent, form);
-        this.addComponent(contentWrapper);
-        this.setComponentAlignment(contentWrapper, Alignment.TOP_LEFT);
-        this.setExpandRatio(contentWrapper, 1.0F);
+        addComponent(contentWrapper);
+        setComponentAlignment(contentWrapper, Alignment.TOP_LEFT);
+        setExpandRatio(contentWrapper, 1.0F);
     }
 
     private HorizontalLayout createTopBar() {
@@ -60,9 +61,10 @@ public class ProductAdminViewDesign extends VerticalLayout {
         searchWrapper.setWidth("100%");
         searchWrapper.setMargin(false);
 
-        this.search = new TextField();
-        search.setIcon(FontAwesome.SEARCH);
-        search.setStyleName("small inline-icon search");
+        search = new TextField();
+        search.setIcon(VaadinIcons.SEARCH);
+        search.setStyleName(ValoTheme.TEXTFIELD_SMALL + " "
+                + ValoTheme.TEXTFIELD_INLINE_ICON + " search");
         search.setPlaceholder("Search");
         search.setWidth("100%");
         search.setId("search");
@@ -73,8 +75,8 @@ public class ProductAdminViewDesign extends VerticalLayout {
         topBar.setComponentAlignment(searchWrapper, Alignment.MIDDLE_LEFT);
         topBar.setExpandRatio(searchWrapper, 1.0F);
 
-        this.add = new Button();
-        add.setIcon(FontAwesome.PLUS);
+        add = new Button();
+        add.setIcon(VaadinIcons.PLUS);
         add.setStyleName("borderless");
         add.setCaption("Add new");
         add.setId("add");
@@ -91,7 +93,7 @@ public class ProductAdminViewDesign extends VerticalLayout {
         listParent.setWidth("100%");
         listParent.setHeight("100%");
 
-        this.list = new Grid<>(Product.class);
+        list = new Grid<>(Product.class);
         list.setWidth("100%");
         list.setHeight("100%");
         list.setId("list");
@@ -104,34 +106,36 @@ public class ProductAdminViewDesign extends VerticalLayout {
     private Form createForm() {
         Form form = new Form();
 
-        this.name = new TextField();
+        name = new TextField();
         name.setCaption("Name");
-        name.setStyleName("small");
+        name.setStyleName(ValoTheme.TEXTFIELD_SMALL);
         name.setWidth("100%");
         name.setId("name");
         form.addField(name);
 
-        this.price = new TextField();
+        price = new TextField();
         price.setCaption("Price");
-        price.setStyleName("small");
+        price.setStyleName(ValoTheme.TEXTFIELD_SMALL);
         price.setWidth("100%");
         price.setId("price");
         form.addField(price);
 
-        this.update = new Button();
-        update.setStyleName("small primary");
+        update = new Button();
+        update.setStyleName(
+                ValoTheme.BUTTON_SMALL + " " + ValoTheme.BUTTON_PRIMARY);
         update.setCaption("Update");
         update.setId("update");
         form.setUpdateButton(update);
 
-        this.cancel = new Button();
-        cancel.setStyleName("small");
+        cancel = new Button();
+        cancel.setStyleName(ValoTheme.BUTTON_SMALL);
         cancel.setCaption("Cancel");
         cancel.setId("cancel");
         form.setCancelButton(cancel);
 
-        this.delete = new Button();
-        delete.setStyleName("small danger");
+        delete = new Button();
+        delete.setStyleName(
+                ValoTheme.BUTTON_SMALL + " " + ValoTheme.BUTTON_DANGER);
         delete.setCaption("Delete");
         delete.setId("delete");
         form.setDeleteButton(delete);

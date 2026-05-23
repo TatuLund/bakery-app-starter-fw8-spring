@@ -1,7 +1,7 @@
 
 package com.vaadin.starter.bakery.ui.views.admin.user;
 
-import com.vaadin.server.FontAwesome;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.starter.bakery.backend.data.entity.User;
 import com.vaadin.starter.bakery.ui.components.Form;
 import com.vaadin.starter.bakery.ui.views.admin.RoleSelect;
@@ -12,7 +12,9 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
+@SuppressWarnings({ "java:S2160", "java:S110" })
 public class UserAdminViewDesign extends VerticalLayout {
 
     protected TextField search;
@@ -76,8 +78,9 @@ public class UserAdminViewDesign extends VerticalLayout {
         tools.setMargin(false);
 
         this.search = new TextField();
-        search.setIcon(FontAwesome.SEARCH);
-        search.setStyleName("small inline-icon search");
+        search.setIcon(VaadinIcons.SEARCH);
+        search.setStyleName(ValoTheme.TEXTFIELD_SMALL + " "
+                + ValoTheme.TEXTFIELD_INLINE_ICON + " search");
         search.setPlaceholder("Search");
         search.setWidth("100%");
         search.setId("search");
@@ -89,7 +92,7 @@ public class UserAdminViewDesign extends VerticalLayout {
         topBar.setExpandRatio(tools, 1.0F);
 
         add = new Button();
-        add.setIcon(FontAwesome.PLUS);
+        add.setIcon(VaadinIcons.PLUS);
         add.setStyleName("borderless");
         add.setCaption("Add new");
         add.setId("add");
@@ -104,7 +107,7 @@ public class UserAdminViewDesign extends VerticalLayout {
 
         email = new TextField();
         email.setCaption("Email (login)");
-        email.setStyleName("small");
+        email.setStyleName(ValoTheme.TEXTFIELD_SMALL);
         email.setWidth("100%");
         email.setHeight("31px");
         email.setId("email");
@@ -112,38 +115,40 @@ public class UserAdminViewDesign extends VerticalLayout {
 
         name = new TextField();
         name.setCaption("Name");
-        name.setStyleName("small");
+        name.setStyleName(ValoTheme.TEXTFIELD_SMALL);
         name.setWidth("100%");
         name.setId("name");
         form.addField(name);
 
         password = new TextField();
         password.setCaption("Password");
-        password.setStyleName("small");
+        password.setStyleName(ValoTheme.TEXTFIELD_SMALL);
         password.setWidth("100%");
         password.setId("password");
         form.addField(password);
 
         role = new RoleSelect();
-        role.setStyleName("small");
+        role.setStyleName(ValoTheme.COMBOBOX_SMALL);
         role.setWidth("100%");
         role.setId("role");
         form.addField(role);
 
         update = new Button();
-        update.setStyleName("small primary");
+        update.setStyleName(
+                ValoTheme.BUTTON_SMALL + " " + ValoTheme.BUTTON_PRIMARY);
         update.setCaption("Update");
         update.setId("update");
         form.setUpdateButton(update);
 
         cancel = new Button();
-        cancel.setStyleName("small");
+        cancel.setStyleName(ValoTheme.BUTTON_SMALL);
         cancel.setCaption("Cancel");
         cancel.setId("cancel");
         form.setCancelButton(cancel);
 
         delete = new Button();
-        delete.setStyleName("small danger");
+        delete.setStyleName(
+                ValoTheme.BUTTON_SMALL + " " + ValoTheme.BUTTON_DANGER);
         delete.setCaption("Delete");
         delete.setId("delete");
         form.setDeleteButton(delete);

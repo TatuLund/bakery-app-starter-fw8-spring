@@ -31,6 +31,7 @@ import com.vaadin.ui.TextField;
 
 @SpringComponent
 @PrototypeScope
+@SuppressWarnings({ "java:S110", "java:S2160", "java:S6813" })
 public class ProductInfo extends CssLayout {
 
 	protected Button delete;
@@ -46,7 +47,7 @@ public class ProductInfo extends CssLayout {
 
 	private final DollarPriceConverter priceFormatter;
 
-	private final ViewEventBus viewEventBus;
+	private final transient ViewEventBus viewEventBus;
 
 	private BeanValidationBinder<OrderItem> binder;
 

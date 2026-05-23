@@ -8,6 +8,7 @@ import com.vaadin.ui.ComboBox;
 
 @SpringComponent
 @ViewScope
+@SuppressWarnings("java:S110")
 public class OrderStateSelect extends ComboBox<OrderState> implements HasLogger {
 
 	public OrderStateSelect() {

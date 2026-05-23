@@ -33,7 +33,7 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 
 	private final NavigationManager navigationManager;
 
-	private final S service;
+	private final transient S service;
 
 	private FilterablePageableDataProvider<T, Object> dataProvider;
 
@@ -44,7 +44,7 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 	// class.
 	private T editItem;
 
-	private final BeanFactory beanFactory;
+	private final transient BeanFactory beanFactory;
 
 	private final Class<T> entityType;
 

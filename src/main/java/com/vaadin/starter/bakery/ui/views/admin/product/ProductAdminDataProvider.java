@@ -18,7 +18,8 @@ import com.vaadin.starter.bakery.backend.service.ProductService;
 
 @SpringComponent
 @PrototypeScope
-public class ProductAdminDataProvider extends FilterablePageableDataProvider<Product, Object> {
+public class ProductAdminDataProvider
+		extends FilterablePageableDataProvider<Product, Object> {
 
 	private transient ProductService productService;
 
@@ -28,7 +29,8 @@ public class ProductAdminDataProvider extends FilterablePageableDataProvider<Pro
 	}
 
 	@Override
-	protected Page<Product> fetchFromBackEnd(Query<Product, Object> query, Pageable pageable) {
+	protected Page<Product> fetchFromBackEnd(Query<Product, Object> query,
+			Pageable pageable) {
 		return productService.findAnyMatching(getOptionalFilter(), pageable);
 	}
 

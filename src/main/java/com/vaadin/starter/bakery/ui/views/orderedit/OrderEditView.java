@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vaadin.annotations.PropertyId;
 import com.vaadin.data.BeanValidationBinder;
 import com.vaadin.data.BindingValidationStatus;
 import com.vaadin.data.HasValue;
@@ -37,8 +38,10 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SpringView(name = "order")
+@SuppressWarnings({ "java:S2160", "java:S110", "java:S6813" })
 public class OrderEditView extends VerticalLayout implements View {
 
 	public enum Mode {
@@ -54,8 +57,11 @@ public class OrderEditView extends VerticalLayout implements View {
 
 	@Autowired
 	protected PickupLocationComboBox pickupLocation;
+	@PropertyId("customer.fullName")
 	protected TextField fullName;
+	@PropertyId("customer.phoneNumber")
 	protected TextField phone;
+	@PropertyId("customer.details")
 	protected TextField details;
 	protected CssLayout productInfoContainer;
 	protected Button addItems;
@@ -92,7 +98,7 @@ public class OrderEditView extends VerticalLayout implements View {
 
 		// Binder takes care of binding Vaadin fields defined as Java member
 		// fields in this class to properties in the Order bean
-		binder = new BeanValidationBinder<>(Order.class);
+		binder = new BeanValidationBinder<>(Order.class, true);
 
 		// Almost all fields are required, so we don't want to display
 		// indicators
@@ -103,12 +109,6 @@ public class OrderEditView extends VerticalLayout implements View {
 		// intuitive for the user that we start from the top if there are
 		// multiple errors.
 		binder.bindInstanceFields(this);
-
-		// Must bind sub properties manually until
-		// https://github.com/vaadin/framework/issues/9210 is fixed
-		binder.bind(fullName, "customer.fullName");
-		binder.bind(phone, "customer.phoneNumber");
-		binder.bind(details, "customer.details");
 
 		// Track changes manually as we use setBean and nested binders
 		binder.addValueChangeListener(e -> hasChanges = true);
@@ -140,7 +140,8 @@ public class OrderEditView extends VerticalLayout implements View {
 		reportHeader.setMargin(false);
 
 		orderId = new Label();
-		orderId.setStyleName("h4 colored");
+		orderId.setStyleName(
+				ValoTheme.LABEL_H4 + " " + ValoTheme.LABEL_COLORED);
 		orderId.setId("orderId");
 		orderId.setContentMode(ContentMode.TEXT);
 		orderId.setValue("#182");
@@ -148,7 +149,8 @@ public class OrderEditView extends VerticalLayout implements View {
 		reportHeader.setComponentAlignment(orderId, Alignment.TOP_LEFT);
 
 		stateLabel = new Label();
-		stateLabel.setStyleName("h4 colored");
+		stateLabel.setStyleName(
+				ValoTheme.LABEL_H4 + " " + ValoTheme.LABEL_COLORED);
 		stateLabel.setId("stateLabel");
 		stateLabel.setWidth("100%");
 		stateLabel.setContentMode(ContentMode.TEXT);
@@ -164,7 +166,7 @@ public class OrderEditView extends VerticalLayout implements View {
 		orderForm.addComponent(reportHeader);
 
 		Label dueLabel = new Label();
-		dueLabel.setStyleName("header");
+		dueLabel.setStyleName(ValoTheme.LABEL_H4 + " header");
 		dueLabel.setWidth("100%");
 		dueLabel.setContentMode(ContentMode.TEXT);
 		dueLabel.setValue("Due");
@@ -246,7 +248,8 @@ public class OrderEditView extends VerticalLayout implements View {
 		orderForm.addComponent(addItems);
 
 		total = new Label();
-		total.setStyleName("total huge bold");
+		total.setStyleName(
+				"total " + ValoTheme.LABEL_HUGE + " " + ValoTheme.LABEL_BOLD);
 		total.setId("total");
 		total.setWidth("100%");
 		total.setContentMode(ContentMode.TEXT);
@@ -300,7 +303,8 @@ public class OrderEditView extends VerticalLayout implements View {
 
 		ok = new Button();
 		ok.setIcon(VaadinIcons.ANGLE_RIGHT);
-		ok.setStyleName("primary icon-align-right");
+		ok.setStyleName(ValoTheme.BUTTON_PRIMARY + " "
+				+ ValoTheme.BUTTON_ICON_ALIGN_RIGHT);
 		ok.setId("ok");
 		ok.setCaption("Place order");
 		buttonsWrapper.addComponent(ok);
@@ -406,7 +410,8 @@ public class OrderEditView extends VerticalLayout implements View {
 		history.setVisible(mode == Mode.REPORT);
 		state.setVisible(mode == Mode.EDIT);
 
-		if (mode == Mode.REPORT) {
+		switch (mode) {
+		case REPORT -> {
 			cancel.setCaption("Edit");
 			cancel.setIcon(VaadinIcons.EDIT);
 			Optional<OrderState> nextState = presenter
@@ -414,12 +419,14 @@ public class OrderEditView extends VerticalLayout implements View {
 			ok.setCaption("Mark as "
 					+ nextState.map(OrderState::getDisplayName).orElse("?"));
 			ok.setVisible(nextState.isPresent());
-		} else if (mode == Mode.CONFIRMATION) {
+		}
+		case CONFIRMATION -> {
 			cancel.setCaption("Back");
 			cancel.setIcon(VaadinIcons.ANGLE_LEFT);
 			ok.setCaption("Place order");
 			ok.setVisible(true);
-		} else if (mode == Mode.EDIT) {
+		}
+		case EDIT -> {
 			cancel.setCaption("Cancel");
 			cancel.setIcon(VaadinIcons.CLOSE);
 			if (getOrder() != null && !getOrder().isNew()) {
@@ -428,8 +435,8 @@ public class OrderEditView extends VerticalLayout implements View {
 				ok.setCaption("Review order");
 			}
 			ok.setVisible(true);
-		} else {
-			throw new IllegalArgumentException("Unknown mode " + mode);
+		}
+		default -> throw new IllegalArgumentException("Unknown mode " + mode);
 		}
 	}
 

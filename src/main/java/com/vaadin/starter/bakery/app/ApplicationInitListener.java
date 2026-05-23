@@ -19,6 +19,7 @@ public class ApplicationInitListener implements VaadinServiceInitListener {
 	public void serviceInit(ServiceInitEvent serviceInitEvent) {
 		VaadinService service = serviceInitEvent.getSource();
 
-		service.addSessionInitListener(event -> event.getSession().addBootstrapListener(new IconBootstrapListener()));
+		service.addSessionInitListener(event -> event.getSession()
+				.addBootstrapListener(new IconBootstrapListener()));
 	}
 }

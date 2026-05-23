@@ -1,7 +1,5 @@
 package com.vaadin.starter.bakery.ui.views.admin;
 
-import java.io.Serializable;
-
 import javax.annotation.PostConstruct;
 
 import org.springframework.security.access.annotation.Secured;
@@ -54,7 +52,8 @@ import com.vaadin.ui.components.grid.SingleSelectionModel;
  *            the type of entity which can be edited in the view
  */
 @Secured(Role.ADMIN)
-public abstract class AbstractCrudView<T extends AbstractEntity> implements Serializable, View, HasLogger {
+public abstract class AbstractCrudView<T extends AbstractEntity>
+		implements View, HasLogger {
 
 	public static final String CAPTION_DISCARD = "Discard";
 	public static final String CAPTION_CANCEL = "Cancel";
@@ -103,12 +102,14 @@ public abstract class AbstractCrudView<T extends AbstractEntity> implements Seri
 			if (e.getFirstSelectedItem().isPresent()) {
 				getPresenter().editRequest(e.getFirstSelectedItem().get());
 			} else {
-				throw new IllegalStateException("This should never happen as deselection is not allowed");
+				throw new IllegalStateException(
+						"This should never happen as deselection is not allowed");
 			}
 		});
 
 		// Force user to choose save or cancel in form once enabled
-		((SingleSelectionModel<T>) getGrid().getSelectionModel()).setDeselectAllowed(false);
+		((SingleSelectionModel<T>) getGrid().getSelectionModel())
+				.setDeselectAllowed(false);
 
 		// Button logic
 		getUpdate().addClickListener(event -> getPresenter().updateClicked());
@@ -117,7 +118,8 @@ public abstract class AbstractCrudView<T extends AbstractEntity> implements Seri
 		getAdd().addClickListener(event -> getPresenter().addNewClicked());
 
 		// Search functionality
-		getSearch().addValueChangeListener(event -> getPresenter().filterGrid(event.getValue()));
+		getSearch().addValueChangeListener(
+				event -> getPresenter().filterGrid(event.getValue()));
 
 	}
 
@@ -134,10 +136,11 @@ public abstract class AbstractCrudView<T extends AbstractEntity> implements Seri
 	}
 
 	public void focusField(HasValue<?> field) {
-		if (field instanceof Focusable) {
-			((Focusable) field).focus();
+		if (field instanceof Focusable focusable) {
+			focusable.focus();
 		} else {
-			getLogger().warn("Unable to focus field of type " + field.getClass().getName());
+			getLogger().warn("Unable to focus field of type {}",
+					field.getClass().getName());
 		}
 	}
 

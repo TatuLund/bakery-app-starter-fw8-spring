@@ -9,6 +9,7 @@ import com.vaadin.ui.ComboBox;
 
 @SpringComponent
 @PrototypeScope
+@SuppressWarnings("java:S110")
 public class ProductComboBox extends ComboBox<Product> {
 
 	@Autowired

@@ -8,6 +8,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 
 @SpringComponent
 @PrototypeScope
+@SuppressWarnings("java:S110")
 public class AccessDeniedView extends AccessDeniedDesign implements View {
 
 	@Override

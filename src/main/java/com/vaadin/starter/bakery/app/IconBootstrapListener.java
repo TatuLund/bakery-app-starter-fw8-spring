@@ -42,7 +42,8 @@ public class IconBootstrapListener implements BootstrapListener {
 		for (String rel : rels) {
 			for (int size : sizes) {
 				String iconUri = baseUri + size + extension;
-				String href = response.getUriResolver().resolveVaadinUri(iconUri);
+				String href = response.getUriResolver()
+						.resolveVaadinUri(iconUri);
 				String s = size + "x" + size;
 				Element element = document.createElement("link");
 				element.attr("rel", rel);
@@ -57,7 +58,7 @@ public class IconBootstrapListener implements BootstrapListener {
 		element.attr("name", "mobile-web-app-capable");
 		element.attr("content", "yes");
 		head.appendChild(element);
-
+		
 		element = document.createElement("meta");
 		element.attr("name", "apple-mobile-web-app-capable");
 		element.attr("content", "yes");

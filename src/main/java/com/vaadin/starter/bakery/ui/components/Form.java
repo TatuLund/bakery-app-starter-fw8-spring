@@ -8,6 +8,7 @@ import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.VerticalLayout;
 
+@SuppressWarnings("java:S2160")
 public class Form extends Composite {
 
 	private final VerticalLayout root;

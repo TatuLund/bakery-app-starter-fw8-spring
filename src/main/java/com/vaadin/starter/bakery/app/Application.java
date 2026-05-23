@@ -15,7 +15,8 @@ import com.vaadin.starter.bakery.backend.service.UserService;
 import com.vaadin.starter.bakery.backend.util.LocalDateJpaConverter;
 import com.vaadin.starter.bakery.ui.AppUI;
 
-@SpringBootApplication(scanBasePackageClasses = { AppUI.class, Application.class, UserService.class,
+@SpringBootApplication(scanBasePackageClasses = { AppUI.class,
+		Application.class, UserService.class,
 		SecurityConfig.class })
 @EnableJpaRepositories(basePackageClasses = { OrderRepository.class })
 @EntityScan(basePackageClasses = { Order.class, LocalDateJpaConverter.class })
@@ -33,7 +34,8 @@ public class Application extends SpringBootServletInitializer {
 	}
 
 	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+	protected SpringApplicationBuilder configure(
+			SpringApplicationBuilder application) {
 		return application.sources(Application.class);
 	}
 }
