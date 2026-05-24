@@ -3,6 +3,7 @@ package com.vaadin.starter.bakery.ui;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.addon.charts.ChartOptions;
+import com.vaadin.annotations.StyleSheet;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.Viewport;
@@ -13,12 +14,14 @@ import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.starter.bakery.app.HasLogger;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.views.AccessDeniedView;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
 
 @Theme("apptheme")
 @SpringUI
-@Viewport("width=device-width,initial-scale=1.0,user-scalable=no")
-@Title("###Bakery###")
+@StyleSheet("vaadin://styles/additional-styles.css")
+@Viewport("width=device-width, initial-scale=1, maximum-scale=5.0, user-scalable=yes")
+@Title("Bakery")
 @SuppressWarnings("java:S2160")
 public class AppUI extends UI implements HasLogger {
 
@@ -29,7 +32,8 @@ public class AppUI extends UI implements HasLogger {
 	private final MainView mainView;
 
 	@Autowired
-	public AppUI(SpringViewProvider viewProvider, NavigationManager navigationManager, MainView mainView) {
+	public AppUI(SpringViewProvider viewProvider,
+			NavigationManager navigationManager, MainView mainView) {
 		this.viewProvider = viewProvider;
 		this.navigationManager = navigationManager;
 		this.mainView = mainView;
@@ -37,8 +41,15 @@ public class AppUI extends UI implements HasLogger {
 
 	@Override
 	protected void init(VaadinRequest vaadinRequest) {
+		setTabIndex(0);
+		setOverlayContainerLabel("");
+		getNotificationConfiguration()
+				.setAssistivePostfix(Type.ASSISTIVE_NOTIFICATION, "");
+		getNotificationConfiguration()
+				.setAssistivePrefix(Type.ASSISTIVE_NOTIFICATION, "");
 		setErrorHandler(event -> {
-			Throwable t = DefaultErrorHandler.findRelevantThrowable(event.getThrowable());
+			Throwable t = DefaultErrorHandler
+					.findRelevantThrowable(event.getThrowable());
 			getLogger().error("Error during request", t);
 		});
 

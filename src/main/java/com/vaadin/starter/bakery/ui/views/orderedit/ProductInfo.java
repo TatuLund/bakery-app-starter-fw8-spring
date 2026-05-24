@@ -20,19 +20,26 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.starter.bakery.backend.data.entity.OrderItem;
 import com.vaadin.starter.bakery.backend.data.entity.Product;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaRoles;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.HasAttributes;
 import com.vaadin.starter.bakery.ui.utils.DollarPriceConverter;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.Notification.Type;
 
 @SpringComponent
 @PrototypeScope
 @SuppressWarnings({ "java:S110", "java:S2160", "java:S6813" })
-public class ProductInfo extends CssLayout {
+public class ProductInfo extends CssLayout
+		implements HasAttributes<ProductInfo> {
 
 	protected Button delete;
 
@@ -59,9 +66,10 @@ public class ProductInfo extends CssLayout {
 	@Autowired
 	public ProductInfo(DollarPriceConverter priceFormatter,
 			ViewEventBus viewEventBus) {
+		setRole(AriaRoles.GROUP);
+		setAriaLabel("Product information");
 		this.priceFormatter = priceFormatter;
 		this.viewEventBus = viewEventBus;
-
 	}
 
 	@PostConstruct
@@ -74,6 +82,7 @@ public class ProductInfo extends CssLayout {
 						"Please enter a number"))
 				.bind("quantity");
 		binder.bindInstanceFields(this);
+		quantity.addValueChangeListener(e -> announceLinePrice(e.getValue()));
 		binder.addValueChangeListener(e -> fireProductInfoChanged());
 
 		product.addSelectionListener(e -> {
@@ -105,6 +114,7 @@ public class ProductInfo extends CssLayout {
 		delete.setStyleName("delete");
 		delete.setCaption("");
 		delete.setId("delete");
+		delete.setDescription("Delete product entry");
 		productComboBoxWrapper.addComponent(delete);
 		productComboBoxWrapper.setComponentAlignment(delete,
 				Alignment.MIDDLE_LEFT);
@@ -129,6 +139,8 @@ public class ProductInfo extends CssLayout {
 		quantity.setStyleName("quantity");
 		quantity.setId("quantity");
 		quantity.setWidth("4em");
+		AttributeExtension.of(quantity).setAttribute(AriaAttributes.LABEL,
+				"Quantity");
 		quantityLayout.addComponent(quantity);
 		quantityLayout.setComponentAlignment(quantity, Alignment.TOP_LEFT);
 
@@ -162,6 +174,30 @@ public class ProductInfo extends CssLayout {
 	private void updatePrice(int productPrice) {
 		price.setValue(priceFormatter.convertToPresentation(productPrice,
 				new ValueContext(Locale.US)));
+	}
+
+	private void announceLinePrice(String quantityValue) {
+		if (getItem().getProduct() == null || quantityValue == null
+				|| quantityValue.trim().isEmpty()) {
+			return;
+		}
+		parseQuantity(quantityValue).ifPresent(value -> Notification.show(
+				String.format(Locale.US, "Quantity %d, line price $%s", value,
+						priceFormatter.convertToPresentation(getSum(),
+								new ValueContext(Locale.US))),
+				Type.ASSISTIVE_NOTIFICATION));
+	}
+
+	private Optional<Integer> parseQuantity(String quantityValue) {
+		if (quantityValue == null || quantityValue.trim().isEmpty()) {
+			return Optional.empty();
+		}
+
+		try {
+			return Optional.of(Integer.parseInt(quantityValue.trim()));
+		} catch (NumberFormatException exception) {
+			return Optional.empty();
+		}
 	}
 
 	private void fireProductInfoChanged() {

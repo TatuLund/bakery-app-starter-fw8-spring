@@ -1,5 +1,7 @@
 package com.vaadin.starter.bakery.ui.components;
 
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaRoles;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.HasAttributes;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -9,7 +11,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("java:S2160")
-public class Form extends Composite {
+public class Form extends Composite implements HasAttributes<Form> {
 
 	private final VerticalLayout root;
 	private final CssLayout editWrapper;
@@ -19,6 +21,7 @@ public class Form extends Composite {
 	private Button deleteButton;
 
 	public Form() {
+		setRole(AriaRoles.FORM);
 		root = new VerticalLayout();
 		root.setSpacing(false);
 		root.setMargin(false);

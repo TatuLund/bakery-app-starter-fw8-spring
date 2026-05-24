@@ -7,12 +7,14 @@ import org.vaadin.spring.annotation.PrototypeScope;
 
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.starter.bakery.backend.data.entity.PickupLocation;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.HasAttributes;
 import com.vaadin.ui.ComboBox;
 
 @SpringComponent
 @PrototypeScope
 @SuppressWarnings({ "java:S110", "java:S2160" })
-public class PickupLocationComboBox extends ComboBox<PickupLocation> {
+public class PickupLocationComboBox extends ComboBox<PickupLocation>
+		implements HasAttributes<PickupLocationComboBox> {
 
 	private final PickupLocationComboBoxDataProvider dataProvider;
 
@@ -20,6 +22,7 @@ public class PickupLocationComboBox extends ComboBox<PickupLocation> {
 	public PickupLocationComboBox(
 			PickupLocationComboBoxDataProvider dataProvider) {
 		this.dataProvider = dataProvider;
+		setAriaLabel("Pickup location");
 		setEmptySelectionAllowed(false);
 		setTextInputAllowed(false);
 		setPlaceholder("Pickup location");

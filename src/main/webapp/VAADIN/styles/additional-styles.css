@@ -1,0 +1,10 @@
+/* This is a workaround. There is a bug in SASS compiler when using JDK17 minus sign is converted to un-supported character */
+.v-filterselect [class$="button"]:before {
+  margin-top: -0.47em;
+}
+
+ /* Hides the selected date assistive text in the date field to reduce verbosity */
+.v-datefield-selecteddate {
+  display: none;
+}
+

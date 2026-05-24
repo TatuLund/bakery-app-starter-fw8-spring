@@ -38,6 +38,8 @@ public class IconBootstrapListener implements BootstrapListener {
 	public void modifyBootstrapPage(BootstrapPageResponse response) {
 		// Generate link-tags for "add to homescreen" icons
 		final Document document = response.getDocument();
+		document.getElementsByTag("html").get(0).attributes()
+				.add("lang", "en");
 		final Element head = document.getElementsByTag("head").get(0);
 		for (String rel : rels) {
 			for (int size : sizes) {
@@ -59,7 +61,7 @@ public class IconBootstrapListener implements BootstrapListener {
 		element.attr("content", "yes");
 		head.appendChild(element);
 		
-		element = document.createElement("meta");
+		element = document.createEleme	nt("meta");
 		element.attr("name", "apple-mobile-web-app-capable");
 		element.attr("content", "yes");
 		head.appendChild(element);

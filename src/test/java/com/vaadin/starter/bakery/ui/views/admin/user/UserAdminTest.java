@@ -64,6 +64,7 @@ public class UserAdminTest extends AbstractUITest {
     @Test
     public void initialState_displaysLoadedGridAndDisabledForm() {
         assertTrue(test(grid()).size() > 0);
+        assertTrue(grid().isAccessibleNavigation());
         assertEquals(0, grid().getSelectedItems().size());
         assertFalse(form().isEnabled());
         assertFalse(updateButton().isEnabled());

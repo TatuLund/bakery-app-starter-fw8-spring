@@ -3,8 +3,13 @@ package com.vaadin.starter.bakery.ui;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaRoles;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.HasAttributes;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Composite;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -16,7 +21,7 @@ public class MainViewDesign extends HorizontalLayout {
 
     protected Label activeViewName;
     protected Button menuButton;
-    protected CssLayout menu;
+    protected Navigation menu;
     protected Button storefront;
     protected Button dashboard;
     protected Button users;
@@ -40,11 +45,13 @@ public class MainViewDesign extends HorizontalLayout {
         addComponent(navigationContainer);
         setComponentAlignment(navigationContainer, Alignment.TOP_LEFT);
         content = new VerticalLayout();
-        content.setStyleName("content-container v-scrollable");
+        content.setStyleName("content-container " + ValoTheme.SCROLLABLE);
         content.setWidth("100%");
         content.setHeight("100%");
         content.setMargin(false);
         content.setId("content");
+        AttributeExtension.of(content).setAttribute(AriaAttributes.ROLE,
+                AriaRoles.MAIN);
         addComponent(content);
         setComponentAlignment(content, Alignment.TOP_LEFT);
         setExpandRatio(content, 1.0F);
@@ -76,51 +83,108 @@ public class MainViewDesign extends HorizontalLayout {
         menuButton.setId("menuButton");
         navigationBar.addComponent(menuButton);
 
-        menu = new CssLayout();
-        menu.setStyleName("navigation");
-        menu.setId("menu");
-        menu.setWidth("100%");
+        menu = new Navigation();
 
-        storefront = new Button();
-        storefront.setIcon(VaadinIcons.CART);
-        storefront.setCaption("Storefront");
+        storefront = new MenuButton("Storefront", VaadinIcons.CART);
         storefront.setId("storefront");
-        addMenuButton(storefront);
+        menu.addMenuButton(storefront);
 
-        dashboard = new Button();
-        dashboard.setIcon(VaadinIcons.LINE_BAR_CHART);
-        dashboard.setCaption("Dashboard");
+        dashboard = new MenuButton("Dashboard", VaadinIcons.LINE_BAR_CHART);
         dashboard.setId("dashboard");
-        addMenuButton(dashboard);
+        menu.addMenuButton(dashboard);
 
-        users = new Button();
-        users.setIcon(VaadinIcons.USERS);
-        users.setCaption("Users");
+        users = new MenuButton("Users", VaadinIcons.USERS);
         users.setId("users");
-        addMenuButton(users);
+        menu.addMenuButton(users);
 
-        products = new Button();
-        products.setIcon(VaadinIcons.STOCK);
-        products.setCaption("Products");
+        products = new MenuButton("Products", VaadinIcons.STOCK);
         products.setId("products");
-        addMenuButton(products);
+        menu.addMenuButton(products);
 
-        logout = new Button();
-        logout.setIcon(VaadinIcons.SIGN_OUT);
-        logout.setCaption("Log out");
+        logout = new MenuButton("Log out", VaadinIcons.SIGN_OUT);
         logout.setId("logout");
-        addMenuButton(logout);
+        menu.addMenuButton(logout);
         menu.setId("menu");
 
         navigationBar.addComponent(menu);
         return navigationBar;
     }
 
-    private void addMenuButton(Button button) {
-        button.setStyleName(ValoTheme.BUTTON_BORDERLESS);
-        button.setWidth("100%");
-        button.setHeight("80px");
-        menu.addComponent(button);
+    /**
+     * A button for the application menu.
+     */
+    public class MenuButton extends Button
+            implements HasAttributes<MenuButton> {
+
+        String caption;
+
+        public MenuButton(String caption, VaadinIcons icon) {
+            this.caption = caption;
+            setCaption(caption);
+            setIcon(icon);
+            setStyleName(ValoTheme.BUTTON_BORDERLESS);
+            setWidth("100%");
+            setHeight("80px");
+            setRole(AriaRoles.LINK);
+        }
+
+        /**
+         * Set the selected state of the menu item. This will add or remove the
+         * {@link ValoTheme#MENU_SELECTED} style name.
+         * 
+         * @param selected
+         *            boolean value
+         */
+        public void setSelected(boolean selected) {
+            if (selected) {
+                addStyleName(ValoTheme.MENU_SELECTED);
+                setAriaLabel(String.format("%s %s", caption,
+                        "current page"));
+            } else {
+                removeStyleName(ValoTheme.MENU_SELECTED);
+                setAriaLabel(caption);
+            }
+        }
+    }
+
+    /**
+     * A navigation component for the application shell.
+     */
+    static class Navigation extends Composite
+            implements HasAttributes<Navigation> {
+
+        private final CssLayout items = new CssLayout();
+
+        public Navigation() {
+            setCompositionRoot(items);
+            items.setStyleName("navigation");
+            items.setId("menu");
+            items.setWidth("100%");
+        }
+
+        public void addMenuButton(Button button) {
+            items.addComponent(button);
+            button.addClickListener(e -> {
+                clearSelected();
+                if (button instanceof MenuButton menuButton) {
+                    menuButton.setSelected(true);
+                }
+            });
+        }
+
+        /**
+         * Clear the selected state of all menu items.
+         */
+        void clearSelected() {
+            var iter = items.iterator();
+            while (iter.hasNext()) {
+                var component = iter.next();
+                if (component instanceof MenuButton menuButton) {
+                    menuButton.setSelected(false);
+                }
+            }
+        }
+
     }
 
 }

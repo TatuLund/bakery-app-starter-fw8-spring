@@ -1,5 +1,6 @@
 package com.vaadin.starter.bakery.ui.views.orderedit;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Locale;
 import java.util.Optional;
@@ -16,6 +17,8 @@ import com.vaadin.data.BeanValidationBinder;
 import com.vaadin.data.BindingValidationStatus;
 import com.vaadin.data.HasValue;
 import com.vaadin.data.ValueContext;
+import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.event.ShortcutAction.ModifierKey;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewBeforeLeaveEvent;
@@ -26,6 +29,9 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.starter.bakery.backend.data.OrderState;
 import com.vaadin.starter.bakery.backend.data.entity.Order;
 import com.vaadin.starter.bakery.backend.data.entity.OrderItem;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaRoles;
 import com.vaadin.starter.bakery.ui.components.ConfirmPopup;
 import com.vaadin.starter.bakery.ui.utils.DollarPriceConverter;
 import com.vaadin.ui.Alignment;
@@ -110,6 +116,10 @@ public class OrderEditView extends VerticalLayout implements View {
 		// multiple errors.
 		binder.bindInstanceFields(this);
 
+		binder.bind(fullName, "customer.fullName");
+		binder.bind(phone, "customer.phoneNumber");
+		binder.bind(details, "customer.details");
+
 		// Track changes manually as we use setBean and nested binders
 		binder.addValueChangeListener(e -> hasChanges = true);
 
@@ -130,6 +140,8 @@ public class OrderEditView extends VerticalLayout implements View {
 
 	private CssLayout createOrderForm() {
 		CssLayout orderForm = new CssLayout();
+		AttributeExtension.of(orderForm).setAttribute(AriaAttributes.ROLE,
+				AriaRoles.FORM);
 		orderForm.setStyleName("order-form responsive");
 		orderForm.setResponsive(true);
 		orderForm.setWidth("100%");
@@ -170,6 +182,7 @@ public class OrderEditView extends VerticalLayout implements View {
 		dueLabel.setWidth("100%");
 		dueLabel.setContentMode(ContentMode.TEXT);
 		dueLabel.setValue("Due");
+		dueLabel.setId("dueLabel");
 		orderForm.addComponent(dueLabel);
 
 		HorizontalLayout dateTimeWrapper = new HorizontalLayout();
@@ -182,6 +195,11 @@ public class OrderEditView extends VerticalLayout implements View {
 		dueDate.setId("dueDate");
 		dueDate.setPlaceholder("Date");
 		dueDate.setWidth("180px");
+		dueDate.setRangeStart(LocalDate.now());
+		AttributeExtension.of(dueDate).setAttribute(AriaAttributes.DESCRIBEDBY,
+				"dueLabel");
+		AttributeExtension.of(dueDate).setAttribute(AriaAttributes.LABEL,
+				"Date");
 		dateTimeWrapper.addComponent(dueDate);
 		dateTimeWrapper.setComponentAlignment(dueDate, Alignment.TOP_LEFT);
 
@@ -190,6 +208,10 @@ public class OrderEditView extends VerticalLayout implements View {
 		dueTime.setId("dueTime");
 		dueTime.setTextInputAllowed(false);
 		dueTime.setWidth("6em");
+		AttributeExtension.of(dueTime).setAttribute(AriaAttributes.DESCRIBEDBY,
+				"dueLabel");
+		AttributeExtension.of(dueTime).setAttribute(AriaAttributes.LABEL,
+				"Time");
 		dateTimeWrapper.addComponent(dueTime);
 		dateTimeWrapper.setComponentAlignment(dueTime, Alignment.TOP_LEFT);
 		dateTimeWrapper.setExpandRatio(dueTime, 1.0F);
@@ -202,6 +224,7 @@ public class OrderEditView extends VerticalLayout implements View {
 		customerLabel.setWidth("100%");
 		customerLabel.setContentMode(ContentMode.TEXT);
 		customerLabel.setValue("Customer");
+		customerLabel.setId("customerLabel");
 		orderForm.addComponent(customerLabel);
 
 		fullName = new TextField();
@@ -209,6 +232,10 @@ public class OrderEditView extends VerticalLayout implements View {
 		fullName.setId("fullName");
 		fullName.setPlaceholder("Firstname Lastname");
 		fullName.setWidth("100%");
+		AttributeExtension.of(fullName).setAttribute(AriaAttributes.DESCRIBEDBY,
+				"customerLabel");
+		AttributeExtension.of(fullName).setAttribute(AriaAttributes.LABEL,
+				"Full name");
 		orderForm.addComponent(fullName);
 
 		phone = new TextField();
@@ -216,12 +243,20 @@ public class OrderEditView extends VerticalLayout implements View {
 		phone.setId("phone");
 		phone.setPlaceholder("Phone number");
 		phone.setWidth("100%");
+		AttributeExtension.of(phone).setAttribute(AriaAttributes.DESCRIBEDBY,
+				"customerLabel");
+		AttributeExtension.of(phone).setAttribute(AriaAttributes.LABEL,
+				"Phone number");
 		orderForm.addComponent(phone);
 
 		details = new TextField();
 		details.setId("details");
 		details.setPlaceholder("Additional details");
 		details.setWidth("100%");
+		AttributeExtension.of(details).setAttribute(AriaAttributes.DESCRIBEDBY,
+				"customerLabel");
+		AttributeExtension.of(details).setAttribute(AriaAttributes.LABEL,
+				"Additional details");
 		orderForm.addComponent(details);
 
 		Label detailsLabel = new Label();
@@ -239,7 +274,7 @@ public class OrderEditView extends VerticalLayout implements View {
 
 		addItems = new Button();
 		addItems.setIcon(VaadinIcons.PLUS_CIRCLE_O);
-		addItems.setStyleName("add-items link");
+		addItems.setStyleName("add-items " + ValoTheme.BUTTON_LINK);
 		addItems.setId("addItems");
 		addItems.setWidth("100%");
 		addItems.setHeight("100px");
@@ -254,6 +289,10 @@ public class OrderEditView extends VerticalLayout implements View {
 		total.setWidth("100%");
 		total.setContentMode(ContentMode.TEXT);
 		total.setValue("0.00");
+		AttributeExtension.of(total).setAttribute(AriaAttributes.LABEL,
+				"Total price");
+		AttributeExtension.of(total).setAttribute(AriaAttributes.LIVE,
+				"polite");
 		orderForm.addComponent(total);
 
 		history.setId("history");
@@ -299,6 +338,11 @@ public class OrderEditView extends VerticalLayout implements View {
 		cancel.setId("cancel");
 		cancel.setCaptionAsHtml(true);
 		cancel.setCaption("Cancel");
+		cancel.addBlurListener(e -> {
+			if (mode != Mode.EDIT) {
+				dueDate.focus();
+			}
+		});
 		buttonsWrapper.addComponent(cancel);
 
 		ok = new Button();
@@ -412,10 +456,13 @@ public class OrderEditView extends VerticalLayout implements View {
 
 		switch (mode) {
 		case REPORT -> {
+			cancel.removeClickShortcut();
+			cancel.focus();
 			cancel.setCaption("Edit");
 			cancel.setIcon(VaadinIcons.EDIT);
 			Optional<OrderState> nextState = presenter
 					.getNextHappyPathState(getOrder().getState());
+			ok.removeClickShortcut();
 			ok.setCaption("Mark as "
 					+ nextState.map(OrderState::getDisplayName).orElse("?"));
 			ok.setVisible(nextState.isPresent());
@@ -429,12 +476,15 @@ public class OrderEditView extends VerticalLayout implements View {
 		case EDIT -> {
 			cancel.setCaption("Cancel");
 			cancel.setIcon(VaadinIcons.CLOSE);
+			cancel.setClickShortcut(KeyCode.ESCAPE);
+			ok.setClickShortcut(KeyCode.S, ModifierKey.CTRL);
 			if (getOrder() != null && !getOrder().isNew()) {
 				ok.setCaption("Save");
 			} else {
 				ok.setCaption("Review order");
 			}
 			ok.setVisible(true);
+			state.focus();
 		}
 		default -> throw new IllegalArgumentException("Unknown mode " + mode);
 		}

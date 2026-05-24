@@ -49,6 +49,7 @@ public class StorefrontTest extends AbstractUITest {
         assertTrue(
                 "With the generated data, there should be at least twenty rows in the grid",
                 test(list()).size() > 20);
+        assertTrue(list().isAccessibleNavigation());
 
         Order firstOrder = test(list()).item(0);
         assertEquals(
@@ -88,6 +89,12 @@ public class StorefrontTest extends AbstractUITest {
                         + rowCount,
                 rowCount < 100);
         assertAllVisibleCustomersContain("pickett");
+    }
+
+    @Test
+    public void searchControlsExposeAccessibilityMetadata() {
+        assertEquals("Search orders", searchButton().getDescription());
+        assertTrue(list().isAccessibleNavigation());
     }
 
     private void assertAllVisibleCustomersContain(String filter) {

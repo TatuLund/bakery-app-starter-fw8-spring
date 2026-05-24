@@ -61,6 +61,7 @@ public class UserAdminViewDesign extends VerticalLayout {
         list.setWidth("100%");
         list.setHeight("100%");
         list.setId("list");
+        list.setAccessibleNavigation(true);
         return listWrapper;
     }
 

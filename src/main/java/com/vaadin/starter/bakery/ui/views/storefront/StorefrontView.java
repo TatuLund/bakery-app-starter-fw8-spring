@@ -124,6 +124,7 @@ public class StorefrontView extends VerticalLayout implements View {
 		list.setId("list");
 		list.setWidth("100%");
 		list.setHeight("100%");
+		list.setAccessibleNavigation(true);
 		addComponent(list);
 		setComponentAlignment(list, Alignment.TOP_LEFT);
 		setExpandRatio(list, 1.0F);
@@ -143,6 +144,7 @@ public class StorefrontView extends VerticalLayout implements View {
 		searchButton.setIcon(VaadinIcons.SEARCH);
 		searchButton.setId("searchButton");
 		searchButton.setCaption("");
+		searchButton.setDescription("Search orders");
 		filterLayout.addComponent(searchButton);
 
 		includePast = new CheckBox();

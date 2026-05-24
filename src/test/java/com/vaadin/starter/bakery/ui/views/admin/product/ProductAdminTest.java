@@ -53,6 +53,7 @@ public class ProductAdminTest extends AbstractUITest {
     @Test
     public void initialState_displaysLoadedGridAndDisabledForm() {
         assertTrue(test(grid()).size() > 0);
+        assertTrue(grid().isAccessibleNavigation());
         assertFalse(form().isEnabled());
         assertFalse(updateButton().isEnabled());
         assertFalse(cancelButton().isEnabled());

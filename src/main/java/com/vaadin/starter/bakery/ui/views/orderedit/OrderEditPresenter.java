@@ -43,21 +43,24 @@ public class OrderEditPresenter implements Serializable, HasLogger {
 
 	private OrderEditView view;
 
-	private final OrderService orderService;
-	private final UserService userService;
+	private final transient OrderService orderService;
+	private final transient UserService userService;
 
-	private final PickupLocationService pickupLocationService;
+	private final transient PickupLocationService pickupLocationService;
 
 	private final NavigationManager navigationManager;
 
-	private final ViewEventBus viewEventBus;
+	private final transient ViewEventBus viewEventBus;
 
-	private static final List<OrderState> happyPath = Arrays.asList(OrderState.NEW, OrderState.CONFIRMED,
+	private static final List<OrderState> happyPath = Arrays.asList(
+			OrderState.NEW, OrderState.CONFIRMED,
 			OrderState.READY, OrderState.DELIVERED);
 
 	@Autowired
-	public OrderEditPresenter(ViewEventBus viewEventBus, NavigationManager navigationManager, OrderService orderService,
-			UserService userService, PickupLocationService pickupLocationService) {
+	public OrderEditPresenter(ViewEventBus viewEventBus,
+			NavigationManager navigationManager, OrderService orderService,
+			UserService userService,
+			PickupLocationService pickupLocationService) {
 		this.viewEventBus = viewEventBus;
 		this.navigationManager = navigationManager;
 		this.orderService = orderService;
@@ -118,8 +121,11 @@ public class OrderEditPresenter implements Serializable, HasLogger {
 	}
 
 	private void updateTotalSum() {
-		int sum = view.getOrder().getItems().stream().filter(item -> item.getProduct() != null)
-				.collect(Collectors.summingInt(item -> item.getProduct().getPrice() * item.getQuantity()));
+		int sum = view.getOrder().getItems().stream()
+				.filter(item -> item.getProduct() != null)
+				.collect(Collectors
+						.summingInt(item -> item.getProduct().getPrice()
+								* item.getQuantity()));
 		view.setSum(sum);
 	}
 
@@ -145,12 +151,14 @@ public class OrderEditPresenter implements Serializable, HasLogger {
 		if (view.getMode() == Mode.REPORT) {
 			// Set next state
 			Order order = view.getOrder();
-			Optional<OrderState> nextState = getNextHappyPathState(order.getState());
+			Optional<OrderState> nextState = getNextHappyPathState(
+					order.getState());
 			if (!nextState.isPresent()) {
 				throw new IllegalStateException(
 						"The next state button should never be enabled when the state does not follow the happy path");
 			}
-			orderService.changeState(order, nextState.get(), SecurityUtils.getCurrentUser(userService));
+			orderService.changeState(order, nextState.get(),
+					SecurityUtils.getCurrentUser(userService));
 			refresh(order.getId());
 		} else if (view.getMode() == Mode.CONFIRMATION) {
 			Order order = saveOrder();
@@ -213,21 +221,25 @@ public class OrderEditPresenter implements Serializable, HasLogger {
 		try {
 			filterEmptyProducts();
 			Order order = view.getOrder();
-			return orderService.saveOrder(order, SecurityUtils.getCurrentUser(userService));
+			return orderService.saveOrder(order,
+					SecurityUtils.getCurrentUser(userService));
 		} catch (ValidationException e) {
 			// Should not get here if validation is setup properly
-			Notification.show("Please check the contents of the fields: " + e.getMessage(), Type.ERROR_MESSAGE);
+			Notification.show("Please check the contents of the fields: "
+					+ e.getMessage(), Type.ERROR_MESSAGE);
 			getLogger().error("Validation error during order save", e);
 			return null;
 		} catch (OptimisticLockingFailureException e) {
 			// Somebody else probably edited the data at the same time
-			Notification.show("Somebody else might have updated the data. Please refresh and try again.",
+			Notification.show(
+					"Somebody else might have updated the data. Please refresh and try again.",
 					Type.ERROR_MESSAGE);
 			getLogger().debug("Optimistic locking error while saving order", e);
 			return null;
 		} catch (Exception e) {
 			// Something went wrong, no idea what
-			Notification.show("An unexpected error occurred while saving. Please refresh and try again.",
+			Notification.show(
+					"An unexpected error occurred while saving. Please refresh and try again.",
 					Type.ERROR_MESSAGE);
 			getLogger().error("Unable to save order", e);
 			return null;
