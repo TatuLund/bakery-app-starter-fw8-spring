@@ -3,6 +3,8 @@ package com.vaadin.starter.bakery.ui.views.admin.user;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.starter.bakery.backend.data.entity.User;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
 import com.vaadin.starter.bakery.ui.components.Form;
 import com.vaadin.starter.bakery.ui.views.admin.RoleSelect;
 import com.vaadin.ui.Alignment;
@@ -85,6 +87,8 @@ public class UserAdminViewDesign extends VerticalLayout {
         search.setPlaceholder("Search");
         search.setWidth("100%");
         search.setId("search");
+        AttributeExtension.of(search).setAttribute(AriaAttributes.LABEL,
+                "Search products");
         tools.addComponent(search);
         tools.setComponentAlignment(search, Alignment.TOP_LEFT);
 

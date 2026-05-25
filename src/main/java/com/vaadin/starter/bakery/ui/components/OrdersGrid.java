@@ -47,6 +47,7 @@ public class OrdersGrid extends Grid<Order> {
 			return twoRowCell(customer.getFullName(), getOrderSummary(order));
 		}, new HtmlRenderer()).setExpandRatio(1).setSortProperty("customer.fullName").setMinimumWidthFromContent(false);
 		summaryColumn.setStyleGenerator(order -> "summary");
+		setAccessibleNavigation(true);
 	}
 
 	public void filterGrid(String searchTerm, boolean includePast) {

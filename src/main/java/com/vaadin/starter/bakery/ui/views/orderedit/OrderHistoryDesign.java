@@ -2,6 +2,8 @@
 package com.vaadin.starter.bakery.ui.views.orderedit;
 
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
@@ -48,6 +50,8 @@ public class OrderHistoryDesign extends Panel {
         newCommentInput.setPlaceholder("Message");
         newCommentInput.setWidth("100%");
         newCommentInput.setId("newCommentInput");
+        AttributeExtension.of(newCommentInput).setAttribute(
+                AriaAttributes.LABEL, "New comment");
         commentLayout.addComponent(newCommentInput);
         commentLayout.setComponentAlignment(newCommentInput,
                 Alignment.TOP_LEFT);

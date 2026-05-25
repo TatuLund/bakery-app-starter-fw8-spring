@@ -10,9 +10,13 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.starter.bakery.backend.data.entity.Order;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
 import com.vaadin.starter.bakery.ui.components.OrdersGrid;
 import com.vaadin.starter.bakery.ui.views.orderedit.OrderEditView;
 import com.vaadin.icons.VaadinIcons;
@@ -124,7 +128,6 @@ public class StorefrontView extends VerticalLayout implements View {
 		list.setId("list");
 		list.setWidth("100%");
 		list.setHeight("100%");
-		list.setAccessibleNavigation(true);
 		addComponent(list);
 		setComponentAlignment(list, Alignment.TOP_LEFT);
 		setExpandRatio(list, 1.0F);
@@ -138,6 +141,8 @@ public class StorefrontView extends VerticalLayout implements View {
 		searchField = new TextField();
 		searchField.setId("searchField");
 		searchField.setPlaceholder("Search");
+		AttributeExtension.of(searchField).setAttribute(AriaAttributes.LABEL,
+				"Order search criteria");
 		filterLayout.addComponent(searchField);
 
 		searchButton = new Button();

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.junit.Test;
 
@@ -43,6 +44,20 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         assertEquals("foo", lastEntry.message);
         assertEquals("Malin", lastEntry.author);
         assertWithinLastFiveMinutes(lastEntry.date);
+    }
+
+    @Test
+    public void focusingHistoryCommentAnnouncesOrderHistoryAssistively() {
+        OrderFixture fixture = persist(sampleExistingOrder());
+        openOrder(fixture.order.getId());
+
+        List<HistoryEntry> entries = historyEntries();
+
+        test(newCommentInput()).focus();
+
+        assertNotNull(lastNotification());
+        assertEquals(expectedHistoryAnnouncement(entries),
+                lastNotification().getCaption());
     }
 
     @Test
@@ -205,5 +220,12 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
                 defaultPickupLocation(), "First Last", "Phone", "Details",
                 line(products.get(0), 2, "Comment 1"),
                 line(products.get(1), 1, "Comment 2"));
+    }
+
+    private String expectedHistoryAnnouncement(List<HistoryEntry> entries) {
+        StringJoiner joiner = new StringJoiner(". ", "Order history. ", ".");
+        entries.forEach(entry ->
+                joiner.add(entry.date + " by " + entry.author + ": " + entry.message));
+        return joiner.toString();
     }
 }

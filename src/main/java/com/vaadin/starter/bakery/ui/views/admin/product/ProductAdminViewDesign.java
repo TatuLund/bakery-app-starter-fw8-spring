@@ -3,7 +3,9 @@ package com.vaadin.starter.bakery.ui.views.admin.product;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.starter.bakery.backend.data.entity.Product;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension;
 import com.vaadin.starter.bakery.ui.components.Form;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
@@ -66,6 +68,8 @@ public class ProductAdminViewDesign extends VerticalLayout {
         search.setStyleName(ValoTheme.TEXTFIELD_SMALL + " "
                 + ValoTheme.TEXTFIELD_INLINE_ICON + " search");
         search.setPlaceholder("Search");
+        AttributeExtension.of(search).setAttribute(AriaAttributes.LABEL,
+                "Search products");
         search.setWidth("100%");
         search.setId("search");
         searchWrapper.addComponent(search);

@@ -158,6 +158,7 @@ public class ProductInfo extends CssLayout
 		price.setId("price");
 		price.setContentMode(ContentMode.TEXT);
 		price.setValue("0.00");
+		AttributeExtension.of(price).setAttribute("tabindex", "0");
 		quantityLayout.addComponent(price);
 		quantityLayout.setComponentAlignment(price, Alignment.MIDDLE_RIGHT);
 		addComponent(quantityLayout);

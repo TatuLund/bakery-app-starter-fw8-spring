@@ -100,6 +100,12 @@
         display: none;
       }
     }
+
+    .v-label:focus-visible {
+      outline: unset;
+      background: #0070d0;
+      color: white;
+    }
   }
 
   // minimalistic custom responsive "layout"

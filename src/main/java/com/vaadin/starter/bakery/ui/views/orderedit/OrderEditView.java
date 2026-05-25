@@ -293,6 +293,7 @@ public class OrderEditView extends VerticalLayout implements View {
 				"Total price");
 		AttributeExtension.of(total).setAttribute(AriaAttributes.LIVE,
 				"polite");
+		AttributeExtension.of(total).setAttribute("tabindex", "0");
 		orderForm.addComponent(total);
 
 		history.setId("history");

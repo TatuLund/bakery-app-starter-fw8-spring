@@ -1,6 +1,7 @@
 package com.vaadin.starter.bakery.ui.views.orderedit;
 
 import java.util.Locale;
+import java.util.StringJoiner;
 
 import javax.annotation.PostConstruct;
 
@@ -19,6 +20,8 @@ import com.vaadin.starter.bakery.backend.service.UserService;
 import com.vaadin.starter.bakery.ui.utils.DateTimeFormatter;
 import com.vaadin.ui.Button.ClickShortcut;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
@@ -69,6 +72,8 @@ public class OrderHistory extends OrderHistoryDesign {
 
 		// We don't want a global shortcut for enter, scope it to the panel
 		addAction(new ClickShortcut(commitNewComment, KeyCode.ENTER, null));
+
+		newCommentInput.addFocusListener(e -> announceOrderHistory());
 	}
 
 	public void addNewComment(String comment) {
@@ -91,6 +96,22 @@ public class OrderHistory extends OrderHistoryDesign {
 
 	private String formatTimestamp(HistoryItem historyItem) {
 		return dateTimeFormatter.format(historyItem.getTimestamp(), Locale.US);
+	}
+
+	private void announceOrderHistory() {
+		if (order == null || order.getHistory() == null || order.getHistory().isEmpty()) {
+			Notification.show("Order history is empty.", Type.ASSISTIVE_NOTIFICATION);
+			return;
+		}
+
+		Notification.show(buildHistoryAnnouncement(), Type.ASSISTIVE_NOTIFICATION);
+	}
+
+	private String buildHistoryAnnouncement() {
+		StringJoiner joiner = new StringJoiner(". ", "Order history. ", ".");
+		order.getHistory().forEach(historyItem -> joiner.add(formatTimestamp(historyItem) + " by "
+				+ historyItem.getCreatedBy().getName() + ": " + formatMessage(historyItem)));
+		return joiner.toString();
 	}
 
 	private String formatMessage(HistoryItem historyItem) {

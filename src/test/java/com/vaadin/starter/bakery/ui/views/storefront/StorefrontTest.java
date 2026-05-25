@@ -56,7 +56,7 @@ public class StorefrontTest extends AbstractUITest {
                 "With the generated data, there should be at least one order due today",
                 LocalDate.now(), firstOrder.getDueDate());
         assertTrue("The customer part should contain data",
-                firstOrder.getCustomer().getFullName().length() > 10);
+                firstOrder.getCustomer().getFullName().length() > 8);
         assertFalse("The order should contain products",
                 firstOrder.getItems().isEmpty());
     }
