@@ -270,6 +270,12 @@
 					<plugin>
 						<groupId>org.springframework.boot</groupId>
 						<artifactId>spring-boot-maven-plugin</artifactId>
+						<configuration>
+							<profiles>
+								<profile>it</profile>
+							</profiles>
+							<maxAttempts>120</maxAttempts>
+						</configuration>
 						<executions>
 							<execution>
 								<id>pre-integration-test</id>
@@ -284,9 +290,6 @@
 								</goals>
 							</execution>
 						</executions>
-						<configuration>
-							<maxAttempts>120</maxAttempts>
-						</configuration>
 					</plugin>
 
 					<plugin>

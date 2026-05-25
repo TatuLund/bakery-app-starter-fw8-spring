@@ -9,6 +9,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import com.vaadin.annotations.Push;
+import com.vaadin.server.Constants;
 import com.vaadin.navigator.View;
 import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.RequestHandler;
@@ -389,8 +391,14 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
                 SpringMockServletContext servletContext)
                 throws ServiceException {
             this(new MockSpringVaadinServlet(),
-                    new MockDeploymentConfiguration(), applicationContext,
+                    createDeploymentConfiguration(), applicationContext,
                     servletContext);
+        }
+
+        private static DeploymentConfiguration createDeploymentConfiguration() {
+            MockDeploymentConfiguration configuration = new MockDeploymentConfiguration();
+            configuration.setProductionMode(true);
+            return configuration;
         }
 
         private MockSpringVaadinService(MockSpringVaadinServlet servlet,
@@ -434,6 +442,14 @@ public abstract class AbstractUITest extends AbstractUIUnitTest {
                 DeploymentConfiguration deploymentConfiguration)
                 throws ServiceException {
             return service;
+        }
+
+        @Override
+        protected DeploymentConfiguration createDeploymentConfiguration(
+                Properties initParameters) {
+            initParameters.setProperty(
+                    Constants.SERVLET_PARAMETER_PRODUCTION_MODE, "true");
+            return super.createDeploymentConfiguration(initParameters);
         }
 
         private void setServletService(SpringVaadinServletService service) {
