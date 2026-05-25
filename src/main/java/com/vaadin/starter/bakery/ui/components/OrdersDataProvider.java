@@ -22,7 +22,7 @@ import com.vaadin.starter.bakery.backend.service.OrderService;
 @PrototypeScope
 public class OrdersDataProvider extends FilterablePageableDataProvider<Order, Object> {
 
-	private final OrderService orderService;
+	private transient final OrderService orderService;
 	private LocalDate filterDate = LocalDate.now().minusDays(1);
 
 	@Autowired

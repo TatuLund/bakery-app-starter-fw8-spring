@@ -52,13 +52,13 @@ public class AbstractIT extends TestBenchTestCase {
 	@Before
 	public void setup() {
 		setDriver(createDriver());
-		getDriver().resizeViewPortTo(800, 600);
 	}
 
 	protected WebDriver createDriver() {
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--headless=bew");
 		options.addArguments("--disable-gpu");
+        options.addArguments("--window-size=800,600");
 
         // Disable password manager to avoid interference with tests
         // IMHO: Can't understand why this is not the default in headless mode.
