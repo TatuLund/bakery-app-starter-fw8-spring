@@ -23,7 +23,8 @@ public class DashboardViewElement extends DashboardViewDesignElement {
 	}
 
 	@ServerClass("com.vaadin.addon.charts.Chart")
-	public static class ChartElement extends com.vaadin.testbench.elements.ChartElement {
+	public static class ChartElement
+			extends com.vaadin.testbench.elements.ChartElement {
 
 		public boolean hasData() {
 			return findElements(By.className("highcharts-no-data")).isEmpty();

@@ -72,6 +72,7 @@ public class DashboardViewTest extends AbstractUITest {
     private CustomChart monthlyProductSplit() {
         return $(view, CustomChart.class).id("monthlyProductSplit");
     }
+
     private String attribute(AbstractComponent component, String name) {
         return AttributeExtension.of(component).getAttribute(name);
     }

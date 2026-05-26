@@ -8,9 +8,11 @@ import static org.junit.Assert.assertTrue;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.Test;
 
+import com.vaadin.data.ValueContext;
 import com.vaadin.starter.bakery.backend.data.OrderState;
 import com.vaadin.starter.bakery.backend.data.entity.Order;
 import com.vaadin.starter.bakery.backend.data.entity.Product;
@@ -52,8 +54,8 @@ public class AddOrderTest extends AbstractOrderEditTest {
                 attribute(totalLabel(), AriaAttributes.LABEL));
         assertEquals("polite", attribute(totalLabel(), AriaAttributes.LIVE));
         assertEquals("group", attribute(productInfo(0), AriaAttributes.ROLE));
-        assertEquals("Product information",
-                attribute(productInfo(0), AriaAttributes.LABEL));
+        assertEquals("Product information", attribute(productInfo(0),
+                AriaAttributes.LABEL));
         assertEquals("Quantity",
                 attribute(quantityField(productInfo(0)), AriaAttributes.LABEL));
         assertEquals("Delete product entry",
@@ -71,7 +73,7 @@ public class AddOrderTest extends AbstractOrderEditTest {
         assertNotNull(lastNotification());
         assertEquals(String.format("Quantity 3, line price $%s",
                 priceConverter.convertToPresentation(product.getPrice() * 3,
-                        new com.vaadin.data.ValueContext(java.util.Locale.US))),
+                        new ValueContext(Locale.US))),
                 lastNotification().getCaption());
     }
 
@@ -120,8 +122,8 @@ public class AddOrderTest extends AbstractOrderEditTest {
     public void changeStateForNewOrder() {
         ExpectedOrder draft = expectedOrder(LocalDate.of(2026, 12, 5),
                 LocalTime.of(8, 0), defaultPickupLocation(), "fullname",
-                "phone", "detailss", line(anyProducts(1).get(0), 12,
-                        "A comment"));
+                "phone", "detailss",
+                line(anyProducts(1).get(0), 12, "A comment"));
 
         openNewOrder();
         fillOrderForm(draft);
@@ -161,8 +163,10 @@ public class AddOrderTest extends AbstractOrderEditTest {
 
     private ExpectedOrder sampleDraftOrder() {
         List<Product> products = anyProducts(2);
-        return expectedOrder(LocalDate.of(2026, 12, 5), LocalTime.of(8, 0),
-                defaultPickupLocation(), "First Last", "Phone", "Details",
+        return expectedOrder(LocalDate.of(2026, 12, 5),
+                LocalTime.of(8, 0),
+                defaultPickupLocation(), "First Last", "Phone",
+                "Details",
                 line(products.get(0), 2, "Lactose free"),
                 line(products.get(1), 1, ""));
     }

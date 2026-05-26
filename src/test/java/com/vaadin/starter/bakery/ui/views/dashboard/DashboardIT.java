@@ -23,14 +23,18 @@ public class DashboardIT extends AbstractIT {
 	@Test
 	public void containsCharts() {
 		DashboardViewElement dashboardView = loginAsAdmin();
-		ChartElement deliveriesThisMonth = dashboardView.getDeliveriesThisMonth();
-		String thisMonth = YearMonth.now().getMonth().getDisplayName(TextStyle.FULL, Locale.US);
-		Assert.assertEquals(("Deliveries in " + thisMonth).toUpperCase(), deliveriesThisMonth.getTitle().toUpperCase());
+		ChartElement deliveriesThisMonth = dashboardView
+				.getDeliveriesThisMonth();
+		String thisMonth = YearMonth.now().getMonth()
+				.getDisplayName(TextStyle.FULL, Locale.US);
+		Assert.assertEquals(("Deliveries in " + thisMonth).toUpperCase(),
+				deliveriesThisMonth.getTitle().toUpperCase());
 		Assert.assertEquals(1, deliveriesThisMonth.getSeries().size());
 		Assert.assertTrue(deliveriesThisMonth.hasData());
 
 		ChartElement deliveriesThisYear = dashboardView.getDeliveriesThisYear();
-		Assert.assertEquals(("Deliveries in " + Year.now().getValue()).toUpperCase(),
+		Assert.assertEquals(
+				("Deliveries in " + Year.now().getValue()).toUpperCase(),
 				deliveriesThisYear.getTitle().toUpperCase());
 		Assert.assertEquals(1, deliveriesThisYear.getSeries().size());
 		Assert.assertTrue(deliveriesThisYear.hasData());
@@ -42,7 +46,8 @@ public class DashboardIT extends AbstractIT {
 		ChartElement productSplit = dashboardView.getMonthlyProductSplit();
 		List<WebElement> series = productSplit.getSeries();
 		Assert.assertEquals(1, series.size());
-		Assert.assertTrue("With the generated data, more than 1 product should have been sold last month",
+		Assert.assertTrue(
+				"With the generated data, more than 1 product should have been sold last month",
 				series.get(0).findElements(By.tagName("path")).size() > 1);
 	}
 
@@ -57,8 +62,11 @@ public class DashboardIT extends AbstractIT {
 		int deliveredToday = Integer.parseInt(todayValues[0]);
 		int totalToday = Integer.parseInt(todayValues[1]);
 
-		Assert.assertTrue("With the generated data, there should be at least one delivery", totalToday > 0);
-		Assert.assertTrue("Delivered cannot be larger than total", deliveredToday <= totalToday);
+		Assert.assertTrue(
+				"With the generated data, there should be at least one delivery",
+				totalToday > 0);
+		Assert.assertTrue("Delivered cannot be larger than total",
+				deliveredToday <= totalToday);
 
 		BoardBoxElement naBox = dashboardView.getNotAvailableBox();
 		int naToday = Integer.parseInt(naBox.getContent());
@@ -66,17 +74,22 @@ public class DashboardIT extends AbstractIT {
 
 		BoardBoxElement newBox = dashboardView.getNewBox();
 		int nrNew = Integer.parseInt(newBox.getContent());
-		Assert.assertTrue("With the generated data, there should be more than one new order", nrNew > 1);
+		Assert.assertTrue(
+				"With the generated data, there should be more than one new order",
+				nrNew > 1);
 
 		BoardBoxElement tomorrowBox = dashboardView.getTomorrowBox();
 		int nrTomorrow = Integer.parseInt(tomorrowBox.getContent());
-		Assert.assertTrue("With the generated data, there should be at least one order tomorrow", nrTomorrow > 0);
+		Assert.assertTrue(
+				"With the generated data, there should be at least one order tomorrow",
+				nrTomorrow > 0);
 	}
 
 	@Test
 	public void gridContainsData() {
 		DashboardViewElement dashboardView = loginAsAdmin();
-		Assert.assertTrue("With the generated data, there should be at least ten rows in the grid",
+		Assert.assertTrue(
+				"With the generated data, there should be at least ten rows in the grid",
 				dashboardView.getGrid().getRowCount() > 10);
 	}
 }

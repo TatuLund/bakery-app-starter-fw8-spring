@@ -25,7 +25,8 @@ public class LoginViewElement extends TestBenchElement {
 	}
 
 	protected void waitUntilElementPresent(By by) {
-		new WebDriverWait(getDriver(), Duration.ofSeconds(30)).until(ExpectedConditions.presenceOfElementLocated(by));
+		new WebDriverWait(getDriver(), Duration.ofSeconds(30))
+				.until(ExpectedConditions.presenceOfElementLocated(by));
 	}
 
 	private WebElement getSubmit() {

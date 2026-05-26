@@ -16,7 +16,8 @@ public class MenuElement extends AbstractComponentElement {
 	public WebElement getMenuLink(String caption) {
 		try {
 			// ../.. is because WebDriver refuses to click on a covered element
-			return findElement(By.xpath("//span[text()='" + caption + "']/../.."));
+			return findElement(
+					By.xpath("//span[text()='" + caption + "']/../.."));
 		} catch (NoSuchElementException e) {
 			return null;
 		}

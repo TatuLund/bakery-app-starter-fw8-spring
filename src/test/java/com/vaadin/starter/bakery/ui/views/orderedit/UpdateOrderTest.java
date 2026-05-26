@@ -6,10 +6,12 @@ import static org.junit.Assert.assertNotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.StringJoiner;
 
 import org.junit.Test;
 
+import com.vaadin.data.ValueContext;
 import com.vaadin.starter.bakery.backend.data.OrderState;
 import com.vaadin.starter.bakery.backend.data.entity.Order;
 import com.vaadin.starter.bakery.backend.data.entity.Product;
@@ -86,7 +88,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         updated.total = priceConverter.convertToPresentation(
                 updated.products.stream()
                         .mapToInt(line -> line.quantity * line.price).sum(),
-                new com.vaadin.data.ValueContext(java.util.Locale.US));
+                new ValueContext(Locale.US));
 
         dueDateField().setValue(updated.dueDate);
         dueTimeField().setValue(updated.dueTime);
@@ -224,8 +226,8 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
 
     private String expectedHistoryAnnouncement(List<HistoryEntry> entries) {
         StringJoiner joiner = new StringJoiner(". ", "Order history. ", ".");
-        entries.forEach(entry ->
-                joiner.add(entry.date + " by " + entry.author + ": " + entry.message));
+        entries.forEach(entry -> joiner.add(
+                entry.date + " by " + entry.author + ": " + entry.message));
         return joiner.toString();
     }
 }

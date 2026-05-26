@@ -10,6 +10,6 @@ import com.vaadin.testbench.elementsbase.ServerClass;
 public class DashboardViewDesignElement extends VerticalLayoutElement {
 
 	public AbstractComponentElement getBoard() {
-		return $(com.vaadin.testbench.elements.AbstractComponentElement.class).id("board");
+		return $(AbstractComponentElement.class).id("board");
 	}
 }
