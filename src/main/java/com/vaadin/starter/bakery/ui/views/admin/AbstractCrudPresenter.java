@@ -1,6 +1,7 @@
 package com.vaadin.starter.bakery.ui.views.admin;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -48,8 +49,10 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 
 	private final Class<T> entityType;
 
-	protected AbstractCrudPresenter(NavigationManager navigationManager, S service, Class<T> entityType,
-			FilterablePageableDataProvider<T, Object> dataProvider, BeanFactory beanFactory) {
+	protected AbstractCrudPresenter(NavigationManager navigationManager,
+			S service, Class<T> entityType,
+			FilterablePageableDataProvider<T, Object> dataProvider,
+			BeanFactory beanFactory) {
 		this.service = service;
 		this.navigationManager = navigationManager;
 		this.entityType = entityType;
@@ -97,16 +100,21 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 
 	private T createEntity() {
 		try {
-			return getEntityType().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			return getEntityType().getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			throw new UnsupportedOperationException(
-					"Entity of type " + getEntityType().getName() + " is missing a public no-args constructor", e);
+					"Entity of type " + getEntityType().getName()
+							+ " is missing a public no-args constructor",
+					e);
 		}
 	}
 
 	protected void deleteEntity(T entity) {
 		if (entity.isNew()) {
-			throw new IllegalArgumentException("Cannot delete an entity which is not in the database");
+			throw new IllegalArgumentException(
+					"Cannot delete an entity which is not in the database");
 		} else {
 			service.delete(entity.getId());
 		}
@@ -162,7 +170,8 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 
 	protected void editItem(T item) {
 		if (item == null) {
-			throw new IllegalArgumentException("The entity to edit cannot be null");
+			throw new IllegalArgumentException(
+					"The entity to edit cannot be null");
 		}
 		this.editItem = item;
 
@@ -198,10 +207,12 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 	 * @return <code>true</code> if the {@literal confirm} command was run
 	 *         immediately, <code>false</code> otherwise
 	 */
-	private void runWithConfirmation(Runnable onConfirmation, Runnable onCancel) {
+	private void runWithConfirmation(Runnable onConfirmation,
+			Runnable onCancel) {
 		if (hasUnsavedChanges()) {
 			ConfirmPopup confirmPopup = beanFactory.getBean(ConfirmPopup.class);
-			confirmPopup.showLeaveViewConfirmDialog(view, onConfirmation, onCancel);
+			confirmPopup.showLeaveViewConfirmDialog(view, onConfirmation,
+					onCancel);
 		} else {
 			onConfirmation.run();
 		}
@@ -219,15 +230,18 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 			getBinder().writeBean(editItem);
 		} catch (ValidationException e) {
 			// Commit failed because of validation errors
-			List<BindingValidationStatus<?>> fieldErrors = e.getFieldValidationErrors();
+			List<BindingValidationStatus<?>> fieldErrors = e
+					.getFieldValidationErrors();
 			if (!fieldErrors.isEmpty()) {
 				// Field level error
 				HasValue<?> firstErrorField = fieldErrors.get(0).getField();
 				getView().focusField(firstErrorField);
 			} else {
 				// Bean validation error
-				ValidationResult firstError = e.getBeanValidationErrors().get(0);
-				Notification.show(firstError.getErrorMessage(), Type.ERROR_MESSAGE);
+				ValidationResult firstError = e.getBeanValidationErrors()
+						.get(0);
+				Notification.show(firstError.getErrorMessage(),
+						Type.ERROR_MESSAGE);
 			}
 			return;
 		}
@@ -238,19 +252,26 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 			entity = service.save(editItem);
 		} catch (OptimisticLockingFailureException e) {
 			// Somebody else probably edited the data at the same time
-			Notification.show("Somebody else might have updated the data. Please refresh and try again.",
+			Notification.show(
+					"Somebody else might have updated the data. Please refresh and try again.",
 					Type.ERROR_MESSAGE);
-			getLogger().debug("Optimistic locking error while saving entity of type " + editItem.getClass().getName(),
+			getLogger().debug(
+					"Optimistic locking error while saving entity of type "
+							+ editItem.getClass().getName(),
 					e);
 			return;
 		} catch (UserFriendlyDataException e) {
 			Notification.show(e.getMessage(), Type.ERROR_MESSAGE);
-			getLogger().debug("Unable to update entity of type " + editItem.getClass().getName(), e);
+			getLogger().debug("Unable to update entity of type "
+					+ editItem.getClass().getName(), e);
 			return;
 		} catch (Exception e) {
 			// Something went wrong, no idea what
-			Notification.show("A problem occured while saving the data. Please check the fields.", Type.ERROR_MESSAGE);
-			getLogger().error("Unable to save entity of type " + editItem.getClass().getName(), e);
+			Notification.show(
+					"A problem occured while saving the data. Please check the fields.",
+					Type.ERROR_MESSAGE);
+			getLogger().error("Unable to save entity of type "
+					+ editItem.getClass().getName(), e);
 			return;
 		}
 
@@ -285,12 +306,15 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 			deleteEntity(editItem);
 		} catch (UserFriendlyDataException e) {
 			Notification.show(e.getMessage(), Type.ERROR_MESSAGE);
-			getLogger().debug("Unable to delete entity of type " + editItem.getClass().getName(), e);
+			getLogger().debug("Unable to delete entity of type "
+					+ editItem.getClass().getName(), e);
 			return;
 		} catch (DataIntegrityViolationException e) {
-			Notification.show("The given entity cannot be deleted as there are references to it in the database",
+			Notification.show(
+					"The given entity cannot be deleted as there are references to it in the database",
 					Type.ERROR_MESSAGE);
-			getLogger().error("Unable to delete entity of type " + editItem.getClass().getName(), e);
+			getLogger().error("Unable to delete entity of type "
+					+ editItem.getClass().getName(), e);
 			return;
 		}
 		dataProvider.refreshAll();

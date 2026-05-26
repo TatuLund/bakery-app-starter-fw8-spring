@@ -12,6 +12,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -88,7 +89,7 @@ public class UserAdminViewDesign extends VerticalLayout {
         search.setWidth("100%");
         search.setId("search");
         AttributeExtension.of(search).setAttribute(AriaAttributes.LABEL,
-                "Search products");
+                "Search users");
         tools.addComponent(search);
         tools.setComponentAlignment(search, Alignment.TOP_LEFT);
 
@@ -98,7 +99,7 @@ public class UserAdminViewDesign extends VerticalLayout {
 
         add = new Button();
         add.setIcon(VaadinIcons.PLUS);
-        add.setStyleName("borderless");
+        add.setStyleName(ValoTheme.BUTTON_BORDERLESS);
         add.setCaption("Add new");
         add.setId("add");
         topBar.addComponent(add);
@@ -125,7 +126,7 @@ public class UserAdminViewDesign extends VerticalLayout {
         name.setId("name");
         form.addField(name);
 
-        password = new TextField();
+        password = new PasswordField();
         password.setCaption("Password");
         password.setStyleName(ValoTheme.TEXTFIELD_SMALL);
         password.setWidth("100%");

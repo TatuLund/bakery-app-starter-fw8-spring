@@ -17,6 +17,7 @@ import com.vaadin.data.BeanValidationBinder;
 import com.vaadin.data.BindingValidationStatus;
 import com.vaadin.data.HasValue;
 import com.vaadin.data.ValueContext;
+import com.vaadin.data.validator.DateRangeValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutAction.ModifierKey;
 import com.vaadin.icons.VaadinIcons;
@@ -110,15 +111,21 @@ public class OrderEditView extends VerticalLayout implements View {
 		// indicators
 		binder.setRequiredConfigurator(null);
 
+		binder.forField(dueDate)
+				.withValidator(
+						new DateRangeValidator("Due date cannot be in the past",
+								LocalDate.now(), null))
+				.bind("dueDate");
+
+		binder.bind(fullName, "customer.fullName");
+		binder.bind(phone, "customer.phoneNumber");
+		binder.bind(details, "customer.details");
+
 		// Bindings are done in the order the fields appear on the screen as we
 		// report validation errors for the first invalid field and it is most
 		// intuitive for the user that we start from the top if there are
 		// multiple errors.
 		binder.bindInstanceFields(this);
-
-		binder.bind(fullName, "customer.fullName");
-		binder.bind(phone, "customer.phoneNumber");
-		binder.bind(details, "customer.details");
 
 		// Track changes manually as we use setBean and nested binders
 		binder.addValueChangeListener(e -> hasChanges = true);
@@ -195,7 +202,6 @@ public class OrderEditView extends VerticalLayout implements View {
 		dueDate.setId("dueDate");
 		dueDate.setPlaceholder("Date");
 		dueDate.setWidth("180px");
-		dueDate.setRangeStart(LocalDate.now());
 		AttributeExtension.of(dueDate).setAttribute(AriaAttributes.DESCRIBEDBY,
 				"dueLabel");
 		AttributeExtension.of(dueDate).setAttribute(AriaAttributes.LABEL,
@@ -461,6 +467,7 @@ public class OrderEditView extends VerticalLayout implements View {
 			cancel.focus();
 			cancel.setCaption("Edit");
 			cancel.setIcon(VaadinIcons.EDIT);
+			cancel.setEnabled(getOrder().getState() != OrderState.DELIVERED);
 			Optional<OrderState> nextState = presenter
 					.getNextHappyPathState(getOrder().getState());
 			ok.removeClickShortcut();
@@ -471,12 +478,14 @@ public class OrderEditView extends VerticalLayout implements View {
 		case CONFIRMATION -> {
 			cancel.setCaption("Back");
 			cancel.setIcon(VaadinIcons.ANGLE_LEFT);
+			cancel.setEnabled(true);
 			ok.setCaption("Place order");
 			ok.setVisible(true);
 		}
 		case EDIT -> {
 			cancel.setCaption("Cancel");
 			cancel.setIcon(VaadinIcons.CLOSE);
+			cancel.setEnabled(true);
 			cancel.setClickShortcut(KeyCode.ESCAPE);
 			ok.setClickShortcut(KeyCode.S, ModifierKey.CTRL);
 			if (getOrder() != null && !getOrder().isNew()) {

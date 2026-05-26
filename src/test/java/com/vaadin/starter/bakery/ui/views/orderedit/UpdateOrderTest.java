@@ -1,6 +1,7 @@
 package com.vaadin.starter.bakery.ui.views.orderedit;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.time.LocalDate;
@@ -105,6 +106,19 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
 
         assertEnabledWithCaption(cancelButton(), "Edit");
         assertOrder(updated);
+    }
+
+    @Test
+    public void deliveredOrderDisablesCancelButton() {
+        OrderFixture fixture = persist(sampleExistingOrder());
+        Order deliveredOrder = orderService.findOrder(fixture.order.getId());
+        deliveredOrder.setState(OrderState.DELIVERED);
+        orderService.saveOrder(deliveredOrder, bakerUser());
+
+        openOrder(fixture.order.getId());
+
+        assertFalse(cancelButton().isEnabled());
+        assertEquals("Edit", cancelButton().getCaption());
     }
 
     @Test

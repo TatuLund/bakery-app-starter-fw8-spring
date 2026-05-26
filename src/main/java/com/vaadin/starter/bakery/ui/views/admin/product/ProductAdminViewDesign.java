@@ -103,7 +103,6 @@ public class ProductAdminViewDesign extends VerticalLayout {
         list.setId("list");
         list.setAccessibleNavigation(true);
         listParent.addComponent(list);
-        listParent.setId("listParent");
 
         return listParent;
     }

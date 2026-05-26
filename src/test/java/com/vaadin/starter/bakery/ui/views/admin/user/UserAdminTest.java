@@ -81,6 +81,15 @@ public class UserAdminTest extends AbstractUITest {
     }
 
     @Test
+    public void grid_doesNotShowPasswordColumn() {
+        assertEquals(3, grid().getColumns().size());
+        assertTrue(grid().getColumns().stream().noneMatch(column ->
+                "passwordHash".equals(column.getId())
+                        || "Password".equals(column.getCaption())
+                        || "Password Hash".equals(column.getCaption())));
+    }
+
+    @Test
     public void createUpdateDeleteUser_persistsChanges() {
         String email = uniqueEmail("browserless-user");
         String name = "John Doe";

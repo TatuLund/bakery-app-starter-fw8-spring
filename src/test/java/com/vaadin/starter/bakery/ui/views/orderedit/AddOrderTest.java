@@ -39,7 +39,6 @@ public class AddOrderTest extends AbstractOrderEditTest {
     public void addOrderViewExposesAccessibilityMetadata() {
         openNewOrder();
 
-        assertEquals(LocalDate.now(), dueDateField().getRangeStart());
         assertEquals("dueLabel",
                 attribute(dueDateField(), AriaAttributes.DESCRIBEDBY));
         assertEquals("Date", attribute(dueDateField(), AriaAttributes.LABEL));
@@ -116,6 +115,20 @@ public class AddOrderTest extends AbstractOrderEditTest {
 
         openOrder(orderId);
         assertOrder(draft);
+    }
+
+    @Test
+    public void pastDueDateIsNotAccepted() {
+        ExpectedOrder draft = sampleDraftOrder();
+        draft.dueDate = LocalDate.now().minusDays(1);
+
+        openNewOrder();
+        fillOrderForm(draft);
+
+        test(okButton()).click();
+
+        assertEquals(OrderEditView.Mode.EDIT, view.getMode());
+        assertNotNull(dueDateField().getComponentError());
     }
 
     @Test

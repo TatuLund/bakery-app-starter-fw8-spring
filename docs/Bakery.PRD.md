@@ -187,6 +187,8 @@ available at the `order` view route.
 - Saving a new order shall create an initial history entry `Order placed` in
   state `NEW`.
 - Opening an existing order shall load its persisted history and current state.
+- Orders in state `DELIVERED` shall remain read-only in the reporting view, and
+  the edit action shall be disabled.
 - The persisted order model contains a paid flag, but the current order editor
   does not expose that field as a primary user-editable control.
 
