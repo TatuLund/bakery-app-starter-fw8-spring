@@ -23,7 +23,7 @@ public class UserAdminView extends AbstractCrudView<User> {
 
 	private final UserAdminPresenter presenter;
 
-	private final UserAdminViewDesign userAdminViewDesign;
+	private final UserAdminLayout userAdminLayout;
 
 	private boolean passwordRequired;
 
@@ -53,8 +53,7 @@ public class UserAdminView extends AbstractCrudView<User> {
 	@Autowired
 	public UserAdminView(UserAdminPresenter presenter) {
 		this.presenter = presenter;
-		userAdminViewDesign = new UserAdminViewDesign();
-		userAdminViewDesign.init();
+		userAdminLayout = new UserAdminLayout();
 	}
 
 	@PostConstruct
@@ -86,8 +85,8 @@ public class UserAdminView extends AbstractCrudView<User> {
 	}
 
 	@Override
-	public UserAdminViewDesign getViewComponent() {
-		return userAdminViewDesign;
+	public UserAdminLayout getViewComponent() {
+		return userAdminLayout;
 	}
 
 	@Override

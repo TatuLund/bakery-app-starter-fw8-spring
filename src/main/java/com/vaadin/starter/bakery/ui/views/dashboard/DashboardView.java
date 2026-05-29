@@ -41,6 +41,8 @@ import com.vaadin.starter.bakery.ui.components.CustomChart;
 import com.vaadin.starter.bakery.ui.components.OrdersGrid;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.views.orderedit.OrderEditView;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * The dashboard view showing statistics about sales and deliveries.
@@ -51,11 +53,13 @@ import com.vaadin.starter.bakery.ui.views.orderedit.OrderEditView;
  */
 @SpringView
 @SuppressWarnings({ "java:S2160", "java:S110" })
-public class DashboardView extends DashboardViewDesign implements View {
+public class DashboardView extends VerticalLayout implements View {
 
 	private static final String DELIVERIES = "Deliveries";
 
 	private static final String BOARD_ROW_PANELS = "board-row-panels";
+
+	protected com.vaadin.board.Board board;
 
 	private final NavigationManager navigationManager;
 	private transient OrderService orderService;
@@ -95,7 +99,7 @@ public class DashboardView extends DashboardViewDesign implements View {
 
 	@PostConstruct
 	public void setup() {
-		init();
+		setupDashboard();
 		setResponsive(true);
 
 		Row row = board.addRow(new BoardBox(todayLabel), notAvailableBox,
@@ -124,6 +128,21 @@ public class DashboardView extends DashboardViewDesign implements View {
 
 		dueGrid.addSelectionListener(
 				e -> selectedOrder(e.getFirstSelectedItem().get()));
+	}
+
+	private void setupDashboard() {
+		setStyleName("dashboard-view");
+		setResponsive(true);
+		setWidth("100%");
+		setHeight("100%");
+		setMargin(false);
+		board = new com.vaadin.board.Board();
+		board.setWidth("100%");
+		board.setHeight("100%");
+		board.setId("board");
+		addComponent(board);
+		setComponentAlignment(board, Alignment.TOP_LEFT);
+		setExpandRatio(board, 1.0F);
 	}
 
 	private void initYearlySalesGraph() {

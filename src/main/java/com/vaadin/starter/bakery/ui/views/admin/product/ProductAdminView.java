@@ -21,7 +21,7 @@ public class ProductAdminView extends AbstractCrudView<Product> {
 
 	private final ProductAdminPresenter presenter;
 
-	private final ProductAdminViewDesign userAdminViewDesign;
+	private final ProductAdminLayout userAdminLayout;
 
 	private final DollarPriceConverter priceToStringConverter;
 
@@ -32,8 +32,7 @@ public class ProductAdminView extends AbstractCrudView<Product> {
 			DollarPriceConverter priceToStringConverter) {
 		this.presenter = presenter;
 		this.priceToStringConverter = priceToStringConverter;
-		userAdminViewDesign = new ProductAdminViewDesign();
-		userAdminViewDesign.init();
+		userAdminLayout = new ProductAdminLayout();
 	}
 
 	@PostConstruct
@@ -60,8 +59,8 @@ public class ProductAdminView extends AbstractCrudView<Product> {
 	}
 
 	@Override
-	public ProductAdminViewDesign getViewComponent() {
-		return userAdminViewDesign;
+	public ProductAdminLayout getViewComponent() {
+		return userAdminLayout;
 	}
 
 	@Override
