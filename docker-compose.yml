@@ -1,0 +1,47 @@
+services:
+  mysql:
+    image: mysql:8.0.41
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: bakery
+      MYSQL_USER: bakery
+      MYSQL_PASSWORD: bakery
+      MYSQL_ROOT_PASSWORD: root
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VAADIN_PRO_KEY: ${VAADIN_PRO_KEY:-}
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      RDS_HOSTNAME: mysql
+      RDS_PORT: 3306
+      RDS_DB_NAME: bakery
+      RDS_USERNAME: bakery
+      RDS_PASSWORD: bakery
+      VAADIN_PRO_KEY: ${VAADIN_PRO_KEY:-}
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=75.0
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql_data:

@@ -1,3 +1,14 @@
+# Bakery
+
+Vaadin 8 demo application for Spring Boot.
+
+This project demonstrates how to build Vaadin 8 applications with Spring Boot and Spring Security, use Spring dependency injection throughout the UI and backend layers, run browserless UI integration tests with `UIUnitTest` and Spring, and apply accessible design and more modern maintenance practices in a Vaadin 8 codebase.
+
+## Stack
+
+- Spring Boot 2.7.18
+- Vaadin 8.31.1
+
 # Running the project
 
 `mvn spring-boot:run`
@@ -8,6 +19,37 @@ Open http://localhost:8080/ to view the application.
 
 Default credentials are admin@vaadin.com/admin for admin access and
 barista@vaadin.com/barista for normal user access.
+
+# Running with Docker Compose and MySQL
+
+The repository includes a local production-like stack with two containers:
+
+- `mysql` runs MySQL 8 with a persistent Docker volume.
+- `app` builds this project into an executable war and starts it with the `production` Spring profile.
+
+If you use Vaadin commercial components, export `VAADIN_PRO_KEY` before building so the key is available during both image build and container runtime.
+
+Start the stack with:
+
+`docker compose up --build`
+
+The application will be available at http://localhost:8080/ and MySQL at localhost:3306.
+
+The compose file maps the existing production datasource variables to the MySQL container:
+
+- `RDS_HOSTNAME=mysql`
+- `RDS_PORT=3306`
+- `RDS_DB_NAME=bakery`
+- `RDS_USERNAME=bakery`
+- `RDS_PASSWORD=bakery`
+
+Stop the stack with:
+
+`docker compose down`
+
+To also remove the persisted MySQL data volume:
+
+`docker compose down -v`
 
 # Running the project as an executable jar
 
