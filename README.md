@@ -9,6 +9,10 @@ This project demonstrates how to build Vaadin 8 applications with Spring Boot an
 - Spring Boot 2.7.18
 - Vaadin 8.31.1
 
+## Wiki
+
+The [project Wiki](https://github.com/TatuLund/bakery-app-starter-fw8-spring/wiki) contains practical articles about the main implementation patterns in this codebase. It explains how Bakery uses Vaadin 8, Spring Boot, Spring Security, Spring Data JPA, browserless UI tests, accessibility improvements, and operational UI patterns in a maintainable legacy application.
+
 # Running the project
 
 `mvn spring-boot:run`
