@@ -2,6 +2,7 @@ package com.vaadin.starter.bakery.ui.views.admin;
 
 import javax.annotation.PostConstruct;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.access.annotation.Secured;
 
 import com.vaadin.data.BeanValidationBinder;
@@ -51,6 +52,7 @@ import com.vaadin.ui.components.grid.SingleSelectionModel;
  * @param <T>
  *            the type of entity which can be edited in the view
  */
+@NullMarked
 @Secured(Role.ADMIN)
 public abstract class AbstractCrudView<T extends AbstractEntity>
 		implements View, HasLogger {
@@ -144,6 +146,7 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 		}
 	}
 
+	@SuppressWarnings("java:S1452")
 	protected abstract AbstractCrudPresenter<T, ?, ? extends AbstractCrudView<T>> getPresenter();
 
 	protected abstract Grid<T> getGrid();

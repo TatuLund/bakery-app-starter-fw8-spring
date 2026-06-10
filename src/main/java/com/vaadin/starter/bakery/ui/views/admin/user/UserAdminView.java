@@ -2,6 +2,7 @@ package com.vaadin.starter.bakery.ui.views.admin.user;
 
 import javax.annotation.PostConstruct;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.BeanValidationBinder;
@@ -18,6 +19,7 @@ import com.vaadin.ui.Component.Focusable;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
 
+@NullMarked
 @SpringView
 public class UserAdminView extends AbstractCrudView<User> {
 
@@ -106,32 +108,32 @@ public class UserAdminView extends AbstractCrudView<User> {
 
 	@Override
 	protected Component getForm() {
-		return getViewComponent().form;
+		return getViewComponent().getForm();
 	}
 
 	@Override
 	protected Button getAdd() {
-		return getViewComponent().add;
+		return getViewComponent().getAdd();
 	}
 
 	@Override
 	protected Button getCancel() {
-		return getViewComponent().cancel;
+		return getViewComponent().getCancel();
 	}
 
 	@Override
 	protected Button getDelete() {
-		return getViewComponent().delete;
+		return getViewComponent().getDelete();
 	}
 
 	@Override
 	protected Button getUpdate() {
-		return getViewComponent().update;
+		return getViewComponent().getUpdate();
 	}
 
 	@Override
 	protected TextField getSearch() {
-		return getViewComponent().search;
+		return getViewComponent().getSearch();
 	}
 
 	@Override

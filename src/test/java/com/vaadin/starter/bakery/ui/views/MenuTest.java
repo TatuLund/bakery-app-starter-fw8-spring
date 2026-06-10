@@ -10,9 +10,9 @@ import org.junit.Test;
 
 import com.vaadin.server.ServiceException;
 import com.vaadin.starter.bakery.ui.AbstractUITest;
-import com.vaadin.starter.bakery.ui.MainView;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
+import com.vaadin.starter.bakery.ui.views.mainview.MainView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;

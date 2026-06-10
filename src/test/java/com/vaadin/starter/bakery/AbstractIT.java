@@ -56,7 +56,7 @@ public class AbstractIT extends TestBenchTestCase {
 
 	protected WebDriver createDriver() {
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless=bew");
+		options.addArguments("--headless=new");
 		options.addArguments("--disable-gpu");
         options.addArguments("--window-size=800,600");
 

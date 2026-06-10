@@ -1,5 +1,6 @@
 package com.vaadin.starter.bakery.ui.views;
 
+import org.jspecify.annotations.NullMarked;
 import org.vaadin.spring.annotation.PrototypeScope;
 
 import com.vaadin.navigator.View;
@@ -11,6 +12,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 
+@NullMarked
 @SpringComponent
 @PrototypeScope
 @SuppressWarnings("java:S110")

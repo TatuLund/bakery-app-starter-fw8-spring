@@ -1,10 +1,12 @@
-package com.vaadin.starter.bakery.ui;
+package com.vaadin.starter.bakery.ui.views.mainview;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.icons.VaadinIcons;
@@ -18,7 +20,6 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaRoles;
-import com.vaadin.starter.bakery.ui.components.AttributeExtension.HasAttributes;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.views.admin.product.ProductAdminView;
 import com.vaadin.starter.bakery.ui.views.admin.user.UserAdminView;
@@ -26,7 +27,6 @@ import com.vaadin.starter.bakery.ui.views.dashboard.DashboardView;
 import com.vaadin.starter.bakery.ui.views.storefront.StorefrontView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Composite;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -42,19 +42,29 @@ import com.vaadin.ui.themes.ValoTheme;
  * pattern like MVP would add much overhead for little gain. If more complexity
  * is added to the class, you should consider splitting out a presenter.
  */
+@NullMarked
 @SpringViewDisplay
 @UIScope
 @SuppressWarnings({ "java:S2160", "java:S110" })
 public class MainView extends HorizontalLayout implements ViewDisplay {
 
+	@Nullable
 	protected Label activeViewName;
+	@Nullable
 	protected Button menuButton;
+	@Nullable
 	protected Navigation menu;
+	@Nullable
 	protected Button storefront;
+	@Nullable
 	protected Button dashboard;
+	@Nullable
 	protected Button users;
+	@Nullable
 	protected Button products;
+	@Nullable
 	protected Button logout;
+	@Nullable
 	protected VerticalLayout content;
 
 	private final Map<Class<? extends View>, Button> navigationButtons = new HashMap<>();
@@ -213,65 +223,4 @@ public class MainView extends HorizontalLayout implements ViewDisplay {
 
 		navigationManager.runAfterLeaveConfirmation(doLogout);
 	}
-
-	private class MenuButton extends Button
-			implements HasAttributes<MenuButton> {
-
-		private final String caption;
-
-		MenuButton(String caption, VaadinIcons icon) {
-			this.caption = caption;
-			setCaption(caption);
-			setIcon(icon);
-			setStyleName(ValoTheme.BUTTON_BORDERLESS);
-			setWidth("100%");
-			setHeight("80px");
-			setRole(AriaRoles.LINK);
-		}
-
-		public void setSelected(boolean selected) {
-			if (selected) {
-				addStyleName(ValoTheme.MENU_SELECTED);
-				setAriaLabel(String.format("%s %s", caption,
-						"current page"));
-			} else {
-				removeStyleName(ValoTheme.MENU_SELECTED);
-				setAriaLabel(caption);
-			}
-		}
-	}
-
-	static class Navigation extends Composite
-			implements HasAttributes<Navigation> {
-
-		private final CssLayout items = new CssLayout();
-
-		Navigation() {
-			setCompositionRoot(items);
-			items.setStyleName("navigation");
-			items.setId("menu");
-			items.setWidth("100%");
-		}
-
-		public void addMenuButton(Button button) {
-			items.addComponent(button);
-			button.addClickListener(e -> {
-				clearSelected();
-				if (button instanceof MenuButton menuButton) {
-					menuButton.setSelected(true);
-				}
-			});
-		}
-
-		void clearSelected() {
-			var iter = items.iterator();
-			while (iter.hasNext()) {
-				var component = iter.next();
-				if (component instanceof MenuButton menuButton) {
-					menuButton.setSelected(false);
-				}
-			}
-		}
-	}
-
 }

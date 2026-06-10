@@ -15,7 +15,9 @@ import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
@@ -27,6 +29,7 @@ import com.vaadin.addon.charts.model.Marker;
 import com.vaadin.addon.charts.model.PlotOptionsColumn;
 import com.vaadin.addon.charts.model.PlotOptionsLine;
 import com.vaadin.addon.charts.model.YAxis;
+import com.vaadin.board.Board;
 import com.vaadin.board.Row;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -51,6 +54,7 @@ import com.vaadin.ui.VerticalLayout;
  * pattern like MVP would add much overhead for little gain. If more complexity
  * is added to the class, you should consider splitting out a presenter.
  */
+@NullMarked
 @SpringView
 @SuppressWarnings({ "java:S2160", "java:S110" })
 public class DashboardView extends VerticalLayout implements View {
@@ -59,7 +63,8 @@ public class DashboardView extends VerticalLayout implements View {
 
 	private static final String BOARD_ROW_PANELS = "board-row-panels";
 
-	protected com.vaadin.board.Board board;
+	@Nullable
+	protected Board board;
 
 	private final NavigationManager navigationManager;
 	private transient OrderService orderService;
@@ -83,10 +88,14 @@ public class DashboardView extends VerticalLayout implements View {
 			ChartType.PIE);
 	private final OrdersGrid dueGrid;
 
+	@Nullable
 	private ListSeries deliveriesThisMonthSeries;
+	@Nullable
 	private ListSeries deliveriesThisYearSeries;
+	@Nullable
 	private ListSeries[] salesPerYear;
 
+	@Nullable
 	private DataSeries deliveriesPerProductSeries;
 
 	@Autowired
@@ -98,6 +107,7 @@ public class DashboardView extends VerticalLayout implements View {
 	}
 
 	@PostConstruct
+	@SuppressWarnings("null")
 	public void setup() {
 		setupDashboard();
 		setResponsive(true);
@@ -130,13 +140,14 @@ public class DashboardView extends VerticalLayout implements View {
 				e -> selectedOrder(e.getFirstSelectedItem().get()));
 	}
 
+	@SuppressWarnings("null")
 	private void setupDashboard() {
 		setStyleName("dashboard-view");
 		setResponsive(true);
 		setWidth("100%");
 		setHeight("100%");
 		setMargin(false);
-		board = new com.vaadin.board.Board();
+		board = new Board();
 		board.setWidth("100%");
 		board.setHeight("100%");
 		board.setId("board");
@@ -145,6 +156,7 @@ public class DashboardView extends VerticalLayout implements View {
 		setExpandRatio(board, 1.0F);
 	}
 
+	@SuppressWarnings("null")
 	private void initYearlySalesGraph() {
 		yearlySalesGraph.setId("yearlySales");
 		yearlySalesGraph.setSizeFull();
@@ -264,7 +276,13 @@ public class DashboardView extends VerticalLayout implements View {
 				Year.now().getValue());
 	}
 
+	@SuppressWarnings("null")
 	private void updateGraphs(DashboardData data) {
+		if (deliveriesThisMonthSeries == null
+				|| deliveriesThisYearSeries == null
+				|| salesPerYear == null || deliveriesPerProductSeries == null) {
+			throw new IllegalStateException("Graphs not initialized");
+		}
 		deliveriesThisMonthSeries.setData(data.getDeliveriesThisMonth());
 		deliveriesThisYearSeries.setData(data.getDeliveriesThisYear());
 		updateDeliveriesThisMonthAccessibilityAttributes();
@@ -284,7 +302,11 @@ public class DashboardView extends VerticalLayout implements View {
 		updateMonthlyProductSplitAccessibilityAttributes();
 	}
 
+	@SuppressWarnings("null")
 	private void updateDeliveriesThisMonthAccessibilityAttributes() {
+		if (deliveriesThisMonthSeries == null) {
+			throw new IllegalStateException("Graph not initialized");
+		}
 		LocalDate today = LocalDate.now();
 		int daysInMonth = YearMonth.of(today.getYear(), today.getMonthValue())
 				.lengthOfMonth();
@@ -298,7 +320,11 @@ public class DashboardView extends VerticalLayout implements View {
 				categories));
 	}
 
+	@SuppressWarnings("null")
 	private void updateDeliveriesThisYearAccessibilityAttributes() {
+		if (deliveriesThisYearSeries == null) {
+			throw new IllegalStateException("Graph not initialized");
+		}
 		deliveriesThisYearGraph.setAriaLabel(buildListSeriesAriaLabel(
 				deliveriesThisYearGraph.getConfiguration().getTitle().getText(),
 				deliveriesThisYearSeries.getName(), deliveriesThisYearSeries,
@@ -323,6 +349,9 @@ public class DashboardView extends VerticalLayout implements View {
 	}
 
 	private void updateMonthlyProductSplitAccessibilityAttributes() {
+		if (deliveriesPerProductSeries == null) {
+			throw new IllegalStateException("Graph not initialized");
+		}
 		String ariaLabel = deliveriesPerProductSeries.getData().stream()
 				.map(data -> data.getName() + " " + data.getY())
 				.collect(Collectors.joining(","));

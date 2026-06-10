@@ -3,6 +3,7 @@ package com.vaadin.starter.bakery.ui.views.admin.product;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.starter.bakery.backend.data.entity.Product;
 import com.vaadin.starter.bakery.backend.service.ProductService;
 
+@NullMarked
 @SpringComponent
 @PrototypeScope
 public class ProductAdminDataProvider

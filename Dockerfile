@@ -8,7 +8,7 @@ ENV VAADIN_PRO_KEY=${VAADIN_PRO_KEY}
 COPY pom.xml ./
 COPY src ./src
 
-RUN mvn clean package -DskipTests
+RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jre
 

@@ -4,6 +4,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -39,6 +41,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * is added to the class, you should consider splitting out a presenter.
  */
 @SpringView
+@NullMarked
 @SuppressWarnings({ "java:S110", "java:S2160", "java:S6813" })
 public class StorefrontView extends VerticalLayout implements View {
 
@@ -46,16 +49,22 @@ public class StorefrontView extends VerticalLayout implements View {
 
 	private static final String PARAMETER_INCLUDE_PAST = "includePast";
 
+	@Nullable
 	protected Panel searchPanel;
 
+	@Nullable
 	protected TextField searchField;
 
+	@Nullable
 	protected Button searchButton;
 
+	@Nullable
 	protected CheckBox includePast;
 
+	@Nullable
 	protected Button newOrder;
 
+	@Nullable
 	@Autowired
 	private OrdersGrid list;
 
@@ -88,8 +97,7 @@ public class StorefrontView extends VerticalLayout implements View {
 				e -> search(searchField.getValue(), includePast.getValue()));
 
 		// We don't want a global shortcut for enter, scope it to the panel
-		searchPanel.addAction(
-				new ClickShortcut(searchButton, KeyCode.ENTER, null));
+		searchPanel.addAction(new ClickShortcut(searchButton, KeyCode.ENTER));
 	}
 
 	private void initLayout() {
@@ -189,13 +197,14 @@ public class StorefrontView extends VerticalLayout implements View {
 	public void enter(ViewChangeEvent event) {
 		Map<String, String> params = event.getParameterMap();
 		String searchTerm = params.getOrDefault(PARAMETER_SEARCH, "");
-		boolean includePast = params.containsKey(PARAMETER_INCLUDE_PAST);
-		filterGrid(searchTerm, includePast);
+		boolean includePastPurchases = params
+				.containsKey(PARAMETER_INCLUDE_PAST);
+		filterGrid(searchTerm, includePastPurchases);
 	}
 
-	public void filterGrid(String searchTerm, boolean includePast) {
-		list.filterGrid(searchTerm, includePast);
+	public void filterGrid(String searchTerm, boolean includePastPurchases) {
+		list.filterGrid(searchTerm, includePastPurchases);
 		searchField.setValue(searchTerm);
-		this.includePast.setValue(includePast);
+		this.includePast.setValue(includePastPurchases);
 	}
 }

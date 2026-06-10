@@ -1,60 +1,30 @@
 
 package com.vaadin.starter.bakery.ui.views.admin.user;
 
-import com.vaadin.icons.VaadinIcons;
+import org.jspecify.annotations.NullMarked;
+
 import com.vaadin.starter.bakery.backend.data.entity.User;
-import com.vaadin.starter.bakery.ui.components.AttributeExtension;
-import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
 import com.vaadin.starter.bakery.ui.components.Form;
+import com.vaadin.starter.bakery.ui.views.admin.AbstractCrudLayout;
 import com.vaadin.starter.bakery.ui.views.admin.RoleSelect;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+@NullMarked
 @SuppressWarnings({ "java:S2160", "java:S110" })
-public class UserAdminLayout extends VerticalLayout {
+public class UserAdminLayout extends AbstractCrudLayout {
 
-    protected TextField search;
-    protected Button add;
     protected Grid<User> list;
-    protected Form form;
     protected TextField email;
     protected TextField name;
     protected TextField password;
     protected RoleSelect role;
-    protected Button update;
-    protected Button cancel;
-    protected Button delete;
 
-    public UserAdminLayout() {
-        setStyleName("crud-template");
-        setSpacing(false);
-        setResponsive(true);
-        setWidth("100%");
-        setHeight("100%");
-        setMargin(false);
-        HorizontalLayout topBar = createTopBar();
-        addComponent(topBar);
-        setComponentAlignment(topBar, Alignment.TOP_LEFT);
-        CssLayout contentWrapper = new CssLayout();
-        contentWrapper.setStyleName("content");
-        contentWrapper.setWidth("100%");
-        contentWrapper.setHeight("100%");
-        CssLayout listWrapper = createList();
-        form = createForm();
-        contentWrapper.addComponents(listWrapper, form);
-        addComponent(contentWrapper);
-        setComponentAlignment(contentWrapper, Alignment.TOP_LEFT);
-        setExpandRatio(contentWrapper, 1.0F);
-    }
-
-    private CssLayout createList() {
+    @Override
+    protected CssLayout createListParent() {
         CssLayout listWrapper = new CssLayout();
         listWrapper.setStyleName("list");
         listWrapper.setWidth("100%");
@@ -68,47 +38,8 @@ public class UserAdminLayout extends VerticalLayout {
         return listWrapper;
     }
 
-    private HorizontalLayout createTopBar() {
-        HorizontalLayout topBar = new HorizontalLayout();
-        topBar.setStyleName("top-bar");
-        topBar.setSpacing(false);
-        topBar.setWidth("100%");
-        topBar.setHeight("50px");
-        topBar.setMargin(false);
-
-        HorizontalLayout tools = new HorizontalLayout();
-        tools.setSpacing(false);
-        tools.setWidth("100%");
-        tools.setMargin(false);
-
-        this.search = new TextField();
-        search.setIcon(VaadinIcons.SEARCH);
-        search.setStyleName(ValoTheme.TEXTFIELD_SMALL + " "
-                + ValoTheme.TEXTFIELD_INLINE_ICON + " search");
-        search.setPlaceholder("Search");
-        search.setWidth("100%");
-        search.setId("search");
-        AttributeExtension.of(search).setAttribute(AriaAttributes.LABEL,
-                "Search users");
-        tools.addComponent(search);
-        tools.setComponentAlignment(search, Alignment.TOP_LEFT);
-
-        topBar.addComponent(tools);
-        topBar.setComponentAlignment(tools, Alignment.MIDDLE_LEFT);
-        topBar.setExpandRatio(tools, 1.0F);
-
-        add = new Button();
-        add.setIcon(VaadinIcons.PLUS);
-        add.setStyleName(ValoTheme.BUTTON_BORDERLESS);
-        add.setCaption("Add new");
-        add.setId("add");
-        topBar.addComponent(add);
-        topBar.setComponentAlignment(add, Alignment.MIDDLE_RIGHT);
-
-        return topBar;
-    }
-
-    private Form createForm() {
+    @Override
+    protected Form createForm() {
         Form form = new Form();
 
         email = new TextField();
@@ -138,26 +69,6 @@ public class UserAdminLayout extends VerticalLayout {
         role.setWidth("100%");
         role.setId("role");
         form.addField(role);
-
-        update = new Button();
-        update.setStyleName(
-                ValoTheme.BUTTON_SMALL + " " + ValoTheme.BUTTON_PRIMARY);
-        update.setCaption("Update");
-        update.setId("update");
-        form.setUpdateButton(update);
-
-        cancel = new Button();
-        cancel.setStyleName(ValoTheme.BUTTON_SMALL);
-        cancel.setCaption("Cancel");
-        cancel.setId("cancel");
-        form.setCancelButton(cancel);
-
-        delete = new Button();
-        delete.setStyleName(
-                ValoTheme.BUTTON_SMALL + " " + ValoTheme.BUTTON_DANGER);
-        delete.setCaption("Delete");
-        delete.setId("delete");
-        form.setDeleteButton(delete);
 
         return form;
     }

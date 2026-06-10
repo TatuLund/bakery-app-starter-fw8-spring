@@ -1,11 +1,18 @@
 package com.vaadin.starter.bakery.ui.views.dashboard;
 
+import org.jspecify.annotations.NullMarked;
+import org.springframework.lang.Nullable;
+
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Label;
 
+@NullMarked
+@SuppressWarnings("java:S2160")
 public class BoardLabel extends Label {
 
+	@Nullable
 	private String header;
+	@Nullable
 	private String content;
 
 	public BoardLabel(String header, String content) {

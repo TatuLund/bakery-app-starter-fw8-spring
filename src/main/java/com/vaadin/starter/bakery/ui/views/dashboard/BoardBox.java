@@ -1,15 +1,17 @@
 package com.vaadin.starter.bakery.ui.views.dashboard;
 
+import org.jspecify.annotations.NullMarked;
+
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 
+@SuppressWarnings({ "java:S110", "java:S2160" })
+@NullMarked
 public class BoardBox extends CssLayout {
 
 	private CssLayout mainDiv = new CssLayout();
 
 	public BoardBox(Component component) {
-		// An extra wrapper is here because of the IE11 flex box issue
-		// https://github.com/philipwalton/flexbugs#7-flex-basis-doesnt-account-for-box-sizingborder-box
 		addStyleName("board-box-wrapper");
 		setSizeFull();
 		addComponent(mainDiv);

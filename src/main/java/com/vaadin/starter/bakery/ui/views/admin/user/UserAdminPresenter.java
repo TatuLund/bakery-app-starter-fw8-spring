@@ -1,5 +1,6 @@
 package com.vaadin.starter.bakery.ui.views.admin.user;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -10,6 +11,7 @@ import com.vaadin.starter.bakery.backend.service.UserService;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.views.admin.AbstractCrudPresenter;
 
+@NullMarked
 @SpringComponent
 @ViewScope
 public class UserAdminPresenter

@@ -3,7 +3,10 @@ package com.vaadin.starter.bakery.ui.views.admin;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Objects;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -27,9 +30,11 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 
+@NullMarked
 public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends CrudService<T>, V extends AbstractCrudView<T>>
 		implements HasLogger, Serializable {
 
+	@Nullable
 	private V view;
 
 	private final NavigationManager navigationManager;
@@ -38,11 +43,13 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 
 	private FilterablePageableDataProvider<T, Object> dataProvider;
 
+	@Nullable
 	private BeanValidationBinder<T> binder;
 
 	// The model for the view. Not extracted to a class to reduce clutter. If
 	// the model becomes more complex, it could be encapsulated in a separate
 	// class.
+	@Nullable
 	private T editItem;
 
 	private final transient BeanFactory beanFactory;
@@ -121,6 +128,7 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 	}
 
 	public void init(V view) {
+		Objects.requireNonNull(view, "View must not be null");
 		this.view = view;
 		view.setDataProvider(dataProvider);
 		view.bindFormFields(getBinder());
@@ -128,6 +136,7 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 	}
 
 	protected V getView() {
+		assert view != null : "View is not initialized yet";
 		return view;
 	}
 
