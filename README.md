@@ -33,9 +33,15 @@ The repository includes a local production-like stack with two containers:
 
 If you use Vaadin commercial components, export `VAADIN_PRO_KEY` before building so the key is available during both image build and container runtime.
 
+Change `application-prodution.properties` to create new database schema:
+
+`spring.jpa.hibernate.ddl-auto=create`
+
 Start the stack with:
 
 `docker compose up --build`
+
+Wait for approx 5 mins to data generator to run.
 
 The application will be available at http://localhost:8080/ and MySQL at localhost:3306.
 
@@ -51,9 +57,23 @@ Stop the stack with:
 
 `docker compose down`
 
-To also remove the persisted MySQL data volume:
+Change `application-prodution.properties` to validate the database schema:
+
+`spring.jpa.hibernate.ddl-auto=validate`
+
+Rebuild the app
+
+`docker compose build app`
+
+Now data generator should skip and app starts quickly.
+
+`docker compose build up`
+
+You can remove the persisted MySQL data volume:
 
 `docker compose down -v`
+
+(After this you need to rerun data generator)
 
 # Running the project as an executable jar
 
