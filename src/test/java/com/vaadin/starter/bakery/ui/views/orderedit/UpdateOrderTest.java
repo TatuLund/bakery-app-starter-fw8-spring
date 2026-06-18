@@ -205,6 +205,17 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
     }
 
     @Test
+    public void confirmDialogAfterCustomerChanges_whenPressingEsc() {
+        OrderFixture fixture = persist(sampleExistingOrder());
+        openOrder(fixture.order.getId());
+
+        test(editCancelButton()).click();
+        test(fullNameField()).setValue(fixture.expected.fullName + "foo");
+
+        assertConfirmationDialogBlocksLeavingEsc();
+    }
+
+    @Test
     public void confirmDialogAfterProductChanges() {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());

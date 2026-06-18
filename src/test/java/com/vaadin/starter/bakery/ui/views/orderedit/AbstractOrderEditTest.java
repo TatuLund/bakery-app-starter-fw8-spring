@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.springframework.data.domain.PageRequest;
 
 import com.vaadin.data.ValueContext;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.View;
 import com.vaadin.server.ServiceException;
 import com.vaadin.starter.bakery.backend.data.OrderState;
@@ -299,6 +300,13 @@ public abstract class AbstractOrderEditTest extends AbstractUITest {
         test(confirmCancelButton()).click();
 
         test(logoutButton()).click();
+        assertTrue(UI.getCurrent().getNavigator()
+                .getCurrentView() instanceof OrderEditView);
+        test(confirmCancelButton()).click();
+    }
+
+    protected void assertConfirmationDialogBlocksLeavingEsc() {
+        test($(OrderEditView.class).first()).shortcut(KeyCode.ESCAPE);
         assertTrue(UI.getCurrent().getNavigator()
                 .getCurrentView() instanceof OrderEditView);
         test(confirmCancelButton()).click();

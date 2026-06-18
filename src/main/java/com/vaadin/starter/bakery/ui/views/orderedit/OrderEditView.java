@@ -36,7 +36,10 @@ import com.vaadin.starter.bakery.ui.components.AttributeExtension;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaRoles;
 import com.vaadin.starter.bakery.ui.components.ConfirmPopup;
+import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.utils.DollarPriceConverter;
+import com.vaadin.starter.bakery.ui.views.dashboard.DashboardView;
+import com.vaadin.starter.bakery.ui.views.storefront.StorefrontView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
@@ -89,13 +92,15 @@ public class OrderEditView extends VerticalLayout implements View {
 	private transient BeanFactory beanFactory;
 	private View oldView;
 	private Registration shortcutRegistration;
+	private NavigationManager navigationManager;
 
 	@Autowired
 	public OrderEditView(OrderEditPresenter presenter, BeanFactory beanFactory,
-			DollarPriceConverter priceConverter) {
+			DollarPriceConverter priceConverter, NavigationManager navigationManager) {
 		this.presenter = presenter;
 		this.beanFactory = beanFactory;
 		this.priceConverter = priceConverter;
+		this.navigationManager = navigationManager;
 		shortcutRegistration = addShortcutListener(new EscapeListener());
 	}
 
@@ -561,8 +566,14 @@ public class OrderEditView extends VerticalLayout implements View {
 
 		@Override
 		public void handleAction(Object sender, Object target) {
-			if (oldView != null) {
-				// Navigate back to where we came from
+			if (oldView == null) {
+				return;
+			}
+			if (oldView instanceof DashboardView) {
+				navigationManager.navigateTo("dashboard");
+			}
+			if (oldView instanceof StorefrontView) {
+				navigationManager.navigateTo("storefront");
 				getUI().getNavigator().getDisplay().showView(oldView);
 			}
 		}
