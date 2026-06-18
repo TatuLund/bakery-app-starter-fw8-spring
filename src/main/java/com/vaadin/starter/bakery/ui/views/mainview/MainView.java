@@ -123,12 +123,15 @@ public class MainView extends HorizontalLayout implements ViewDisplay {
 		navigationBar.setWidth("100%");
 		navigationBar.setHeight("100%");
 
+		Label icon = new Label();
+		icon.setStyleName("icon");
+
 		Label logo = new Label();
 		logo.setStyleName("logo");
 		logo.setWidth("100%");
 		logo.setContentMode(ContentMode.TEXT);
-		logo.setValue("###Bakery###");
-		navigationBar.addComponent(logo);
+		logo.setValue("Bakery");
+		navigationBar.addComponents(icon, logo);
 
 		activeViewName = new Label();
 		activeViewName.setStyleName("activeViewName");

@@ -109,6 +109,25 @@ public class ProductAdminTest extends AbstractUITest {
     }
 
     @Test
+    public void changeProduct_revertChangeByEdit_cancelButtonIsNotEnabled_noConfirmChangesDialog() {
+        test(grid()).click(0, 0);
+        var product = test(grid()).item(0);
+        var originalName = product.getName();
+
+        assertFalse(cancelButton().isEnabled());
+
+        String dirtyName = nameField().getValue() + "-dirty";
+        test(nameField()).setValue(dirtyName);
+        assertTrue(cancelButton().isEnabled());
+
+        test(nameField()).setValue(originalName);
+        assertFalse(cancelButton().isEnabled());
+
+        test(storefrontButton()).click();
+        assertNull(confirmCancelButton());
+    }
+
+    @Test
     public void createProductButCancel_doesNotPersistChanges() {
         String name = uniqueName("cancel-product");
 
@@ -121,6 +140,7 @@ public class ProductAdminTest extends AbstractUITest {
         assertTrue(cancelButton().isEnabled());
 
         test(cancelButton()).click();
+        assertFalse(test(cancelButton()).isInteractable());
 
         assertNull(findProduct(name));
         assertFalse(form().isEnabled());

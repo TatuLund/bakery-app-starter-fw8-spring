@@ -15,6 +15,7 @@ import org.vaadin.artur.spring.dataprovider.FilterablePageableDataProvider;
 import com.vaadin.data.BeanValidationBinder;
 import com.vaadin.data.BindingValidationStatus;
 import com.vaadin.data.HasValue;
+import com.vaadin.data.HasValue.ValueChangeEvent;
 import com.vaadin.data.StatusChangeEvent;
 import com.vaadin.data.ValidationException;
 import com.vaadin.data.ValidationResult;
@@ -56,6 +57,8 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 
 	private final Class<T> entityType;
 
+	private boolean hasValidationErrors;
+
 	protected AbstractCrudPresenter(NavigationManager navigationManager,
 			S service, Class<T> entityType,
 			FilterablePageableDataProvider<T, Object> dataProvider,
@@ -83,6 +86,8 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 	protected void createBinder() {
 		binder = new BeanValidationBinder<>(getEntityType());
 		binder.addStatusChangeListener(this::onFormStatusChange);
+		binder.addValueChangeListener(this::onFormValueChange);
+		binder.setChangeDetectionEnabled(true);
 	}
 
 	protected BeanValidationBinder<T> getBinder() {
@@ -332,9 +337,13 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 
 	public void onFormStatusChange(StatusChangeEvent event) {
 		boolean hasChanges = event.getBinder().hasChanges();
-		boolean hasValidationErrors = event.hasValidationErrors();
+		hasValidationErrors = event.hasValidationErrors();
 		getView().setUpdateEnabled(hasChanges && !hasValidationErrors);
-		getView().setCancelEnabled(hasChanges);
 	}
 
+	public void onFormValueChange(ValueChangeEvent<?> event) {
+		boolean hasChanges = getBinder().hasChanges();
+		getView().setCancelEnabled(hasChanges);
+		getView().setUpdateEnabled(hasChanges && !hasValidationErrors);
+	}
 }

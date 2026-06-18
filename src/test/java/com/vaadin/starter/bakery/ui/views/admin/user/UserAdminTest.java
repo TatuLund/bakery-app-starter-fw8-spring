@@ -148,6 +148,25 @@ public class UserAdminTest extends AbstractUITest {
     }
 
     @Test
+    public void changeUser_revertChangeByEdit_cancelButtonIsNotEnabled_noConfirmChangesDialog() {
+        test(grid()).click(0, 0);
+        var user = test(grid()).item(0);
+        var originalName = user.getName();
+
+        assertFalse(cancelButton().isEnabled());
+
+        String dirtyName = nameField().getValue() + "-dirty";
+        test(nameField()).setValue(dirtyName);
+        assertTrue(cancelButton().isEnabled());
+
+        test(nameField()).setValue(originalName);
+        assertFalse(cancelButton().isEnabled());
+
+        test(storefrontButton()).click();
+        assertNull(confirmCancelButton());
+    }
+
+    @Test
     public void createUserButCancel_doesNotPersistChanges() {
         String email = uniqueEmail("cancel-user");
 
@@ -162,6 +181,7 @@ public class UserAdminTest extends AbstractUITest {
         assertTrue(cancelButton().isEnabled());
 
         test(cancelButton()).click();
+        assertFalse(test(cancelButton()).isInteractable());
 
         assertNull(findUser(email));
         assertFalse(form().isEnabled());

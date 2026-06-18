@@ -77,6 +77,8 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 		getGrid().deselectAll();
 		getUpdate().setCaption(CAPTION_UPDATE);
 		getCancel().setCaption(CAPTION_DISCARD);
+		getCancel().setDisableOnClick(true);
+		getCancel().setEnabled(false);
 	}
 
 	public void editItem(boolean isNew) {
