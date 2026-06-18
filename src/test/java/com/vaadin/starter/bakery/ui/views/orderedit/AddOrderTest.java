@@ -30,7 +30,7 @@ public class AddOrderTest extends AbstractOrderEditTest {
 
         assertFalse(reportHeader().isVisible());
         assertEquals(OrderEditView.Mode.EDIT, view.getMode());
-        assertEnabledWithCaption(cancelButton(), "Cancel");
+        assertEnabledWithCaption(editCancelButton(), "Cancel");
         assertEnabledWithCaption(okButton(), "Review order");
         assertEnabledWithCaption(addItemsButton(), "Add item");
     }
@@ -106,7 +106,7 @@ public class AddOrderTest extends AbstractOrderEditTest {
         assertNotNull(orderId);
         assertTrue(orderIdLabel().getValue().matches("#\\d+"));
         assertEquals(orderViewId() + "/" + orderId, currentStatePath());
-        assertEnabledWithCaption(cancelButton(), "Edit");
+        assertEnabledWithCaption(editCancelButton(), "Edit");
         assertEnabledWithCaption(okButton(), "Mark as Confirmed");
         assertOrder(draft);
 
@@ -147,7 +147,7 @@ public class AddOrderTest extends AbstractOrderEditTest {
         assertEquals(OrderState.NEW,
                 OrderState.forDisplayName(stateLabel().getValue()));
 
-        test(cancelButton()).click();
+        test(editCancelButton()).click();
         assertEquals(OrderEditView.Mode.EDIT, view.getMode());
         stateField().setValue(OrderState.CONFIRMED);
         test(okButton()).focus();

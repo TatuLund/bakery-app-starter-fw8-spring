@@ -1,6 +1,7 @@
 package com.vaadin.starter.bakery.ui.views.dashboard;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
@@ -12,12 +13,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.ServiceException;
 import com.vaadin.starter.bakery.ui.AbstractUITest;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
 import com.vaadin.starter.bakery.ui.components.CustomChart;
 import com.vaadin.starter.bakery.ui.components.OrdersGrid;
+import com.vaadin.starter.bakery.ui.views.orderedit.OrderEditView;
 import com.vaadin.ui.AbstractComponent;
 
 public class DashboardViewTest extends AbstractUITest {
@@ -51,6 +54,22 @@ public class DashboardViewTest extends AbstractUITest {
         assertTrue(attribute(monthlyProductSplit(), AriaAttributes.LABEL)
                 .startsWith("Products delivered in " + currentMonth));
         assertEquals("dueGrid", dueGrid().getId());
+    }
+
+
+    @Test
+    public void clickGridItemShowsOrderEditView_andPressingEscReturnsToDashboard() {
+        // WHEN: Clicking the first item in the due grid
+        test(dueGrid()).click(0, 0);
+
+        // THEN: We are navigated to OrderEditView
+        assertNotNull($(OrderEditView.class).first());
+
+        // WHEN: Pressing escape to cancel
+        test($(OrderEditView.class).first()).shortcut(KeyCode.ESCAPE);
+
+        // THEN: We are back to DashboardView
+        assertNotNull($(DashboardView.class).first());
     }
 
     private OrdersGrid dueGrid() {

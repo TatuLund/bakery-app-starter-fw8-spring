@@ -20,11 +20,13 @@ import com.vaadin.data.ValueContext;
 import com.vaadin.data.validator.DateRangeValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutAction.ModifierKey;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewBeforeLeaveEvent;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.shared.Registration;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.starter.bakery.backend.data.OrderState;
@@ -85,6 +87,8 @@ public class OrderEditView extends VerticalLayout implements View {
 	private Mode mode;
 	private boolean hasChanges;
 	private transient BeanFactory beanFactory;
+	private View oldView;
+	private Registration shortcutRegistration;
 
 	@Autowired
 	public OrderEditView(OrderEditPresenter presenter, BeanFactory beanFactory,
@@ -92,6 +96,7 @@ public class OrderEditView extends VerticalLayout implements View {
 		this.presenter = presenter;
 		this.beanFactory = beanFactory;
 		this.priceConverter = priceConverter;
+		shortcutRegistration = addShortcutListener(new EscapeListener());
 	}
 
 	@PostConstruct
@@ -365,8 +370,11 @@ public class OrderEditView extends VerticalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeEvent event) {
+		// Save where we came from so that we can navigate back if the user
+		// cancels
+		oldView = event.getOldView();
 		String orderId = event.getParameters();
-		if ("".equals(orderId)) {
+		if ("".equals(	orderId)) {
 			presenter.enterView(null);
 		} else {
 			presenter.enterView(Long.valueOf(orderId));
@@ -535,5 +543,28 @@ public class OrderEditView extends VerticalLayout implements View {
 
 	public boolean containsUnsavedChanges() {
 		return hasChanges;
+	}
+
+	@Override
+	public void detach() {
+		super.detach();
+		if (shortcutRegistration != null) {
+			shortcutRegistration.remove();
+			shortcutRegistration = null;
+		}
+	}
+
+	class EscapeListener extends ShortcutListener {
+		EscapeListener() {
+			super("Cancel", KeyCode.ESCAPE, new int[0]);
+		}
+
+		@Override
+		public void handleAction(Object sender, Object target) {
+			if (oldView != null) {
+				// Navigate back to where we came from
+				getUI().getNavigator().getDisplay().showView(oldView);
+			}
+		}
 	}
 }

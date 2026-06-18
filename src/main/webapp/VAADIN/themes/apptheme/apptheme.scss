@@ -51,6 +51,12 @@ $app-background-image: url('bg.jpg');
     // Only show validation errors using field styles
     display: none;
   }
+
+  .v-tooltip {
+    color: rgba(50, 50, 50, 0.9);
+    background-color: white;
+  }
+
   .Vaadin-Icons {
     // Make Vaadin Icons behave exactly like FontAwesome
     font-style: normal;

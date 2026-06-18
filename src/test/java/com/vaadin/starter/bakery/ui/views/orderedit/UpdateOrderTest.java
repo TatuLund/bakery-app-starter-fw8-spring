@@ -13,9 +13,11 @@ import java.util.StringJoiner;
 import org.junit.Test;
 
 import com.vaadin.data.ValueContext;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.starter.bakery.backend.data.OrderState;
 import com.vaadin.starter.bakery.backend.data.entity.Order;
 import com.vaadin.starter.bakery.backend.data.entity.Product;
+import com.vaadin.starter.bakery.ui.views.storefront.StorefrontView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.TextField;
 
@@ -68,8 +70,8 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(cancelButton()).click();
-        assertEnabledWithCaption(cancelButton(), "Cancel");
+        test(editCancelButton()).click();
+        assertEnabledWithCaption(editCancelButton(), "Cancel");
         assertEnabledWithCaption(okButton(), "Save");
 
         ExpectedOrder updated = copyOrder(fixture.expected);
@@ -104,7 +106,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
 
         test(okButton()).click();
 
-        assertEnabledWithCaption(cancelButton(), "Edit");
+        assertEnabledWithCaption(editCancelButton(), "Edit");
         assertOrder(updated);
     }
 
@@ -117,26 +119,60 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
 
         openOrder(fixture.order.getId());
 
-        assertFalse(cancelButton().isEnabled());
-        assertEquals("Edit", cancelButton().getCaption());
+        assertFalse(editCancelButton().isEnabled());
+        assertEquals("Edit", editCancelButton().getCaption());
     }
 
     @Test
     public void updateButCancel() {
+        // GIVEN: An existing order is opened for editing
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(cancelButton()).click();
+        // Click cancel/edit to enter edit mode
+        test(editCancelButton()).click();
+
         test(fullNameField()).setValue(fixture.expected.fullName + "-updated");
         test(phoneField()).setValue(fixture.expected.phone + "-updated");
         test(detailsField()).setValue(fixture.expected.details + "-updated");
         setProductLine(0, line(fixture.expected.products.get(0).product,
                 fixture.expected.products.get(0).quantity + 1,
                 fixture.expected.products.get(0).comment + "-updated"));
+    
+        // WHEN: Clicking cancel
+        test(editCancelButton()).click();
 
-        test(cancelButton()).click();
-
+        // THEN: We edits are discarded and form is not editable
         assertOrder(fixture.expected);
+
+        assertFalse(test(fullNameField()).isInteractable());
+        assertFalse(test(phoneField()).isInteractable());
+        assertFalse(test(detailsField()).isInteractable());
+        assertFalse(test(fullNameField()).isInteractable());
+        assertFalse(test(pickupLocationField()).isInteractable());
+    }
+
+    @Test
+    public void updateButCancelByEsc() {
+        // GIVEN: An existing order is opened for editing
+        OrderFixture fixture = persist(sampleExistingOrder());
+        openOrder(fixture.order.getId());
+
+        // Click cancel/edit to enter edit mode
+        test(editCancelButton()).click();
+
+        test(fullNameField()).setValue(fixture.expected.fullName + "-updated");
+        test(phoneField()).setValue(fixture.expected.phone + "-updated");
+        test(detailsField()).setValue(fixture.expected.details + "-updated");
+        setProductLine(0, line(fixture.expected.products.get(0).product,
+                fixture.expected.products.get(0).quantity + 1,
+                fixture.expected.products.get(0).comment + "-updated"));
+    
+        // WHEN: Pressing escape to cancel
+        test($(OrderEditView.class).first()).shortcut(KeyCode.ESCAPE);
+
+        // THEN: We are back to StorefrontView
+        assertNotNull($(StorefrontView.class).first());
     }
 
     @Test
@@ -144,7 +180,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(cancelButton()).click();
+        test(editCancelButton()).click();
         int originalCount = numberOfProducts();
         test(addItemsButton()).click();
         test(addItemsButton()).click();
@@ -153,7 +189,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
 
         test(okButton()).click();
 
-        assertEnabledWithCaption(cancelButton(), "Edit");
+        assertEnabledWithCaption(editCancelButton(), "Edit");
         assertEquals(originalCount, numberOfProducts());
     }
 
@@ -162,7 +198,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(cancelButton()).click();
+        test(editCancelButton()).click();
         test(fullNameField()).setValue(fixture.expected.fullName + "foo");
 
         assertConfirmationDialogBlocksLeaving();
@@ -173,7 +209,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(cancelButton()).click();
+        test(editCancelButton()).click();
         test($(productInfo(0), TextField.class).id("quantity"))
                 .setValue(String.valueOf(
                         fixture.expected.products.get(0).quantity + 1));
@@ -186,7 +222,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(cancelButton()).click();
+        test(editCancelButton()).click();
         test(addItemsButton()).click();
         Product alternateProduct = alternateProduct(
                 fixture.expected.products.get(0).product);
@@ -200,7 +236,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(cancelButton()).click();
+        test(editCancelButton()).click();
         test($(productInfo(0), Button.class).id("delete")).click();
 
         assertConfirmationDialogBlocksLeaving();
@@ -211,7 +247,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(cancelButton()).click();
+        test(editCancelButton()).click();
         test(fullNameField())
                 .setValue(fixture.expected.fullName + "-edited-by-user-1");
 
@@ -224,7 +260,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
 
         test(okButton()).click();
 
-        assertEnabledWithCaption(cancelButton(), "Cancel");
+        assertEnabledWithCaption(editCancelButton(), "Cancel");
         assertNotNull(lastNotification());
         assertEquals(CONCURRENT_UPDATE_MESSAGE,
                 lastNotification().getCaption());
