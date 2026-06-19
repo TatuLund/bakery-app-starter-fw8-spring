@@ -12,6 +12,7 @@ import com.vaadin.server.ServiceException;
 import com.vaadin.shared.Position;
 import com.vaadin.starter.bakery.ui.components.OrdersGrid;
 import com.vaadin.starter.bakery.ui.views.AccessDeniedView;
+import com.vaadin.starter.bakery.ui.views.ErrorView;
 import com.vaadin.starter.bakery.ui.views.dashboard.DashboardView;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
@@ -56,11 +57,29 @@ public class SpringNavigationTest extends AbstractUITest {
 
         assertNotNull(view);
         assertSame(view, UI.getCurrent().getNavigator().getCurrentView());
-        assertNotNull($(view, Label.class).id("accessDeniedLabel"));
+        assertNotNull($(view, Label.class).id("errorLabel"));
         assertNotNull(lastNotification());
         assertEquals(Position.ASSISTIVE, lastNotification().getPosition());
         assertEquals(
                 "Access denied. You do not have permission to view this page.",
+                lastNotification().getCaption());
+    }
+
+    @Test
+    public void navigatingToNonExistingView_showsErrorView() throws ServiceException {
+        tearDown();
+        authenticator = this::authenticateAsBarista;
+        mockVaadin();
+
+        ErrorView view = navigate("unknown-view", ErrorView.class);
+
+        assertNotNull(view);
+        assertSame(view, UI.getCurrent().getNavigator().getCurrentView());
+        assertNotNull($(view, Label.class).id("errorLabel"));
+        assertNotNull(lastNotification());
+        assertEquals(Position.ASSISTIVE, lastNotification().getPosition());
+        assertEquals(
+                "View not found",
                 lastNotification().getCaption());
     }
 

@@ -15,6 +15,7 @@ import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.starter.bakery.app.HasLogger;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.views.AccessDeniedView;
+import com.vaadin.starter.bakery.ui.views.ErrorView;
 import com.vaadin.starter.bakery.ui.views.mainview.MainView;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
@@ -63,6 +64,7 @@ public class AppUI extends UI implements HasLogger {
 		setContent(mainView);
 
 		navigationManager.navigateToDefaultView();
+		navigationManager.setErrorView(ErrorView.class);
 	}
 
 }

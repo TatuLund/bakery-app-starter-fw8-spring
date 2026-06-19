@@ -161,8 +161,9 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 	}
 
 	private void selectAndEditEntity(T entity) {
-		getView().getGrid().select(entity);
-		editRequest(entity);
+		if (getView().selectEntity(entity)) {
+			editRequest(entity);
+		}
 	}
 
 	public void editRequest(T entity) {

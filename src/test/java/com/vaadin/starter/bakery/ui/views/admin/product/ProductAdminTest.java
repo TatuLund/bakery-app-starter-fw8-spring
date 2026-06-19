@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import com.vaadin.server.ServiceException;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -26,6 +27,7 @@ import com.vaadin.starter.bakery.backend.service.ProductService;
 import com.vaadin.starter.bakery.ui.AbstractUITest;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.views.admin.AbstractCrudView;
+import com.vaadin.starter.bakery.ui.views.admin.user.UserAdminView;
 import com.vaadin.starter.bakery.ui.views.storefront.StorefrontView;
 
 public class ProductAdminTest extends AbstractUITest {
@@ -199,6 +201,14 @@ public class ProductAdminTest extends AbstractUITest {
         }
     }
 
+    @Test
+    public void navigateWithParameter_nonExistingProduct_showsNotification() {
+        view = navigate(viewId() + "/99999", ProductAdminView.class);
+
+        assertNotNull(lastNotification());
+        assertEquals("Unknown entity id", lastNotification().getCaption());
+    }
+    
     @Test
     public void navigateWithParameter_loadsExistingProductIntoFormAndAllowsSaving() {
         Product product = createProduct(uniqueName("parameter-product"), 4321);
@@ -402,5 +412,9 @@ public class ProductAdminTest extends AbstractUITest {
 
     private String uniqueName(String prefix) {
         return prefix + "-" + UUID.randomUUID();
+    }
+
+    private Notification lastNotification() {
+        return $(Notification.class).last();
     }
 }

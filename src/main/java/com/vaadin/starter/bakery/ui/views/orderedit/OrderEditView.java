@@ -96,12 +96,14 @@ public class OrderEditView extends VerticalLayout implements View {
 
 	@Autowired
 	public OrderEditView(OrderEditPresenter presenter, BeanFactory beanFactory,
-			DollarPriceConverter priceConverter, NavigationManager navigationManager) {
+			DollarPriceConverter priceConverter,
+			NavigationManager navigationManager) {
 		this.presenter = presenter;
 		this.beanFactory = beanFactory;
 		this.priceConverter = priceConverter;
 		this.navigationManager = navigationManager;
 		registerEscapeShortcut();
+		setSizeFull();
 	}
 
 	private void registerEscapeShortcut() {
@@ -383,7 +385,7 @@ public class OrderEditView extends VerticalLayout implements View {
 		// cancels
 		oldView = event.getOldView();
 		String orderId = event.getParameters();
-		if ("".equals(	orderId)) {
+		if ("".equals(orderId)) {
 			presenter.enterView(null);
 		} else {
 			presenter.enterView(Long.valueOf(orderId));
@@ -457,7 +459,13 @@ public class OrderEditView extends VerticalLayout implements View {
 
 	public void showNotFound() {
 		removeAllComponents();
-		addComponent(new Label("Order not found"));
+		var label = new Label("Order not found");
+		label.setStyleName(ValoTheme.LABEL_FAILURE);
+		label.setId("notFoundLabel");
+		AttributeExtension.of(label).setAttribute(AriaAttributes.LIVE,
+				"polite");
+		addComponent(label);
+		setComponentAlignment(label, Alignment.MIDDLE_CENTER);
 	}
 
 	public void setMode(Mode mode) {
@@ -484,7 +492,8 @@ public class OrderEditView extends VerticalLayout implements View {
 			editDiscard.focus();
 			editDiscard.setCaption("Edit");
 			editDiscard.setIcon(VaadinIcons.EDIT);
-			editDiscard.setEnabled(getOrder().getState() != OrderState.DELIVERED);
+			editDiscard
+					.setEnabled(getOrder().getState() != OrderState.DELIVERED);
 			Optional<OrderState> nextState = presenter
 					.getNextHappyPathState(getOrder().getState());
 			ok.removeClickShortcut();

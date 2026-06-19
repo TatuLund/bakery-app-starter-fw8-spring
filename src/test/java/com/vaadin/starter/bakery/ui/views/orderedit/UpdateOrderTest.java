@@ -20,6 +20,7 @@ import com.vaadin.starter.bakery.backend.data.entity.Order;
 import com.vaadin.starter.bakery.backend.data.entity.Product;
 import com.vaadin.starter.bakery.ui.views.storefront.StorefrontView;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 
 public class UpdateOrderTest extends AbstractOrderEditTest {
@@ -122,6 +123,14 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
 
         assertFalse(editDiscardButton().isEnabled());
         assertEquals("Edit", editDiscardButton().getCaption());
+    }
+
+    @Test
+    public void openingNonExistingOrderShowsNotFound() {
+        openOrder(99999L);
+
+        assertNotNull($(OrderEditView.class).first());
+        assertNotNull($(Label.class).id("notFoundLabel"));
     }
 
     @Test

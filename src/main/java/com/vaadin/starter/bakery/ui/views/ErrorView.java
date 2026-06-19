@@ -7,11 +7,10 @@ import com.vaadin.spring.annotation.SpringComponent;
 @SpringComponent
 @PrototypeScope
 @SuppressWarnings("java:S110")
-public class AccessDeniedView extends AbstractErrorView {
+public class ErrorView extends AbstractErrorView {
 
-    public AccessDeniedView() {
-        errorLabel.setValue(
-                "Access denied. You do not have permission to view this page.");
+    public ErrorView() {
+        errorLabel.setValue("View not found");
     }
-
+    
 }

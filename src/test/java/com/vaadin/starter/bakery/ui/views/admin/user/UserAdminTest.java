@@ -83,8 +83,8 @@ public class UserAdminTest extends AbstractUITest {
     @Test
     public void grid_doesNotShowPasswordColumn() {
         assertEquals(3, grid().getColumns().size());
-        assertTrue(grid().getColumns().stream().noneMatch(column ->
-                "passwordHash".equals(column.getId())
+        assertTrue(grid().getColumns().stream()
+                .noneMatch(column -> "passwordHash".equals(column.getId())
                         || "Password".equals(column.getCaption())
                         || "Password Hash".equals(column.getCaption())));
     }
@@ -245,6 +245,14 @@ public class UserAdminTest extends AbstractUITest {
             userService.delete(second.getId());
             userService.delete(third.getId());
         }
+    }
+
+    @Test
+    public void navigateWithParameter_nonExistingUser_showsNotification() {
+        view = navigate(viewId() + "/99999", UserAdminView.class);
+
+        assertNotNull(lastNotification());
+        assertEquals("Unknown entity id", lastNotification().getCaption());
     }
 
     @Test

@@ -18,6 +18,8 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Component.Focusable;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.components.grid.SingleSelectionModel;
 
@@ -94,7 +96,7 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 
 		getForm().setEnabled(true);
 		getDelete().setEnabled(!isNew);
-		
+
 	}
 
 	@PostConstruct
@@ -146,6 +148,16 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 		} else {
 			getLogger().warn("Unable to focus field of type {}",
 					field.getClass().getName());
+		}
+	}
+
+	public boolean selectEntity(T entity) {
+		try {
+			getGrid().select(entity);
+			return true;
+		} catch (Exception e) {
+			Notification.show("Unknown entity id", Type.ERROR_MESSAGE);
+			return false;
 		}
 	}
 
