@@ -489,6 +489,10 @@ public abstract class AbstractOrderEditTest extends AbstractUITest {
         return $(Button.class).id("confirmdialog-cancel-button");
     }
 
+    protected Button confirmOkButton() {
+        return $(Button.class).id("confirmdialog-ok-button");
+    }
+
     protected Notification lastNotification() {
         return $(Notification.class).last();
     }

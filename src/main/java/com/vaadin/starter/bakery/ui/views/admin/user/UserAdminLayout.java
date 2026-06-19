@@ -72,5 +72,4 @@ public class UserAdminLayout extends AbstractCrudLayout {
 
         return form;
     }
-
 }

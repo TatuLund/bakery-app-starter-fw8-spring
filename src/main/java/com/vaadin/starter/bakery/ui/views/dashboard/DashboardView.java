@@ -268,7 +268,11 @@ public class DashboardView extends VerticalLayout implements View {
 		DashboardData data = fetchData();
 		updateLabels(data.getDeliveryStats());
 		updateGraphs(data);
-		deliveriesThisMonthGraph.focus();
+		if (event.getOldView() instanceof OrderEditView) {
+			dueGrid.focus();
+		} else {
+			deliveriesThisMonthGraph.focus();
+		}
 	}
 
 	private DashboardData fetchData() {

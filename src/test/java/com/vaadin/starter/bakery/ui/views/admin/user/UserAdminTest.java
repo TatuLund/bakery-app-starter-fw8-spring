@@ -172,6 +172,7 @@ public class UserAdminTest extends AbstractUITest {
 
         test(addButton()).click();
 
+        assertTrue(test(emailField()).isFocused());
         test(emailField()).setValue(email);
         test(nameField()).setValue("Cancel User");
         test(passwordField()).setValue("secret1");
@@ -285,7 +286,8 @@ public class UserAdminTest extends AbstractUITest {
         test(passwordField()).setValue("foo");
 
         assertFalse(updateButton().isEnabled());
-        assertNotNull(passwordField().getComponentError());
+        assertTrue(test(passwordField()).isFocused());
+        assertTrue(test(passwordField()).isInvalid());
         assertTrue(passwordEncoder.matches("baker",
                 findExistingUser(BAKER_EMAIL).getPasswordHash()));
 
@@ -321,7 +323,7 @@ public class UserAdminTest extends AbstractUITest {
         assertTrue(updateButton().isEnabled());
         test(updateButton()).click();
 
-        assertNotNull(passwordField().getComponentError());
+        assertTrue(test(passwordField()).isInvalid());
         assertNull(findUser(email));
     }
 

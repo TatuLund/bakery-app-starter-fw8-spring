@@ -101,6 +101,10 @@ public class OrderEditView extends VerticalLayout implements View {
 		this.beanFactory = beanFactory;
 		this.priceConverter = priceConverter;
 		this.navigationManager = navigationManager;
+		registerEscapeShortcut();
+	}
+
+	private void registerEscapeShortcut() {
 		shortcutRegistration = addShortcutListener(new EscapeListener());
 	}
 
@@ -499,7 +503,7 @@ public class OrderEditView extends VerticalLayout implements View {
 			cancel.setCaption("Cancel");
 			cancel.setIcon(VaadinIcons.CLOSE);
 			cancel.setEnabled(true);
-			cancel.setClickShortcut(KeyCode.ESCAPE);
+			cancel.setClickShortcut(KeyCode.Z, ModifierKey.CTRL);
 			ok.setClickShortcut(KeyCode.S, ModifierKey.CTRL);
 			if (getOrder() != null && !getOrder().isNew()) {
 				ok.setCaption("Save");
@@ -574,7 +578,6 @@ public class OrderEditView extends VerticalLayout implements View {
 			}
 			if (oldView instanceof StorefrontView) {
 				navigationManager.navigateTo("storefront");
-				getUI().getNavigator().getDisplay().showView(oldView);
 			}
 		}
 	}

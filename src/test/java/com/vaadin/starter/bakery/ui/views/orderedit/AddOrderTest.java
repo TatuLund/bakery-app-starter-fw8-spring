@@ -128,7 +128,9 @@ public class AddOrderTest extends AbstractOrderEditTest {
         test(okButton()).click();
 
         assertEquals(OrderEditView.Mode.EDIT, view.getMode());
-        assertNotNull(dueDateField().getComponentError());
+        assertTrue(test(dueDateField()).isInvalid());
+        assertEquals("Due date cannot be in the past",
+                test(dueDateField()).errorMessage());
     }
 
     @Test

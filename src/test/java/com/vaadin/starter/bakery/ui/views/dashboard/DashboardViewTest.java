@@ -43,7 +43,8 @@ public class DashboardViewTest extends AbstractUITest {
         String currentMonth = LocalDate.now().getMonth()
                 .getDisplayName(TextStyle.FULL, Locale.US);
 
-        assertTrue(dueGrid().isAccessibleNavigation());
+        assertTrue(test(deliveriesThisMonthGraph()).isFocused());
+        assertTrue(dueGrid().isAccessibleNavigation()); 
         assertTrue(attribute(deliveriesThisMonthGraph(), AriaAttributes.LABEL)
                 .startsWith("Deliveries in " + currentMonth + ": Deliveries:"));
         assertTrue(attribute(deliveriesThisYearGraph(), AriaAttributes.LABEL)
@@ -70,6 +71,7 @@ public class DashboardViewTest extends AbstractUITest {
 
         // THEN: We are back to DashboardView
         assertNotNull($(DashboardView.class).first());
+        assertTrue(test($(OrdersGrid.class).first()).isFocused());
     }
 
     private OrdersGrid dueGrid() {

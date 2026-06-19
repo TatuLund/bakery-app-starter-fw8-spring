@@ -94,6 +94,7 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 
 		getForm().setEnabled(true);
 		getDelete().setEnabled(!isNew);
+		
 	}
 
 	@PostConstruct

@@ -3,6 +3,7 @@ package com.vaadin.starter.bakery.ui.views.orderedit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -129,6 +130,8 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
+        assertTrue(test(editCancelButton()).isFocused());
+
         // Click cancel/edit to enter edit mode
         test(editCancelButton()).click();
 
@@ -138,7 +141,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         setProductLine(0, line(fixture.expected.products.get(0).product,
                 fixture.expected.products.get(0).quantity + 1,
                 fixture.expected.products.get(0).comment + "-updated"));
-    
+
         // WHEN: Clicking cancel
         test(editCancelButton()).click();
 
@@ -167,9 +170,10 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         setProductLine(0, line(fixture.expected.products.get(0).product,
                 fixture.expected.products.get(0).quantity + 1,
                 fixture.expected.products.get(0).comment + "-updated"));
-    
-        // WHEN: Pressing escape to cancel
+
+        // WHEN: Pressing escape to cancel and edits are discarded
         test($(OrderEditView.class).first()).shortcut(KeyCode.ESCAPE);
+        test(confirmOkButton()).click();
 
         // THEN: We are back to StorefrontView
         assertNotNull($(StorefrontView.class).first());

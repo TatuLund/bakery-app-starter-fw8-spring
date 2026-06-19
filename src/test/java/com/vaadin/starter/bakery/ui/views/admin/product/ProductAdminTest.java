@@ -133,6 +133,7 @@ public class ProductAdminTest extends AbstractUITest {
 
         test(addButton()).click();
 
+        assertTrue(test(nameField()).isFocused());
         test(nameField()).setValue(name);
         test(priceField()).setValue("$98.76");
 
