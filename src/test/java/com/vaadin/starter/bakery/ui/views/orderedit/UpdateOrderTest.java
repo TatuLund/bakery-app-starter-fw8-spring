@@ -71,8 +71,8 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(editCancelButton()).click();
-        assertEnabledWithCaption(editCancelButton(), "Cancel");
+        test(editDiscardButton()).click();
+        assertEnabledWithCaption(editDiscardButton(), "Discard");
         assertEnabledWithCaption(okButton(), "Save");
 
         ExpectedOrder updated = copyOrder(fixture.expected);
@@ -107,7 +107,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
 
         test(okButton()).click();
 
-        assertEnabledWithCaption(editCancelButton(), "Edit");
+        assertEnabledWithCaption(editDiscardButton(), "Edit");
         assertOrder(updated);
     }
 
@@ -120,8 +120,8 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
 
         openOrder(fixture.order.getId());
 
-        assertFalse(editCancelButton().isEnabled());
-        assertEquals("Edit", editCancelButton().getCaption());
+        assertFalse(editDiscardButton().isEnabled());
+        assertEquals("Edit", editDiscardButton().getCaption());
     }
 
     @Test
@@ -130,10 +130,10 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        assertTrue(test(editCancelButton()).isFocused());
+        assertTrue(test(editDiscardButton()).isFocused());
 
         // Click cancel/edit to enter edit mode
-        test(editCancelButton()).click();
+        test(editDiscardButton()).click();
 
         test(fullNameField()).setValue(fixture.expected.fullName + "-updated");
         test(phoneField()).setValue(fixture.expected.phone + "-updated");
@@ -143,7 +143,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
                 fixture.expected.products.get(0).comment + "-updated"));
 
         // WHEN: Clicking cancel
-        test(editCancelButton()).click();
+        test(editDiscardButton()).click();
 
         // THEN: We edits are discarded and form is not editable
         assertOrder(fixture.expected);
@@ -162,7 +162,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         openOrder(fixture.order.getId());
 
         // Click cancel/edit to enter edit mode
-        test(editCancelButton()).click();
+        test(editDiscardButton()).click();
 
         test(fullNameField()).setValue(fixture.expected.fullName + "-updated");
         test(phoneField()).setValue(fixture.expected.phone + "-updated");
@@ -184,7 +184,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(editCancelButton()).click();
+        test(editDiscardButton()).click();
         int originalCount = numberOfProducts();
         test(addItemsButton()).click();
         test(addItemsButton()).click();
@@ -193,7 +193,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
 
         test(okButton()).click();
 
-        assertEnabledWithCaption(editCancelButton(), "Edit");
+        assertEnabledWithCaption(editDiscardButton(), "Edit");
         assertEquals(originalCount, numberOfProducts());
     }
 
@@ -202,7 +202,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(editCancelButton()).click();
+        test(editDiscardButton()).click();
         test(fullNameField()).setValue(fixture.expected.fullName + "foo");
 
         assertConfirmationDialogBlocksLeaving();
@@ -213,7 +213,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(editCancelButton()).click();
+        test(editDiscardButton()).click();
         test(fullNameField()).setValue(fixture.expected.fullName + "foo");
 
         assertConfirmationDialogBlocksLeavingEsc();
@@ -224,7 +224,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(editCancelButton()).click();
+        test(editDiscardButton()).click();
         test($(productInfo(0), TextField.class).id("quantity"))
                 .setValue(String.valueOf(
                         fixture.expected.products.get(0).quantity + 1));
@@ -237,7 +237,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(editCancelButton()).click();
+        test(editDiscardButton()).click();
         test(addItemsButton()).click();
         Product alternateProduct = alternateProduct(
                 fixture.expected.products.get(0).product);
@@ -251,7 +251,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(editCancelButton()).click();
+        test(editDiscardButton()).click();
         test($(productInfo(0), Button.class).id("delete")).click();
 
         assertConfirmationDialogBlocksLeaving();
@@ -262,7 +262,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
         OrderFixture fixture = persist(sampleExistingOrder());
         openOrder(fixture.order.getId());
 
-        test(editCancelButton()).click();
+        test(editDiscardButton()).click();
         test(fullNameField())
                 .setValue(fixture.expected.fullName + "-edited-by-user-1");
 
@@ -275,7 +275,7 @@ public class UpdateOrderTest extends AbstractOrderEditTest {
 
         test(okButton()).click();
 
-        assertEnabledWithCaption(editCancelButton(), "Cancel");
+        assertEnabledWithCaption(editDiscardButton(), "Discard");
         assertNotNull(lastNotification());
         assertEquals(CONCURRENT_UPDATE_MESSAGE,
                 lastNotification().getCaption());

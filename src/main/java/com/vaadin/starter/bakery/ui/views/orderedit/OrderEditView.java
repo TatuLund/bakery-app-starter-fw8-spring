@@ -82,7 +82,7 @@ public class OrderEditView extends VerticalLayout implements View {
 	@Autowired
 	private OrderHistory history;
 
-	protected Button cancel;
+	protected Button editDiscard;
 	protected Button ok;
 	private final OrderEditPresenter presenter;
 	private final DollarPriceConverter priceConverter;
@@ -145,7 +145,7 @@ public class OrderEditView extends VerticalLayout implements View {
 		binder.addValueChangeListener(e -> hasChanges = true);
 
 		addItems.addClickListener(e -> addEmptyOrderItem());
-		cancel.addClickListener(e -> presenter.editBackCancelPressed());
+		editDiscard.addClickListener(e -> presenter.editBackCancelPressed());
 		ok.addClickListener(e -> presenter.okPressed());
 	}
 
@@ -353,18 +353,18 @@ public class OrderEditView extends VerticalLayout implements View {
 		buttonsWrapper.setStyleName("buttons");
 		buttonsWrapper.setWidth("100%");
 
-		cancel = new Button();
-		cancel.setIcon(VaadinIcons.CLOSE);
-		cancel.setStyleName("cancel");
-		cancel.setId("cancel");
-		cancel.setCaptionAsHtml(true);
-		cancel.setCaption("Cancel");
-		cancel.addBlurListener(e -> {
+		editDiscard = new Button();
+		editDiscard.setIcon(VaadinIcons.CLOSE);
+		editDiscard.setStyleName("edit-discard");
+		editDiscard.setId("edit-discard");
+		editDiscard.setCaptionAsHtml(true);
+		editDiscard.setCaption("Cancel");
+		editDiscard.addBlurListener(e -> {
 			if (mode != Mode.EDIT) {
 				dueDate.focus();
 			}
 		});
-		buttonsWrapper.addComponent(cancel);
+		buttonsWrapper.addComponent(editDiscard);
 
 		ok = new Button();
 		ok.setIcon(VaadinIcons.ANGLE_RIGHT);
@@ -480,11 +480,11 @@ public class OrderEditView extends VerticalLayout implements View {
 
 		switch (mode) {
 		case REPORT -> {
-			cancel.removeClickShortcut();
-			cancel.focus();
-			cancel.setCaption("Edit");
-			cancel.setIcon(VaadinIcons.EDIT);
-			cancel.setEnabled(getOrder().getState() != OrderState.DELIVERED);
+			editDiscard.removeClickShortcut();
+			editDiscard.focus();
+			editDiscard.setCaption("Edit");
+			editDiscard.setIcon(VaadinIcons.EDIT);
+			editDiscard.setEnabled(getOrder().getState() != OrderState.DELIVERED);
 			Optional<OrderState> nextState = presenter
 					.getNextHappyPathState(getOrder().getState());
 			ok.removeClickShortcut();
@@ -493,17 +493,17 @@ public class OrderEditView extends VerticalLayout implements View {
 			ok.setVisible(nextState.isPresent());
 		}
 		case CONFIRMATION -> {
-			cancel.setCaption("Back");
-			cancel.setIcon(VaadinIcons.ANGLE_LEFT);
-			cancel.setEnabled(true);
+			editDiscard.setCaption("Back");
+			editDiscard.setIcon(VaadinIcons.ANGLE_LEFT);
+			editDiscard.setEnabled(true);
 			ok.setCaption("Place order");
 			ok.setVisible(true);
 		}
 		case EDIT -> {
-			cancel.setCaption("Cancel");
-			cancel.setIcon(VaadinIcons.CLOSE);
-			cancel.setEnabled(true);
-			cancel.setClickShortcut(KeyCode.Z, ModifierKey.CTRL);
+			editDiscard.setCaption("Discard");
+			editDiscard.setIcon(VaadinIcons.CLOSE);
+			editDiscard.setEnabled(true);
+			editDiscard.setClickShortcut(KeyCode.Z, ModifierKey.CTRL);
 			ok.setClickShortcut(KeyCode.S, ModifierKey.CTRL);
 			if (getOrder() != null && !getOrder().isNew()) {
 				ok.setCaption("Save");

@@ -465,8 +465,8 @@ public abstract class AbstractOrderEditTest extends AbstractUITest {
         return $(history(), Button.class).id("commitNewComment");
     }
 
-    protected Button editCancelButton() {
-        return $(view, Button.class).id("cancel");
+    protected Button editDiscardButton() {
+        return $(view, Button.class).id("edit-discard");
     }
 
     protected Button okButton() {
