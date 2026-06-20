@@ -251,7 +251,7 @@ public class OrderEditView extends VerticalLayout implements View {
 		customerLabel.setId("customerLabel");
 		orderForm.addComponent(customerLabel);
 
-		var fullName = new TextField();
+		fullName = new TextField();
 		fullName.setStyleName("half");
 		fullName.setId("fullName");
 		fullName.setPlaceholder("Firstname Lastname");
