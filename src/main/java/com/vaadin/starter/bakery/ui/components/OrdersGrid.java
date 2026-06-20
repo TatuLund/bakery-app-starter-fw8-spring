@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.HtmlUtils;
 import org.vaadin.spring.annotation.PrototypeScope;
@@ -21,6 +22,8 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 
 @SpringComponent
 @PrototypeScope
+@NullMarked
+@SuppressWarnings({ "java:S2160", "java:S6813" })
 public class OrdersGrid extends Grid<Order> {
 
 	@Autowired
@@ -105,7 +108,11 @@ public class OrdersGrid extends Grid<Order> {
 		return quantityAndName.collect(Collectors.joining(", "));
 	}
 
+	@SuppressWarnings("null")
 	private static String twoRowCell(String header, String content) {
+		assert header != null : "Header cannot be null";
+		assert content != null : "Content cannot be null";
+		// Escape header and content to avoid HTML injection, and wrap them in divs for styling
 		return "<div class=\"header\">" + HtmlUtils.htmlEscape(header) + "</div><div class=\"content\">"
 				+ HtmlUtils.htmlEscape(content) + "</div>";
 	}

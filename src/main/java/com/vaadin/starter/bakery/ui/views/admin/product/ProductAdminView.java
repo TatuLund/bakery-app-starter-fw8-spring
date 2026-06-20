@@ -3,12 +3,14 @@ package com.vaadin.starter.bakery.ui.views.admin.product;
 import javax.annotation.PostConstruct;
 
 import org.jspecify.annotations.NullMarked;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.BeanValidationBinder;
 import com.vaadin.data.ValueContext;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.starter.bakery.backend.data.entity.Product;
+import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.utils.DollarPriceConverter;
 import com.vaadin.starter.bakery.ui.views.admin.AbstractCrudView;
 import com.vaadin.ui.Button;
@@ -31,7 +33,11 @@ public class ProductAdminView extends AbstractCrudView<Product> {
 
 	@Autowired
 	public ProductAdminView(ProductAdminPresenter presenter,
-			DollarPriceConverter priceToStringConverter) {
+			ProductAdminDataProvider productAdminDataProvider,
+			DollarPriceConverter priceToStringConverter,
+			NavigationManager navigationManager, BeanFactory beanFactory) {
+		super(navigationManager, Product.class,
+				productAdminDataProvider, beanFactory);
 		this.presenter = presenter;
 		this.priceToStringConverter = priceToStringConverter;
 		userAdminLayout = new ProductAdminLayout();

@@ -18,7 +18,6 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.vaadin.spring.events.EventBus.ViewEventBus;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
-import com.vaadin.data.HasValue;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.starter.bakery.app.HasLogger;
@@ -30,12 +29,7 @@ import com.vaadin.starter.bakery.backend.data.entity.OrderItem;
 import com.vaadin.starter.bakery.backend.service.OrderService;
 import com.vaadin.starter.bakery.backend.service.PickupLocationService;
 import com.vaadin.starter.bakery.backend.service.UserService;
-import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.views.orderedit.OrderEditView.Mode;
-import com.vaadin.starter.bakery.ui.views.storefront.StorefrontView;
-import com.vaadin.ui.Component.Focusable;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
 
 @SpringComponent
 @ViewScope
@@ -48,8 +42,6 @@ public class OrderEditPresenter implements Serializable, HasLogger {
 
 	private final transient PickupLocationService pickupLocationService;
 
-	private final NavigationManager navigationManager;
-
 	private final transient ViewEventBus viewEventBus;
 
 	private static final List<OrderState> happyPath = Arrays.asList(
@@ -58,11 +50,9 @@ public class OrderEditPresenter implements Serializable, HasLogger {
 
 	@Autowired
 	public OrderEditPresenter(ViewEventBus viewEventBus,
-			NavigationManager navigationManager, OrderService orderService,
-			UserService userService,
+			OrderService orderService, UserService userService,
 			PickupLocationService pickupLocationService) {
 		this.viewEventBus = viewEventBus;
-		this.navigationManager = navigationManager;
 		this.orderService = orderService;
 		this.userService = userService;
 		this.pickupLocationService = pickupLocationService;
@@ -140,7 +130,7 @@ public class OrderEditPresenter implements Serializable, HasLogger {
 			// Cancel edit
 			Long id = view.getOrder().getId();
 			if (id == null) {
-				navigationManager.navigateTo(StorefrontView.class);
+				view.navigateToStorefront();
 			} else {
 				enterView(id);
 			}
@@ -164,13 +154,11 @@ public class OrderEditPresenter implements Serializable, HasLogger {
 			Order order = saveOrder();
 			if (order != null) {
 				// Navigate to edit view so URL is updated correctly
-				navigationManager.updateViewParameter("" + order.getId());
+				view.updateViewParameter("" + order.getId());
 				enterView(order.getId());
 			}
 		} else if (view.getMode() == Mode.EDIT) {
-			Optional<HasValue<?>> firstErrorField = view.validate().findFirst();
-			if (firstErrorField.isPresent()) {
-				((Focusable) firstErrorField.get()).focus();
+			if (view.focusFirstErrorField()) {
 				return;
 			}
 			// New order should still show a confirmation page
@@ -225,22 +213,17 @@ public class OrderEditPresenter implements Serializable, HasLogger {
 					SecurityUtils.getCurrentUser(userService));
 		} catch (ValidationException e) {
 			// Should not get here if validation is setup properly
-			Notification.show("Please check the contents of the fields: "
-					+ e.getMessage(), Type.ERROR_MESSAGE);
+			view.showValidationError(e.getMessage());
 			getLogger().error("Validation error during order save", e);
 			return null;
 		} catch (OptimisticLockingFailureException e) {
 			// Somebody else probably edited the data at the same time
-			Notification.show(
-					"Somebody else might have updated the data. Please refresh and try again.",
-					Type.ERROR_MESSAGE);
+			view.showOptimisticLockingError();
 			getLogger().debug("Optimistic locking error while saving order", e);
 			return null;
 		} catch (Exception e) {
 			// Something went wrong, no idea what
-			Notification.show(
-					"An unexpected error occurred while saving. Please refresh and try again.",
-					Type.ERROR_MESSAGE);
+			view.showUnexpectedError();
 			getLogger().error("Unable to save order", e);
 			return null;
 		}

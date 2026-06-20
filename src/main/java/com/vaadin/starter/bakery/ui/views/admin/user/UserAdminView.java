@@ -3,6 +3,7 @@ package com.vaadin.starter.bakery.ui.views.admin.user;
 import javax.annotation.PostConstruct;
 
 import org.jspecify.annotations.NullMarked;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.BeanValidationBinder;
@@ -12,6 +13,7 @@ import com.vaadin.data.ValueContext;
 import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.starter.bakery.backend.data.entity.User;
+import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.views.admin.AbstractCrudView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -53,7 +55,10 @@ public class UserAdminView extends AbstractCrudView<User> {
 	};
 
 	@Autowired
-	public UserAdminView(UserAdminPresenter presenter) {
+	public UserAdminView(UserAdminPresenter presenter,
+			UserAdminDataProvider userAdminDataProvider,
+			NavigationManager navigationManager, BeanFactory beanFactory) {
+		super(navigationManager, User.class, userAdminDataProvider, beanFactory);
 		this.presenter = presenter;
 		userAdminLayout = new UserAdminLayout();
 	}

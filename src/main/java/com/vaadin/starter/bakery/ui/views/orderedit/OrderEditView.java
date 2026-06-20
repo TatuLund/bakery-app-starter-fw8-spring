@@ -48,6 +48,8 @@ import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -249,7 +251,7 @@ public class OrderEditView extends VerticalLayout implements View {
 		customerLabel.setId("customerLabel");
 		orderForm.addComponent(customerLabel);
 
-		fullName = new TextField();
+		var fullName = new TextField();
 		fullName.setStyleName("half");
 		fullName.setId("fullName");
 		fullName.setPlaceholder("Firstname Lastname");
@@ -384,11 +386,11 @@ public class OrderEditView extends VerticalLayout implements View {
 		// Save where we came from so that we can navigate back if the user
 		// cancels
 		oldView = event.getOldView();
-		String orderId = event.getParameters();
-		if ("".equals(orderId)) {
+		String parametersString = event.getParameters();
+		if ("".equals(parametersString)) {
 			presenter.enterView(null);
 		} else {
-			presenter.enterView(Long.valueOf(orderId));
+			presenter.enterView(Long.valueOf(parametersString));
 		}
 	}
 
@@ -570,6 +572,37 @@ public class OrderEditView extends VerticalLayout implements View {
 			shortcutRegistration.remove();
 			shortcutRegistration = null;
 		}
+	}
+
+	public boolean focusFirstErrorField() {
+		Optional<HasValue<?>> firstErrorField = validate().findFirst();
+		firstErrorField.ifPresent(field -> ((Focusable) field).focus());
+		return firstErrorField.isPresent();
+	}
+
+	public void updateViewParameter(String parameter) {
+		navigationManager.updateViewParameter(parameter);
+	}
+
+	public void navigateToStorefront() {
+		navigationManager.navigateTo(StorefrontView.class);
+	}
+
+	public void showUnexpectedError() {
+		Notification.show(
+				"An unexpected error occurred while saving. Please refresh and try again.",
+				Type.ERROR_MESSAGE);
+	}
+
+	public void showValidationError(String message) {
+		Notification.show("Please check the contents of the fields: "
+				+ message, Type.ERROR_MESSAGE);
+	}
+
+	public void showOptimisticLockingError() {
+		Notification.show(
+				"Somebody else might have updated the data. Please refresh and try again.",
+				Type.ERROR_MESSAGE);
 	}
 
 	class EscapeListener extends ShortcutListener {

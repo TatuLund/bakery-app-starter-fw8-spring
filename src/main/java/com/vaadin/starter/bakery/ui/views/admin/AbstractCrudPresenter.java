@@ -2,34 +2,15 @@ package com.vaadin.starter.bakery.ui.views.admin;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.Objects;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.OptimisticLockingFailureException;
-import org.vaadin.artur.spring.dataprovider.FilterablePageableDataProvider;
 
-import com.vaadin.data.BeanValidationBinder;
-import com.vaadin.data.BindingValidationStatus;
-import com.vaadin.data.HasValue;
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.StatusChangeEvent;
-import com.vaadin.data.ValidationException;
-import com.vaadin.data.ValidationResult;
 import com.vaadin.navigator.ViewBeforeLeaveEvent;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.starter.bakery.app.HasLogger;
 import com.vaadin.starter.bakery.backend.data.entity.AbstractEntity;
 import com.vaadin.starter.bakery.backend.service.CrudService;
-import com.vaadin.starter.bakery.backend.service.UserFriendlyDataException;
-import com.vaadin.starter.bakery.ui.components.ConfirmPopup;
-import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
 
 @NullMarked
 public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends CrudService<T>, V extends AbstractCrudView<T>>
@@ -38,14 +19,7 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 	@Nullable
 	private V view;
 
-	private final NavigationManager navigationManager;
-
 	private final transient S service;
-
-	private FilterablePageableDataProvider<T, Object> dataProvider;
-
-	@Nullable
-	private BeanValidationBinder<T> binder;
 
 	// The model for the view. Not extracted to a class to reduce clutter. If
 	// the model becomes more complex, it could be encapsulated in a separate
@@ -53,71 +27,36 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 	@Nullable
 	private T editItem;
 
-	private final transient BeanFactory beanFactory;
-
 	private final Class<T> entityType;
 
-	private boolean hasValidationErrors;
-
-	protected AbstractCrudPresenter(NavigationManager navigationManager,
-			S service, Class<T> entityType,
-			FilterablePageableDataProvider<T, Object> dataProvider,
-			BeanFactory beanFactory) {
+	protected AbstractCrudPresenter(S service, Class<T> entityType) {
 		this.service = service;
-		this.navigationManager = navigationManager;
 		this.entityType = entityType;
-		this.dataProvider = dataProvider;
-		this.beanFactory = beanFactory;
-		createBinder();
-	}
-
-	public void viewEntered(ViewChangeEvent event) {
-		if (!event.getParameters().isEmpty()) {
-			editRequest(event.getParameters());
-		}
 	}
 
 	public void beforeLeavingView(ViewBeforeLeaveEvent event) {
-		runWithConfirmation(event::navigate, () -> {
-			// Nothing special needs to be done if user aborts the navigation
-		});
-	}
-
-	protected void createBinder() {
-		binder = new BeanValidationBinder<>(getEntityType());
-		binder.addStatusChangeListener(this::onFormStatusChange);
-		binder.addValueChangeListener(this::onFormValueChange);
-		binder.setChangeDetectionEnabled(true);
-	}
-
-	protected BeanValidationBinder<T> getBinder() {
-		return binder;
 	}
 
 	protected S getService() {
 		return service;
 	}
 
-	protected void filterGrid(String filter) {
-		dataProvider.setFilter(filter);
-	}
-
 	protected T loadEntity(long id) {
 		return service.load(id);
 	}
 
-	protected Class<T> getEntityType() {
-		return entityType;
+	protected T getEntity() {
+		return editItem;
 	}
 
 	private T createEntity() {
 		try {
-			return getEntityType().getDeclaredConstructor().newInstance();
+			return entityType.getDeclaredConstructor().newInstance();
 		} catch (InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
 			throw new UnsupportedOperationException(
-					"Entity of type " + getEntityType().getName()
+					"Entity of type " + entityType.getName()
 							+ " is missing a public no-args constructor",
 					e);
 		}
@@ -135,9 +74,6 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 	public void init(V view) {
 		Objects.requireNonNull(view, "View must not be null");
 		this.view = view;
-		view.setDataProvider(dataProvider);
-		view.bindFormFields(getBinder());
-		view.showInitialState();
 	}
 
 	protected V getView() {
@@ -167,20 +103,19 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 	}
 
 	public void editRequest(T entity) {
-		runWithConfirmation(() -> {
+		getView().runWithConfirmation(() -> {
 			// Fetch a fresh item so we have the latest changes (less optimistic
 			// locking problems)
 			T freshEntity = loadEntity(entity.getId());
 			editItem(freshEntity);
 		}, () -> {
 			// Revert selection in grid
-			Grid<T> grid = getView().getGrid();
-			if (editItem == null) {
-				grid.deselectAll();
-			} else {
-				grid.select(editItem);
-			}
+			getView().revertSelection(editItem);
 		});
+	}
+
+	public void editCurrent() {
+		editItem(editItem);
 	}
 
 	protected void editItem(T item) {
@@ -192,159 +127,36 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 
 		boolean isNew = item.isNew();
 		if (isNew) {
-			navigationManager.updateViewParameter("new");
+			getView().updateViewParameter("new");
 		} else {
-			navigationManager.updateViewParameter(String.valueOf(item.getId()));
+			getView().updateViewParameter(String.valueOf(item.getId()));
 		}
 
-		getBinder().readBean(editItem);
-		getView().editItem(isNew);
+		getView().editItem(editItem, isNew);
 	}
 
-	public void addNewClicked() {
-		runWithConfirmation(() -> {
-			T entity = createEntity();
-			editItem(entity);
-		}, () -> {
-		});
+	public void editNewEntity() {
+		T entity = createEntity();
+		editItem(entity);
 	}
 
-	/**
-	 * Runs the given command if the form contains no unsaved changes or if the
-	 * user clicks ok in the confirmation dialog telling about unsaved changes.
-	 *
-	 * @param onConfirmation
-	 *            the command to run if there are not changes or user pushes
-	 *            {@literal confirm}
-	 * @param onCancel
-	 *            the command to run if there are changes and the user pushes
-	 *            {@literal cancel}
-	 * @return <code>true</code> if the {@literal confirm} command was run
-	 *         immediately, <code>false</code> otherwise
-	 */
-	private void runWithConfirmation(Runnable onConfirmation,
-			Runnable onCancel) {
-		if (hasUnsavedChanges()) {
-			ConfirmPopup confirmPopup = beanFactory.getBean(ConfirmPopup.class);
-			confirmPopup.showLeaveViewConfirmDialog(view, onConfirmation,
-					onCancel);
-		} else {
-			onConfirmation.run();
-		}
+	public boolean isNewEntity() {
+		return editItem.isNew();
 	}
 
-	private boolean hasUnsavedChanges() {
-		return editItem != null && getBinder().hasChanges();
+	public String getEditItemType() {
+		return editItem.getClass().getName();
 	}
 
-	public void updateClicked() {
-		try {
-			// The validate() call is needed only to ensure that the error
-			// indicator is properly shown for the field in case of an error
-			getBinder().validate();
-			getBinder().writeBean(editItem);
-		} catch (ValidationException e) {
-			// Commit failed because of validation errors
-			List<BindingValidationStatus<?>> fieldErrors = e
-					.getFieldValidationErrors();
-			if (!fieldErrors.isEmpty()) {
-				// Field level error
-				HasValue<?> firstErrorField = fieldErrors.get(0).getField();
-				getView().focusField(firstErrorField);
-			} else {
-				// Bean validation error
-				ValidationResult firstError = e.getBeanValidationErrors()
-						.get(0);
-				Notification.show(firstError.getErrorMessage(),
-						Type.ERROR_MESSAGE);
-			}
-			return;
-		}
-
-		boolean isNew = editItem.isNew();
-		T entity;
-		try {
-			entity = service.save(editItem);
-		} catch (OptimisticLockingFailureException e) {
-			// Somebody else probably edited the data at the same time
-			Notification.show(
-					"Somebody else might have updated the data. Please refresh and try again.",
-					Type.ERROR_MESSAGE);
-			getLogger().debug(
-					"Optimistic locking error while saving entity of type "
-							+ editItem.getClass().getName(),
-					e);
-			return;
-		} catch (UserFriendlyDataException e) {
-			Notification.show(e.getMessage(), Type.ERROR_MESSAGE);
-			getLogger().debug("Unable to update entity of type "
-					+ editItem.getClass().getName(), e);
-			return;
-		} catch (Exception e) {
-			// Something went wrong, no idea what
-			Notification.show(
-					"A problem occured while saving the data. Please check the fields.",
-					Type.ERROR_MESSAGE);
-			getLogger().error("Unable to save entity of type "
-					+ editItem.getClass().getName(), e);
-			return;
-		}
-
-		if (isNew) {
-			// Move to the "Updating an entity" state
-			dataProvider.refreshAll();
-			selectAndEditEntity(entity);
-		} else {
-			// Stay in the "Updating an entity" state
-			dataProvider.refreshItem(entity);
-			editRequest(entity);
-		}
+	public T saveEntity() {
+		return service.save(editItem);
 	}
 
-	public void cancelClicked() {
-		if (editItem.isNew()) {
-			revertToInitialState();
-		} else {
-			editItem(editItem);
-		}
+	public void deleteEntity() {
+		deleteEntity(editItem);
 	}
 
-	private void revertToInitialState() {
+	public void resetEditItem() {
 		editItem = null;
-		getBinder().readBean(null);
-		getView().showInitialState();
-		navigationManager.updateViewParameter("");
-	}
-
-	public void deleteClicked() {
-		try {
-			deleteEntity(editItem);
-		} catch (UserFriendlyDataException e) {
-			Notification.show(e.getMessage(), Type.ERROR_MESSAGE);
-			getLogger().debug("Unable to delete entity of type "
-					+ editItem.getClass().getName(), e);
-			return;
-		} catch (DataIntegrityViolationException e) {
-			Notification.show(
-					"The given entity cannot be deleted as there are references to it in the database",
-					Type.ERROR_MESSAGE);
-			getLogger().error("Unable to delete entity of type "
-					+ editItem.getClass().getName(), e);
-			return;
-		}
-		dataProvider.refreshAll();
-		revertToInitialState();
-	}
-
-	public void onFormStatusChange(StatusChangeEvent event) {
-		boolean hasChanges = event.getBinder().hasChanges();
-		hasValidationErrors = event.hasValidationErrors();
-		getView().setUpdateEnabled(hasChanges && !hasValidationErrors);
-	}
-
-	public void onFormValueChange(ValueChangeEvent<?> event) {
-		boolean hasChanges = getBinder().hasChanges();
-		getView().setCancelEnabled(hasChanges);
-		getView().setUpdateEnabled(hasChanges && !hasValidationErrors);
 	}
 }
