@@ -7,8 +7,6 @@ import javax.annotation.PostConstruct;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.access.annotation.Secured;
 import org.vaadin.artur.spring.dataprovider.FilterablePageableDataProvider;
 
@@ -26,7 +24,6 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.starter.bakery.app.HasLogger;
 import com.vaadin.starter.bakery.backend.data.Role;
 import com.vaadin.starter.bakery.backend.data.entity.AbstractEntity;
-import com.vaadin.starter.bakery.backend.service.UserFriendlyDataException;
 import com.vaadin.starter.bakery.ui.components.ConfirmPopup;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.ui.Button;
@@ -167,6 +164,12 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 		});
 	}
 
+	/**
+	 * Shows the initial state of the view. In the initial state, the form is
+	 * disabled and nothing is selected in the grid. This method should be
+	 * called when the view is first displayed or after an item has been deleted
+	 * or the user has cancelled an edit.
+	 */
 	public void showInitialState() {
 		getBinder().readBean(null);
 		getForm().setEnabled(false);
@@ -177,6 +180,17 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 		getCancel().setEnabled(false);
 	}
 
+	/**
+	 * Switches the view to the "Editing an existing entity" state. The view
+	 * will show the given entity for editing. The view will also update the URL
+	 * to include the ID of the entity being edited, so that the view can be
+	 * bookmarked or shared.
+	 *
+	 * @param editItem
+	 *            the entity to edit, not null
+	 * @param isNew
+	 *            true if the entity is new, false if it is an existing entity
+	 */
 	public void editItem(T editItem, boolean isNew) {
 		getBinder().readBean(editItem);
 
@@ -195,38 +209,32 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 
 	}
 
-	public void deleteClicked() {
-		try {
-			getPresenter().deleteEntity();
-		} catch (UserFriendlyDataException e) {
-			Notification.show(e.getMessage(), Type.ERROR_MESSAGE);
-			getLogger().debug("Unable to delete entity of type "
-					+ getPresenter().getEditItemType(), e);
-			return;
-		} catch (DataIntegrityViolationException e) {
-			Notification.show(
-					"The given entity cannot be deleted as there are references to it in the database",
-					Type.ERROR_MESSAGE);
-			getLogger().error("Unable to delete entity of type "
-					+ getPresenter().getEditItemType(), e);
-			return;
-		}
+	private void deleteClicked() {
+		getPresenter().deleteEntity();
 		dataProvider.refreshAll();
 		revertToInitialState();
 	}
 
-	public void onFormStatusChange(StatusChangeEvent event) {
+	private void onFormStatusChange(StatusChangeEvent event) {
 		boolean hasChanges = event.getBinder().hasChanges();
 		hasValidationErrors = event.hasValidationErrors();
 		setUpdateEnabled(hasChanges && !hasValidationErrors);
 	}
 
-	public void onFormValueChange(ValueChangeEvent<?> event) {
+	private void onFormValueChange(ValueChangeEvent<?> event) {
 		boolean hasChanges = getBinder().hasChanges();
 		setCancelEnabled(hasChanges);
 		setUpdateEnabled(hasChanges && !hasValidationErrors);
 	}
 
+	/**
+	 * Reverts the selection in the grid to the given item. This is used to
+	 * revert the selection in the grid if the user cancels an edit. If the
+	 * given item is null, all items are deselected.
+	 * 
+	 * @param editItem
+	 *            the item to select, or null to deselect all
+	 */
 	public void revertSelection(@Nullable T editItem) {
 		Grid<T> grid = getGrid();
 		if (editItem == null) {
@@ -264,7 +272,7 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 		return getBinder().hasChanges();
 	}
 
-	public void updateClicked() {
+	private void updateClicked() {
 		try {
 			// The validate() call is needed only to ensure that the error
 			// indicator is properly shown for the field in case of an error
@@ -288,59 +296,66 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 			return;
 		}
 
-		boolean isNew = getPresenter().isNewEntity();
-		T entity;
-		try {
-			entity = getPresenter().saveEntity();
-		} catch (OptimisticLockingFailureException e) {
-			// Somebody else probably edited the data at the same time
-			Notification.show(
-					"Somebody else might have updated the data. Please refresh and try again.",
-					Type.ERROR_MESSAGE);
-			getLogger().debug(
-					"Optimistic locking error while saving entity of type "
-							+ entityType.getName(),
-					e);
-			return;
-		} catch (UserFriendlyDataException e) {
-			Notification.show(e.getMessage(), Type.ERROR_MESSAGE);
-			getLogger().debug("Unable to update entity of type "
-					+ entityType.getName(), e);
-			return;
-		} catch (Exception e) {
-			// Something went wrong, no idea what
-			Notification.show(
-					"A problem occured while saving the data. Please check the fields.",
-					Type.ERROR_MESSAGE);
-			getLogger().error("Unable to save entity of type "
-					+ entityType.getName(), e);
-			return;
-		}
-
-		if (isNew) {
-			// Move to the "Updating an entity" state
-			dataProvider.refreshAll();
-			getPresenter().editRequest(entity);
-			revertSelection(entity);
-		} else {
-			// Stay in the "Updating an entity" state
-			dataProvider.refreshItem(entity);
-			getPresenter().editRequest(entity);
-		}
+		getPresenter().saveEntity();
 	}
 
-	public void setDataProvider(DataProvider<T, Object> dataProvider) {
+	public void viewConcurrentEditError() {
+		Notification.show(
+				"Somebody else might have updated the data. Please refresh and try again.",
+				Type.ERROR_MESSAGE);
+	}
+
+	public void viewErrorNotification(@Nullable String message) {
+		Notification.show(message, Type.ERROR_MESSAGE);
+	}
+
+	public void showGenericSaveError() {
+		Notification.show(
+				"A problem occured while saving the data. Please check the fields.",
+				Type.ERROR_MESSAGE);
+	}
+
+	private void setDataProvider(DataProvider<T, Object> dataProvider) {
 		getGrid().setDataProvider(dataProvider);
 	}
 
-	public void setUpdateEnabled(boolean enabled) {
+	private void setUpdateEnabled(boolean enabled) {
 		getUpdate().setEnabled(enabled);
 	}
 
-	public void setCancelEnabled(boolean enabled) {
+	private void setCancelEnabled(boolean enabled) {
 		getCancel().setEnabled(enabled);
 	}
 
+	/**
+	 * Refreshes the given item in the grid. This should be called after
+	 * updating an entity, as the properties of the entity might have changed
+	 * and the grid needs to be updated to reflect the changes.
+	 * 
+	 * @param item
+	 *            the item to refresh, not null
+	 */
+	public void refreshItem(T item) {
+		getGrid().getDataProvider().refreshItem(item);
+	}
+
+	/**
+	 * Refreshes the whole grid. This should be called after adding or deleting
+	 * an entity, as the added or deleted entity might not be in the current
+	 * view.
+	 */
+	public void refreshGrid() {
+		getGrid().getDataProvider().refreshAll();
+	}
+
+	/**
+	 * Focuses the given field if it is focusable. If the field is not
+	 * focusable, does nothing but logs a warning. This is used to focus the
+	 * first field with an error in a form.
+	 *
+	 * @param field
+	 *            the field to focus, not null
+	 */
 	public void focusField(HasValue<?> field) {
 		if (field instanceof Focusable focusable) {
 			focusable.focus();
@@ -350,6 +365,15 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 		}
 	}
 
+	/**
+	 * Selects the given entity in the grid. If the entity is not found, shows
+	 * an error notification.
+	 *
+	 * @param entity
+	 *            the entity to select, not null
+	 * @return <code>true</code> if the entity was found and selected,
+	 *         <code>false</code> otherwise
+	 */
 	public boolean selectEntity(T entity) {
 		try {
 			getGrid().select(entity);
@@ -360,7 +384,7 @@ public abstract class AbstractCrudView<T extends AbstractEntity>
 		}
 	}
 
-	public void cancelClicked() {
+	private void cancelClicked() {
 		if (getPresenter().isNewEntity()) {
 			revertToInitialState();
 		} else {

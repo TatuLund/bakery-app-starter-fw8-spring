@@ -6,11 +6,14 @@ import java.util.Objects;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 
 import com.vaadin.navigator.ViewBeforeLeaveEvent;
 import com.vaadin.starter.bakery.app.HasLogger;
 import com.vaadin.starter.bakery.backend.data.entity.AbstractEntity;
 import com.vaadin.starter.bakery.backend.service.CrudService;
+import com.vaadin.starter.bakery.backend.service.UserFriendlyDataException;
 
 @NullMarked
 public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends CrudService<T>, V extends AbstractCrudView<T>>
@@ -71,6 +74,15 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 		}
 	}
 
+	/**
+	 * Initializes the presenter. This method must be called before using the
+	 * presenter. The presenter is designed to be used with a single view, so it
+	 * is not possible to change the view after initialization. The presenter
+	 * will throw an exception if any method is called before initialization.
+	 *
+	 * @param view
+	 *            the view to initialize the presenter with, not null
+	 */
 	public void init(V view) {
 		Objects.requireNonNull(view, "View must not be null");
 		this.view = view;
@@ -102,22 +114,41 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 		}
 	}
 
+	/**
+	 * Switches the view to the "Editing an existing entity" state. The view
+	 * will show the given entity for editing. The view will also update the URL
+	 * to include the ID of the entity being edited, so that the view can be
+	 * bookmarked in the "Editing an existing entity" state. The view will show
+	 * an error notification if the given entity is null, which should not be
+	 * possible in normal usage.
+	 * 
+	 * @param entity
+	 *            the entity to edit, not null
+	 */
 	public void editRequest(T entity) {
 		getView().runWithConfirmation(() -> {
 			// Fetch a fresh item so we have the latest changes (less optimistic
 			// locking problems)
 			T freshEntity = loadEntity(entity.getId());
 			editItem(freshEntity);
-		}, () -> {
-			// Revert selection in grid
-			getView().revertSelection(editItem);
-		});
+		}, () ->
+		// Revert selection in grid
+		getView().revertSelection(editItem));
 	}
 
+	/**
+	 * Switches the view to the "Editing an existing entity" state. The view
+	 * will show the given entity for editing. The view will also update the URL
+	 * to include the ID of the entity being edited, so that the view can be
+	 * bookmarked in the "Editing an existing entity" state. The view will show
+	 * an error notification if the given entity is null, which should not be
+	 * possible in normal usage.
+	 */
 	public void editCurrent() {
 		editItem(editItem);
 	}
 
+	@SuppressWarnings("java:S2583")
 	protected void editItem(T item) {
 		if (item == null) {
 			throw new IllegalArgumentException(
@@ -135,27 +166,100 @@ public abstract class AbstractCrudPresenter<T extends AbstractEntity, S extends 
 		getView().editItem(editItem, isNew);
 	}
 
+	/**
+	 * Switches the view to the "Editing a new entity" state. The entity is not
+	 * saved to the database until the user clicks the "Save" button.
+	 */
 	public void editNewEntity() {
 		T entity = createEntity();
 		editItem(entity);
 	}
 
+	/**
+	 * @return true if the view is currently in the "Editing a new entity"
+	 *         state, false otherwise
+	 */
 	public boolean isNewEntity() {
 		return editItem.isNew();
 	}
 
-	public String getEditItemType() {
+	private String getEditItemType() {
 		return editItem.getClass().getName();
 	}
 
-	public T saveEntity() {
-		return service.save(editItem);
+	/**
+	 * Saves the entity being edited. If the entity is new, it will be added to
+	 * the database. If the entity already exists, it will be updated in the
+	 * database. After a successful save, the view will switch to the "Editing
+	 * an existing entity" state. If the save fails, the view will remain in the
+	 * same state and show an error notification. The view will also show an
+	 * error notification if the entity being edited is null, which should not
+	 * be possible in normal usage.
+	 */
+	public void saveEntity() {
+		boolean isNew = isNewEntity();
+		T entity;
+		try {
+			entity = service.save(editItem);
+		} catch (OptimisticLockingFailureException e) {
+			// Somebody else probably edited the data at the same time
+			getView().viewConcurrentEditError();
+			getLogger().debug(
+					"Optimistic locking error while saving entity of type {} {}",
+					entityType.getName(), e);
+			return;
+		} catch (UserFriendlyDataException e) {
+			getView().viewErrorNotification(e.getMessage());
+			getLogger().debug("Unable to update entity of type {} {}",
+					entityType.getName(), e);
+			return;
+		} catch (Exception e) {
+			// Something went wrong, no idea what
+			getView().showGenericSaveError();
+			getLogger().error("Unable to save entity of type {} {}",
+					entityType.getName(), e);
+			return;
+		}
+
+		if (isNew) {
+			// Move to the "Updating an entity" state
+			getView().refreshGrid();
+			editRequest(entity);
+			getView().revertSelection(entity);
+		} else {
+			// Stay in the "Updating an entity" state
+			getView().refreshItem(entity);
+			editRequest(entity);
+		}
 	}
 
+	/**
+	 * Deletes the entity being edited. After a successful delete, the view will
+	 * switch to the "Editing an existing entity" state with no entity selected.
+	 * If the delete fails, the view will remain in the same state and show an
+	 * error notification. The view will also show an error notification if the
+	 * entity being edited is null, which should not be possible in normal
+	 * usage.
+	 */
 	public void deleteEntity() {
-		deleteEntity(editItem);
+		try {
+			deleteEntity(editItem);
+		} catch (UserFriendlyDataException e) {
+			getView().viewErrorNotification(e.getMessage());
+			getLogger().debug("Unable to delete entity of type "
+					+ getEditItemType(), e);
+		} catch (DataIntegrityViolationException e) {
+			getView().viewErrorNotification(
+					"The given entity cannot be deleted as there are references to it in the database");
+			getLogger().error("Unable to delete entity of type "
+					+ getEditItemType(), e);
+		}
 	}
 
+	/**
+	 * Resets the entity being edited. After calling this method, there will be
+	 * no entity selected for editing.
+	 */
 	public void resetEditItem() {
 		editItem = null;
 	}
