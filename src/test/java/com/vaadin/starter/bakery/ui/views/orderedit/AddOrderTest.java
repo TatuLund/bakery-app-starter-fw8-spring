@@ -18,6 +18,7 @@ import com.vaadin.starter.bakery.backend.data.entity.Order;
 import com.vaadin.starter.bakery.backend.data.entity.Product;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
+import com.vaadin.starter.bakery.ui.views.storefront.StorefrontView;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.TextField;
@@ -115,6 +116,29 @@ public class AddOrderTest extends AbstractOrderEditTest {
 
         openOrder(orderId);
         assertOrder(draft);
+    }
+
+    @Test
+    public void discardingNewOrderNavigatesToStorefront() {
+        ExpectedOrder draft = sampleDraftOrder();
+
+        // WHEN: open new order and fill in some data
+        openNewOrder();
+        fillOrderForm(draft);
+
+        // WHEN: discard the order and cancel
+        test(editDiscardButton()).click();
+        test(confirmCancelButton()).click();
+
+        // THEN: the user is still in the order edit view
+        assertNotNull($(OrderEditView.class).first());
+
+        // WHEN: discard the order and confirm
+        test(editDiscardButton()).click();
+        test(confirmOkButton()).click();
+
+        // THEN: the user is navigated to the storefront view
+        assertNotNull($(StorefrontView.class).first());
     }
 
     @Test
