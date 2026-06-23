@@ -27,6 +27,7 @@ import com.vaadin.starter.bakery.ui.components.AttributeExtension.HasAttributes;
 import com.vaadin.starter.bakery.ui.utils.DollarPriceConverter;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Composite;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -38,7 +39,7 @@ import com.vaadin.ui.Notification.Type;
 @SpringComponent
 @PrototypeScope
 @SuppressWarnings({ "java:S110", "java:S2160", "java:S6813" })
-public class ProductInfo extends CssLayout
+public class ProductInfo extends Composite
 		implements HasAttributes<ProductInfo> {
 
 	protected Button delete;
@@ -51,6 +52,8 @@ public class ProductInfo extends CssLayout
 	protected Label price;
 
 	protected TextArea comment;
+
+	private CssLayout layout;
 
 	private final DollarPriceConverter priceFormatter;
 
@@ -70,6 +73,8 @@ public class ProductInfo extends CssLayout
 		setAriaLabel("Product information");
 		this.priceFormatter = priceFormatter;
 		this.viewEventBus = viewEventBus;
+		layout = new CssLayout();
+		setCompositionRoot(layout);
 	}
 
 	@PostConstruct
@@ -126,7 +131,7 @@ public class ProductInfo extends CssLayout
 		productComboBoxWrapper.setComponentAlignment(product,
 				Alignment.MIDDLE_LEFT);
 		productComboBoxWrapper.setExpandRatio(product, 1.0F);
-		addComponent(productComboBoxWrapper);
+		layout.addComponent(productComboBoxWrapper);
 
 		HorizontalLayout quantityLayout = new HorizontalLayout();
 		quantityLayout.setStyleName("short");
@@ -161,7 +166,7 @@ public class ProductInfo extends CssLayout
 		AttributeExtension.of(price).setAttribute("tabindex", "0");
 		quantityLayout.addComponent(price);
 		quantityLayout.setComponentAlignment(price, Alignment.MIDDLE_RIGHT);
-		addComponent(quantityLayout);
+		layout.addComponent(quantityLayout);
 
 		comment = new TextArea();
 		comment.setRows(2);
@@ -169,7 +174,7 @@ public class ProductInfo extends CssLayout
 		comment.setId("comment");
 		comment.setPlaceholder("Details");
 		comment.setWidth("100%");
-		addComponent(comment);
+		layout.addComponent(comment);
 	}
 
 	private void updatePrice(int productPrice) {
@@ -234,9 +239,9 @@ public class ProductInfo extends CssLayout
 		if (reportMode) {
 			readOnlyComment.setVisible(!comment.isEmpty());
 			readOnlyComment.setValue(comment.getValue());
-			replaceComponent(comment, readOnlyComment);
+			layout.replaceComponent(comment, readOnlyComment);
 		} else {
-			replaceComponent(readOnlyComment, comment);
+			layout.replaceComponent(readOnlyComment, comment);
 		}
 	}
 

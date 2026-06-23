@@ -45,10 +45,13 @@ import com.vaadin.ui.themes.ValoTheme;
 @SpringComponent
 @PrototypeScope
 @SuppressWarnings({ "java:S2160", "java:S110" })
-public class OrderHistory extends Panel {
+public class OrderHistory extends Composite {
 
 	protected CssLayout items;
 	protected Button commitNewComment;
+
+	private Panel panel;
+
 	private HistoryComment historyComment;
 
 	private final DateTimeFormatter dateTimeFormatter;
@@ -69,6 +72,8 @@ public class OrderHistory extends Panel {
 		this.eventBus = eventBus;
 		this.orderService = orderService;
 		this.userService = userService;
+		panel = new Panel();
+		setCompositionRoot(panel);
 	}
 
 	@PostConstruct
@@ -88,7 +93,8 @@ public class OrderHistory extends Panel {
 		});
 
 		// We don't want a global shortcut for enter, scope it to the panel
-		addAction(new ClickShortcut(commitNewComment, KeyCode.ENTER, null));
+		panel.addAction(
+				new ClickShortcut(commitNewComment, KeyCode.ENTER, null));
 
 		historyComment.getNewCommentInput()
 				.addFocusListener(e -> announceOrderHistory());
@@ -108,7 +114,7 @@ public class OrderHistory extends Panel {
 		historyComment = new HistoryComment();
 		historyLayout.addComponent(historyComment);
 		historyLayout.setComponentAlignment(historyComment, Alignment.TOP_LEFT);
-		setContent(historyLayout);
+		panel.setContent(historyLayout);
 	}
 
 	private void addNewComment(String comment) {
@@ -119,10 +125,11 @@ public class OrderHistory extends Panel {
 
 	/**
 	 * Sets the order for which the history should be shown. The history is read
-	 * from the order bean, so if you want to update the history, just update the
-	 * order bean and call this method again to refresh the view.
+	 * from the order bean, so if you want to update the history, just update
+	 * the order bean and call this method again to refresh the view.
 	 *
-	 * @param order the order for which the history should be shown
+	 * @param order
+	 *            the order for which the history should be shown
 	 */
 	public void setOrder(Order order) {
 		this.order = order;

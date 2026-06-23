@@ -2,6 +2,8 @@ package com.vaadin.starter.bakery.ui.views.orderedit;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -35,6 +37,7 @@ import com.vaadin.starter.bakery.backend.data.entity.OrderItem;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaAttributes;
 import com.vaadin.starter.bakery.ui.components.AttributeExtension.AriaRoles;
+import com.vaadin.starter.bakery.ui.components.AttributeExtension.HasAttributes;
 import com.vaadin.starter.bakery.ui.components.ConfirmPopup;
 import com.vaadin.starter.bakery.ui.navigation.NavigationManager;
 import com.vaadin.starter.bakery.ui.utils.DollarPriceConverter;
@@ -44,6 +47,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Composite;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
@@ -62,9 +66,7 @@ public class OrderEditView extends VerticalLayout implements View {
 		EDIT, REPORT, CONFIRMATION;
 	}
 
-	protected HorizontalLayout reportHeader;
-	protected Label orderId;
-	protected Label stateLabel;
+	protected OrderForm orderForm;
 	protected OrderStateSelect state;
 	protected DateField dueDate;
 	protected ComboBox<LocalTime> dueTime;
@@ -77,7 +79,6 @@ public class OrderEditView extends VerticalLayout implements View {
 	protected TextField phone;
 	@PropertyId("customer.details")
 	protected TextField details;
-	protected CssLayout productInfoContainer;
 	protected Button addItems;
 	protected Label total;
 
@@ -135,10 +136,6 @@ public class OrderEditView extends VerticalLayout implements View {
 								LocalDate.now(), null))
 				.bind("dueDate");
 
-		binder.bind(fullName, "customer.fullName");
-		binder.bind(phone, "customer.phoneNumber");
-		binder.bind(details, "customer.details");
-
 		// Bindings are done in the order the fields appear on the screen as we
 		// report validation errors for the first invalid field and it is most
 		// intuitive for the user that we start from the top if there are
@@ -148,7 +145,7 @@ public class OrderEditView extends VerticalLayout implements View {
 		// Track changes manually as we use setBean and nested binders
 		binder.addValueChangeListener(e -> hasChanges = true);
 
-		addItems.addClickListener(e -> addEmptyOrderItem());
+		addItems.addClickListener(e -> orderForm.addEmptyOrderItem());
 		editDiscard.addClickListener(e -> presenter.editBackCancelPressed());
 		ok.addClickListener(e -> presenter.okPressed());
 	}
@@ -157,228 +154,10 @@ public class OrderEditView extends VerticalLayout implements View {
 		setSpacing(false);
 		setMargin(new MarginInfo(false, true, true, true));
 
-		CssLayout orderForm = createOrderForm();
+		orderForm = new OrderForm();
 
 		addComponent(orderForm);
 		setComponentAlignment(orderForm, Alignment.TOP_LEFT);
-	}
-
-	private CssLayout createOrderForm() {
-		CssLayout orderForm = new CssLayout();
-		AttributeExtension.of(orderForm).setAttribute(AriaAttributes.ROLE,
-				AriaRoles.FORM);
-		orderForm.setStyleName("order-form responsive");
-		orderForm.setResponsive(true);
-		orderForm.setWidth("100%");
-
-		reportHeader = new HorizontalLayout();
-		reportHeader.setId("reportHeader");
-		reportHeader.setWidth("100%");
-		reportHeader.setMargin(false);
-
-		orderId = new Label();
-		orderId.setStyleName(
-				ValoTheme.LABEL_H4 + " " + ValoTheme.LABEL_COLORED);
-		orderId.setId("orderId");
-		orderId.setContentMode(ContentMode.TEXT);
-		orderId.setValue("#182");
-		reportHeader.addComponent(orderId);
-		reportHeader.setComponentAlignment(orderId, Alignment.TOP_LEFT);
-
-		stateLabel = new Label();
-		stateLabel.setStyleName(
-				ValoTheme.LABEL_H4 + " " + ValoTheme.LABEL_COLORED);
-		stateLabel.setId("stateLabel");
-		stateLabel.setWidth("100%");
-		stateLabel.setContentMode(ContentMode.TEXT);
-		stateLabel.setValue("New order");
-		reportHeader.addComponent(stateLabel);
-		reportHeader.setComponentAlignment(stateLabel, Alignment.TOP_LEFT);
-		reportHeader.setExpandRatio(stateLabel, 1.0F);
-
-		state = new OrderStateSelect();
-		state.setId("state");
-		reportHeader.addComponent(state);
-		reportHeader.setComponentAlignment(state, Alignment.MIDDLE_RIGHT);
-		orderForm.addComponent(reportHeader);
-
-		Label dueLabel = new Label();
-		dueLabel.setStyleName(ValoTheme.LABEL_H4 + " header");
-		dueLabel.setWidth("100%");
-		dueLabel.setContentMode(ContentMode.TEXT);
-		dueLabel.setValue("Due");
-		dueLabel.setId("dueLabel");
-		orderForm.addComponent(dueLabel);
-
-		HorizontalLayout dateTimeWrapper = new HorizontalLayout();
-		dateTimeWrapper.setStyleName("half");
-		dateTimeWrapper.setWidth("100%");
-		dateTimeWrapper.setMargin(false);
-
-		dueDate = new DateField();
-		dueDate.setLenient(true);
-		dueDate.setId("dueDate");
-		dueDate.setPlaceholder("Date");
-		dueDate.setWidth("180px");
-		AttributeExtension.of(dueDate).setAttribute(AriaAttributes.DESCRIBEDBY,
-				"dueLabel");
-		AttributeExtension.of(dueDate).setAttribute(AriaAttributes.LABEL,
-				"Date");
-		dateTimeWrapper.addComponent(dueDate);
-		dateTimeWrapper.setComponentAlignment(dueDate, Alignment.TOP_LEFT);
-
-		dueTime = new ComboBox<>();
-		dueTime.setEmptySelectionAllowed(false);
-		dueTime.setId("dueTime");
-		dueTime.setTextInputAllowed(false);
-		dueTime.setWidth("6em");
-		AttributeExtension.of(dueTime).setAttribute(AriaAttributes.DESCRIBEDBY,
-				"dueLabel");
-		AttributeExtension.of(dueTime).setAttribute(AriaAttributes.LABEL,
-				"Time");
-		dateTimeWrapper.addComponent(dueTime);
-		dateTimeWrapper.setComponentAlignment(dueTime, Alignment.TOP_LEFT);
-		dateTimeWrapper.setExpandRatio(dueTime, 1.0F);
-		orderForm.addComponent(dateTimeWrapper);
-
-		orderForm.addComponent(createOrderInfoLayout());
-
-		Label customerLabel = new Label();
-		customerLabel.setStyleName("header");
-		customerLabel.setWidth("100%");
-		customerLabel.setContentMode(ContentMode.TEXT);
-		customerLabel.setValue("Customer");
-		customerLabel.setId("customerLabel");
-		orderForm.addComponent(customerLabel);
-
-		fullName = new TextField();
-		fullName.setStyleName("half");
-		fullName.setId("fullName");
-		fullName.setPlaceholder("Firstname Lastname");
-		fullName.setWidth("100%");
-		AttributeExtension.of(fullName).setAttribute(AriaAttributes.DESCRIBEDBY,
-				"customerLabel");
-		AttributeExtension.of(fullName).setAttribute(AriaAttributes.LABEL,
-				"Full name");
-		orderForm.addComponent(fullName);
-
-		phone = new TextField();
-		phone.setStyleName("half");
-		phone.setId("phone");
-		phone.setPlaceholder("Phone number");
-		phone.setWidth("100%");
-		AttributeExtension.of(phone).setAttribute(AriaAttributes.DESCRIBEDBY,
-				"customerLabel");
-		AttributeExtension.of(phone).setAttribute(AriaAttributes.LABEL,
-				"Phone number");
-		orderForm.addComponent(phone);
-
-		details = new TextField();
-		details.setId("details");
-		details.setPlaceholder("Additional details");
-		details.setWidth("100%");
-		AttributeExtension.of(details).setAttribute(AriaAttributes.DESCRIBEDBY,
-				"customerLabel");
-		AttributeExtension.of(details).setAttribute(AriaAttributes.LABEL,
-				"Additional details");
-		orderForm.addComponent(details);
-
-		Label detailsLabel = new Label();
-		detailsLabel.setStyleName("header");
-		detailsLabel.setWidth("100%");
-		detailsLabel.setContentMode(ContentMode.TEXT);
-		detailsLabel.setValue("Products");
-		orderForm.addComponent(detailsLabel);
-
-		productInfoContainer = new CssLayout();
-		productInfoContainer.setStyleName("product-container");
-		productInfoContainer.setId("productInfoContainer");
-		productInfoContainer.setWidth("100%");
-		orderForm.addComponent(productInfoContainer);
-
-		addItems = new Button();
-		addItems.setIcon(VaadinIcons.PLUS_CIRCLE_O);
-		addItems.setStyleName("add-items " + ValoTheme.BUTTON_LINK);
-		addItems.setId("addItems");
-		addItems.setWidth("100%");
-		addItems.setHeight("100px");
-		addItems.setCaptionAsHtml(true);
-		addItems.setCaption("Add item");
-		orderForm.addComponent(addItems);
-
-		total = new Label();
-		total.setStyleName(
-				"total " + ValoTheme.LABEL_HUGE + " " + ValoTheme.LABEL_BOLD);
-		total.setId("total");
-		total.setWidth("100%");
-		total.setContentMode(ContentMode.TEXT);
-		total.setValue("0.00");
-		AttributeExtension.of(total).setAttribute(AriaAttributes.LABEL,
-				"Total price");
-		AttributeExtension.of(total).setAttribute(AriaAttributes.LIVE,
-				"polite");
-		AttributeExtension.of(total).setAttribute("tabindex", "0");
-		orderForm.addComponent(total);
-
-		history.setId("history");
-		history.setWidth("100%");
-		orderForm.addComponent(history);
-
-		orderForm.addComponent(createButtonsWrapper());
-
-		return orderForm;
-	}
-
-	private HorizontalLayout createOrderInfoLayout() {
-		HorizontalLayout orderInfoLayout = new HorizontalLayout();
-		orderInfoLayout.setStyleName("half");
-		orderInfoLayout.setWidth("100%");
-		orderInfoLayout.setMargin(false);
-
-		Label atLabel = new Label();
-		atLabel.setStyleName("large");
-		atLabel.setContentMode(ContentMode.TEXT);
-		atLabel.setValue("@");
-		orderInfoLayout.addComponent(atLabel);
-		orderInfoLayout.setComponentAlignment(atLabel, Alignment.MIDDLE_LEFT);
-
-		pickupLocation.setId("pickupLocation");
-		pickupLocation.setWidth("100%");
-		orderInfoLayout.addComponent(pickupLocation);
-		orderInfoLayout.setComponentAlignment(pickupLocation,
-				Alignment.MIDDLE_LEFT);
-		orderInfoLayout.setExpandRatio(pickupLocation, 1.0F);
-
-		return orderInfoLayout;
-	}
-
-	private CssLayout createButtonsWrapper() {
-		CssLayout buttonsWrapper = new CssLayout();
-		buttonsWrapper.setStyleName("buttons");
-		buttonsWrapper.setWidth("100%");
-
-		editDiscard = new Button();
-		editDiscard.setIcon(VaadinIcons.CLOSE);
-		editDiscard.setStyleName("edit-discard");
-		editDiscard.setId("edit-discard");
-		editDiscard.setCaptionAsHtml(true);
-		editDiscard.setCaption("Cancel");
-		editDiscard.addBlurListener(e -> {
-			if (mode != Mode.EDIT) {
-				dueDate.focus();
-			}
-		});
-		buttonsWrapper.addComponent(editDiscard);
-
-		ok = new Button();
-		ok.setIcon(VaadinIcons.ANGLE_RIGHT);
-		ok.setStyleName(ValoTheme.BUTTON_PRIMARY + " "
-				+ ValoTheme.BUTTON_ICON_ALIGN_RIGHT);
-		ok.setId("ok");
-		ok.setCaption("Place order");
-		buttonsWrapper.addComponent(ok);
-
-		return buttonsWrapper;
 	}
 
 	@Override
@@ -394,60 +173,23 @@ public class OrderEditView extends VerticalLayout implements View {
 		}
 	}
 
+	/**
+	 * Sets the order to be edited or viewed in this view.
+	 *
+	 * @param order
+	 *            the order to be edited or viewed
+	 */
 	public void setOrder(Order order) {
-		stateLabel.setValue(order.getState().getDisplayName());
+		orderForm.setState(order.getState().getDisplayName());
 		binder.setBean(order);
-		productInfoContainer.removeAllComponents();
 
-		reportHeader.setVisible(order.getId() != null);
-		if (order.getId() == null) {
-			addEmptyOrderItem();
-			dueDate.focus();
-		} else {
-			orderId.setValue("#" + order.getId());
-			for (OrderItem item : order.getItems()) {
-				ProductInfo productInfo = createProductInfo(item);
-				productInfo.setReportMode(mode != Mode.EDIT);
-				productInfoContainer.addComponent(productInfo);
-			}
-			history.setOrder(order);
-		}
+		orderForm.setHeaderVisible(order.getId() != null);
+		orderForm.updateProductInfos(order);
 		hasChanges = false;
 	}
 
-	private void addEmptyOrderItem() {
-		OrderItem orderItem = new OrderItem();
-		ProductInfo productInfo = createProductInfo(orderItem);
-		productInfoContainer.addComponent(productInfo);
-		productInfo.focus();
-		getOrder().getItems().add(orderItem);
-	}
-
-	protected void removeOrderItem(OrderItem orderItem) {
-		getOrder().getItems().remove(orderItem);
-
-		for (Component c : productInfoContainer) {
-			if (c instanceof ProductInfo productInfo
-					&& productInfo.getItem() == orderItem) {
-				productInfoContainer.removeComponent(c);
-				break;
-			}
-		}
-	}
-
-	/**
-	 * Create a ProductInfo instance using Spring so that it is injected and can
-	 * in turn inject a ProductComboBox and its data provider.
-	 *
-	 * @param orderItem
-	 *            the item to edit
-	 *
-	 * @return a new product info instance
-	 */
-	private ProductInfo createProductInfo(OrderItem orderItem) {
-		ProductInfo productInfo = beanFactory.getBean(ProductInfo.class);
-		productInfo.setItem(orderItem);
-		return productInfo;
+	public void removeOrderItem(OrderItem orderItem) {
+		orderForm.removeOrderItem(orderItem);
 	}
 
 	protected Order getOrder() {
@@ -479,11 +221,7 @@ public class OrderEditView extends VerticalLayout implements View {
 
 		this.mode = mode;
 		binder.setReadOnly(mode != Mode.EDIT);
-		for (Component c : productInfoContainer) {
-			if (c instanceof ProductInfo productInfo) {
-				productInfo.setReportMode(mode != Mode.EDIT);
-			}
-		}
+		orderForm.updateProductInfoMode(mode);
 		addItems.setVisible(mode == Mode.EDIT);
 		history.setVisible(mode == Mode.REPORT);
 		state.setVisible(mode == Mode.EDIT);
@@ -537,12 +275,9 @@ public class OrderEditView extends VerticalLayout implements View {
 				.getFieldValidationErrors().stream()
 				.map(BindingValidationStatus::getField);
 
-		for (Component c : productInfoContainer) {
-			if (c instanceof ProductInfo productInfo
-					&& !productInfo.isEmpty()) {
-				errorFields = Stream.concat(errorFields,
-						productInfo.validate());
-			}
+		for (ProductInfo productInfo : orderForm.getProductInfos()) {
+			errorFields = Stream.concat(errorFields,
+					productInfo.validate());
 		}
 		return errorFields;
 	}
@@ -621,6 +356,348 @@ public class OrderEditView extends VerticalLayout implements View {
 			if (oldView instanceof StorefrontView) {
 				navigationManager.navigateTo("storefront");
 			}
+		}
+	}
+
+	class OrderForm extends Composite implements HasAttributes<OrderForm> {
+
+		private HorizontalLayout reportHeader;
+		private Label stateLabel;
+		private CssLayout productInfoContainer;	
+		private Label orderId;
+
+		OrderForm() {
+			CssLayout layout = new CssLayout();
+			layout.setStyleName("order-form responsive");
+			layout.setResponsive(true);
+			layout.setWidth("100%");
+			setCompositionRoot(layout);
+			setAttribute(AriaAttributes.ROLE, AriaRoles.FORM);
+
+			reportHeader = new HorizontalLayout();
+			reportHeader.setId("reportHeader");
+			reportHeader.setWidth("100%");
+			reportHeader.setMargin(false);
+
+			orderId = new Label();
+			orderId.setStyleName(
+					ValoTheme.LABEL_H4 + " " + ValoTheme.LABEL_COLORED);
+			orderId.setId("orderId");
+			orderId.setContentMode(ContentMode.TEXT);
+			orderId.setValue("#182");
+			reportHeader.addComponent(orderId);
+			reportHeader.setComponentAlignment(orderId, Alignment.TOP_LEFT);
+
+			stateLabel = new Label();
+			stateLabel.setStyleName(
+					ValoTheme.LABEL_H4 + " " + ValoTheme.LABEL_COLORED);
+			stateLabel.setId("stateLabel");
+			stateLabel.setWidth("100%");
+			stateLabel.setContentMode(ContentMode.TEXT);
+			stateLabel.setValue("New order");
+			reportHeader.addComponent(stateLabel);
+			reportHeader.setComponentAlignment(stateLabel, Alignment.TOP_LEFT);
+			reportHeader.setExpandRatio(stateLabel, 1.0F);
+
+			state = new OrderStateSelect();
+			state.setId("state");
+			reportHeader.addComponent(state);
+			reportHeader.setComponentAlignment(state, Alignment.MIDDLE_RIGHT);
+			layout.addComponent(reportHeader);
+
+			Label dueLabel = new Label();
+			dueLabel.setStyleName(ValoTheme.LABEL_H4 + " header");
+			dueLabel.setWidth("100%");
+			dueLabel.setContentMode(ContentMode.TEXT);
+			dueLabel.setValue("Due");
+			dueLabel.setId("dueLabel");
+			layout.addComponent(dueLabel);
+
+			HorizontalLayout dateTimeWrapper = new HorizontalLayout();
+			dateTimeWrapper.setStyleName("half");
+			dateTimeWrapper.setWidth("100%");
+			dateTimeWrapper.setMargin(false);
+
+			dueDate = new DateField();
+			dueDate.setLenient(true);
+			dueDate.setId("dueDate");
+			dueDate.setPlaceholder("Date");
+			dueDate.setWidth("180px");
+			AttributeExtension.of(dueDate).setAttribute(
+					AriaAttributes.DESCRIBEDBY,
+					"dueLabel");
+			AttributeExtension.of(dueDate).setAttribute(AriaAttributes.LABEL,
+					"Date");
+			dateTimeWrapper.addComponent(dueDate);
+			dateTimeWrapper.setComponentAlignment(dueDate, Alignment.TOP_LEFT);
+
+			dueTime = new ComboBox<>();
+			dueTime.setEmptySelectionAllowed(false);
+			dueTime.setId("dueTime");
+			dueTime.setTextInputAllowed(false);
+			dueTime.setWidth("6em");
+			AttributeExtension.of(dueTime).setAttribute(
+					AriaAttributes.DESCRIBEDBY,
+					"dueLabel");
+			AttributeExtension.of(dueTime).setAttribute(AriaAttributes.LABEL,
+					"Time");
+			dateTimeWrapper.addComponent(dueTime);
+			dateTimeWrapper.setComponentAlignment(dueTime, Alignment.TOP_LEFT);
+			dateTimeWrapper.setExpandRatio(dueTime, 1.0F);
+			layout.addComponent(dateTimeWrapper);
+
+			layout.addComponent(createOrderInfoLayout());
+
+			Label customerLabel = new Label();
+			customerLabel.setStyleName("header");
+			customerLabel.setWidth("100%");
+			customerLabel.setContentMode(ContentMode.TEXT);
+			customerLabel.setValue("Customer");
+			customerLabel.setId("customerLabel");
+			layout.addComponent(customerLabel);
+
+			fullName = new TextField();
+			fullName.setStyleName("half");
+			fullName.setId("fullName");
+			fullName.setPlaceholder("Firstname Lastname");
+			fullName.setWidth("100%");
+			AttributeExtension.of(fullName).setAttribute(
+					AriaAttributes.DESCRIBEDBY, "customerLabel");
+			AttributeExtension.of(fullName).setAttribute(AriaAttributes.LABEL,
+					"Full name");
+			layout.addComponent(fullName);
+
+			phone = new TextField();
+			phone.setStyleName("half");
+			phone.setId("phone");
+			phone.setPlaceholder("Phone number");
+			phone.setWidth("100%");
+			AttributeExtension.of(phone).setAttribute(
+					AriaAttributes.DESCRIBEDBY,
+					"customerLabel");
+			AttributeExtension.of(phone).setAttribute(AriaAttributes.LABEL,
+					"Phone number");
+			layout.addComponent(phone);
+
+			details = new TextField();
+			details.setId("details");
+			details.setPlaceholder("Additional details");
+			details.setWidth("100%");
+			AttributeExtension.of(details).setAttribute(
+					AriaAttributes.DESCRIBEDBY,
+					"customerLabel");
+			AttributeExtension.of(details).setAttribute(AriaAttributes.LABEL,
+					"Additional details");
+			layout.addComponent(details);
+
+			Label detailsLabel = new Label();
+			detailsLabel.setStyleName("header");
+			detailsLabel.setWidth("100%");
+			detailsLabel.setContentMode(ContentMode.TEXT);
+			detailsLabel.setValue("Products");
+			layout.addComponent(detailsLabel);
+
+			productInfoContainer = new CssLayout();
+			productInfoContainer.setStyleName("product-container");
+			productInfoContainer.setId("productInfoContainer");
+			productInfoContainer.setWidth("100%");
+			layout.addComponent(productInfoContainer);
+
+			addItems = new Button();
+			addItems.setIcon(VaadinIcons.PLUS_CIRCLE_O);
+			addItems.setStyleName("add-items " + ValoTheme.BUTTON_LINK);
+			addItems.setId("addItems");
+			addItems.setWidth("100%");
+			addItems.setHeight("100px");
+			addItems.setCaptionAsHtml(true);
+			addItems.setCaption("Add item");
+			layout.addComponent(addItems);
+
+			total = new Label();
+			total.setStyleName(
+					"total " + ValoTheme.LABEL_HUGE + " "
+							+ ValoTheme.LABEL_BOLD);
+			total.setId("total");
+			total.setWidth("100%");
+			total.setContentMode(ContentMode.TEXT);
+			total.setValue("0.00");
+			AttributeExtension.of(total).setAttribute(AriaAttributes.LABEL,
+					"Total price");
+			AttributeExtension.of(total).setAttribute(AriaAttributes.LIVE,
+					"polite");
+			AttributeExtension.of(total).setAttribute("tabindex", "0");
+			layout.addComponent(total);
+
+			history.setId("history");
+			history.setWidth("100%");
+			layout.addComponent(history);
+
+			layout.addComponent(createButtonsWrapper());
+		}
+
+		private HorizontalLayout createOrderInfoLayout() {
+			HorizontalLayout orderInfoLayout = new HorizontalLayout();
+			orderInfoLayout.setStyleName("half");
+			orderInfoLayout.setWidth("100%");
+			orderInfoLayout.setMargin(false);
+
+			Label atLabel = new Label();
+			atLabel.setStyleName("large");
+			atLabel.setContentMode(ContentMode.TEXT);
+			atLabel.setValue("@");
+			orderInfoLayout.addComponent(atLabel);
+			orderInfoLayout.setComponentAlignment(atLabel,
+					Alignment.MIDDLE_LEFT);
+
+			pickupLocation.setId("pickupLocation");
+			pickupLocation.setWidth("100%");
+			orderInfoLayout.addComponent(pickupLocation);
+			orderInfoLayout.setComponentAlignment(pickupLocation,
+					Alignment.MIDDLE_LEFT);
+			orderInfoLayout.setExpandRatio(pickupLocation, 1.0F);
+
+			return orderInfoLayout;
+		}
+
+		private CssLayout createButtonsWrapper() {
+			CssLayout buttonsWrapper = new CssLayout();
+			buttonsWrapper.setStyleName("buttons");
+			buttonsWrapper.setWidth("100%");
+
+			editDiscard = new Button();
+			editDiscard.setIcon(VaadinIcons.CLOSE);
+			editDiscard.setStyleName("edit-discard");
+			editDiscard.setId("edit-discard");
+			editDiscard.setCaptionAsHtml(true);
+			editDiscard.setCaption("Cancel");
+			editDiscard.addBlurListener(e -> {
+				if (mode != Mode.EDIT) {
+					dueDate.focus();
+				}
+			});
+			buttonsWrapper.addComponent(editDiscard);
+
+			ok = new Button();
+			ok.setIcon(VaadinIcons.ANGLE_RIGHT);
+			ok.setStyleName(ValoTheme.BUTTON_PRIMARY + " "
+					+ ValoTheme.BUTTON_ICON_ALIGN_RIGHT);
+			ok.setId("ok");
+			ok.setCaption("Place order");
+			buttonsWrapper.addComponent(ok);
+
+			return buttonsWrapper;
+		}
+
+		/**
+		 * Sets the visibility of the report header.
+		 *
+		 * @param visible
+		 *            true to make the report header visible, false to hide it
+		 */
+		public void setHeaderVisible(boolean visible) {
+			reportHeader.setVisible(visible);
+		}
+
+		/**
+		 * Sets the state label to the given value.
+		 *
+		 * @param state
+		 *            the state to set
+		 */
+		public void setState(String state) {
+			stateLabel.setValue(state);
+		}
+
+		/**
+		 * Updates the product info components to match the items in the given
+		 * order.
+		 * 
+		 * @param order
+		 *            the order to update the product info components for
+		 */
+		public void updateProductInfos(Order order) {
+			productInfoContainer.removeAllComponents();
+			if (order.getId() == null) {
+				addEmptyOrderItem();
+				dueDate.focus();
+			} else {
+				orderId.setValue("#" + order.getId());
+				for (OrderItem item : order.getItems()) {
+					ProductInfo productInfo = createProductInfo(item);
+					productInfo.setReportMode(mode != Mode.EDIT);
+					productInfoContainer.addComponent(productInfo);
+				}
+				history.setOrder(order);
+			}
+		}
+
+		/**
+		 * Adds a new empty order item to the order and creates a corresponding
+		 * ProductInfo component for it.
+		 */
+		public void addEmptyOrderItem() {
+			OrderItem orderItem = new OrderItem();
+			ProductInfo productInfo = createProductInfo(orderItem);
+			productInfoContainer.addComponent(productInfo);
+			productInfo.focus();
+			getOrder().getItems().add(orderItem);
+		}
+
+		protected void removeOrderItem(OrderItem orderItem) {
+			getOrder().getItems().remove(orderItem);
+
+			for (Component c : productInfoContainer) {
+				if (c instanceof ProductInfo productInfo
+						&& productInfo.getItem() == orderItem) {
+					productInfoContainer.removeComponent(c);
+					break;
+				}
+			}
+		}
+
+		/**
+		 * Create a ProductInfo instance using Spring so that it is injected and
+		 * can in turn inject a ProductComboBox and its data provider.
+		 *
+		 * @param orderItem
+		 *            the item to edit
+		 *
+		 * @return a new product info instance
+		 */
+		private ProductInfo createProductInfo(OrderItem orderItem) {
+			ProductInfo productInfo = beanFactory.getBean(ProductInfo.class);
+			productInfo.setItem(orderItem);
+			return productInfo;
+		}
+
+		/**
+		 * Updates the mode of all product info components.
+		 * 
+		 * @param mode
+		 *            the mode to set
+		 */
+		public void updateProductInfoMode(Mode mode) {
+			for (Component c : productInfoContainer) {
+				if (c instanceof ProductInfo productInfo) {
+					productInfo.setReportMode(mode != Mode.EDIT);
+				}
+			}
+		}
+
+		/**
+		 * Returns a list of all product info components that are not empty.
+		 *
+		 * @return a list of all product info components that are not empty
+		 */
+		public List<ProductInfo> getProductInfos() {
+			List<ProductInfo> productInfos = new ArrayList<>();
+			for (Component c : productInfoContainer) {
+				if (c instanceof ProductInfo productInfo
+						&& !productInfo.isEmpty()) {
+					productInfos.add(productInfo);
+				}
+			}
+			return productInfos;
 		}
 	}
 }
