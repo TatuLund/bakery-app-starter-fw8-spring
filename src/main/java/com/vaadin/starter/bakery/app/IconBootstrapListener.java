@@ -2,6 +2,7 @@ package com.vaadin.starter.bakery.app;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jspecify.annotations.NullMarked;
 
 import com.vaadin.server.BootstrapFragmentResponse;
 import com.vaadin.server.BootstrapListener;
@@ -22,6 +23,7 @@ import com.vaadin.server.BootstrapPageResponse;
  * </pre>
  * </p>
  */
+@NullMarked
 public class IconBootstrapListener implements BootstrapListener {
 
 	protected String baseUri = "theme://icon-";

@@ -2,6 +2,7 @@ package com.vaadin.starter.bakery.app.security;
 
 import java.util.Collections;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +14,7 @@ import com.vaadin.starter.bakery.backend.data.entity.User;
 import com.vaadin.starter.bakery.backend.service.UserService;
 
 @Service
+@NullMarked
 public class UserDetailsServiceImpl implements UserDetailsService {
 
 	private final UserService userService;

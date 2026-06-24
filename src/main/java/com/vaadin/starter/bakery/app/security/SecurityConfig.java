@@ -1,63 +1,55 @@
 package com.vaadin.starter.bakery.app.security;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.vaadin.starter.bakery.app.Application;
 import com.vaadin.starter.bakery.backend.data.Role;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-	private final UserDetailsService userDetailsService;
-
-	private final PasswordEncoder passwordEncoder;
+@NullMarked
+public class SecurityConfig {
 
 	private final RedirectAuthenticationSuccessHandler successHandler;
 
 	@Autowired
-	public SecurityConfig(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder,
+	public SecurityConfig(UserDetailsService userDetailsService,
+			PasswordEncoder passwordEncoder,
 			RedirectAuthenticationSuccessHandler successHandler) {
-		this.userDetailsService = userDetailsService;
-		this.passwordEncoder = passwordEncoder;
 		this.successHandler = successHandler;
 	}
 
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		super.configure(auth);
-		auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
-	}
+	@Bean
+	@SuppressWarnings("java:S4502")
+	public SecurityFilterChain configure(HttpSecurity http) throws Exception {
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+		http.authorizeHttpRequests(auth -> auth
+				.requestMatchers(new AntPathRequestMatcher("/VAADIN/**"))
+				.permitAll().requestMatchers(new AntPathRequestMatcher("/**"))
+				.hasAnyAuthority(Role.getAllRoles()));
+
 		// Not using Spring CSRF here to be able to use plain HTML for the login
 		// page
-		http.csrf().disable();
+		http.csrf(AbstractHttpConfigurer::disable);
 
-		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry reg = http
-				.authorizeRequests();
+		http.formLogin(config -> config.loginPage(Application.LOGIN_URL)
+				.loginProcessingUrl(Application.LOGIN_PROCESSING_URL)
+				.failureUrl(Application.LOGIN_FAILURE_URL)
+				.successHandler(successHandler).permitAll());
 
-		// Allow access to static resources ("/VAADIN/**")
-		reg = reg.antMatchers("/VAADIN/**").permitAll();
-		// Require authentication for all URLS ("/**")
-		reg = reg.antMatchers("/**").hasAnyAuthority(Role.getAllRoles());
-		HttpSecurity sec = reg.and();
+		http.logout(config -> config.logoutSuccessUrl(Application.LOGOUT_URL));
 
-		// Allow access to login page without login
-		FormLoginConfigurer<HttpSecurity> login = sec.formLogin().permitAll();
-		login = login.loginPage(Application.LOGIN_URL).loginProcessingUrl(Application.LOGIN_PROCESSING_URL)
-				.failureUrl(Application.LOGIN_FAILURE_URL).successHandler(successHandler);
-		login.and().logout().logoutSuccessUrl(Application.LOGOUT_URL);
+		return http.build();
 	}
 
 }

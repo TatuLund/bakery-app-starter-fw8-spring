@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,7 @@ import com.vaadin.starter.bakery.backend.service.UserService;
  * security and querying rights from different beans of the UI.
  *
  */
+@NullMarked
 public class SecurityUtils {
 
 	private SecurityUtils() {
@@ -45,8 +47,7 @@ public class SecurityUtils {
 	 *         otherwise
 	 */
 	public static boolean isCurrentUserInRole(String role) {
-		return getUserRoles().stream().filter(roleName -> roleName.equals(Objects.requireNonNull(role))).findAny()
-				.isPresent();
+		return getUserRoles().stream().anyMatch(roleName -> roleName.equals(Objects.requireNonNull(role)));
 	}
 
 	/**
