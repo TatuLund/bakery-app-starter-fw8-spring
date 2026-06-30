@@ -5,6 +5,8 @@ import java.util.StringJoiner;
 
 import javax.annotation.PostConstruct;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.annotation.PrototypeScope;
 import org.vaadin.spring.events.EventBus.ViewEventBus;
@@ -45,6 +47,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @SpringComponent
 @PrototypeScope
 @SuppressWarnings({ "java:S2160", "java:S110" })
+@NullMarked
 public class OrderHistory extends Composite {
 
 	protected CssLayout items;
@@ -58,6 +61,7 @@ public class OrderHistory extends Composite {
 
 	private transient ViewEventBus eventBus;
 
+	@Nullable
 	private Order order;
 
 	private transient OrderService orderService;
@@ -65,6 +69,7 @@ public class OrderHistory extends Composite {
 	private transient UserService userService;
 
 	@Autowired
+	@SuppressWarnings("java:S2637")
 	public OrderHistory(DateTimeFormatter dateTimeFormatter,
 			ViewEventBus eventBus, OrderService orderService,
 			UserService userService) {
@@ -84,7 +89,7 @@ public class OrderHistory extends Composite {
 				HistoryItem.class);
 		binder.setRequiredConfigurator(null); // Don't show a *
 		binder.bind(historyComment.getNewCommentInput(), "message");
-		commitNewComment.addClickListener(e -> {
+		commitNewComment.addClickListener(clicked -> {
 			if (binder.isValid()) {
 				addNewComment(historyComment.getNewCommentInput().getValue());
 			} else {
@@ -94,10 +99,10 @@ public class OrderHistory extends Composite {
 
 		// We don't want a global shortcut for enter, scope it to the panel
 		panel.addAction(
-				new ClickShortcut(commitNewComment, KeyCode.ENTER, null));
+				new ClickShortcut(commitNewComment, KeyCode.ENTER));
 
 		historyComment.getNewCommentInput()
-				.addFocusListener(e -> announceOrderHistory());
+				.addFocusListener(focused -> announceOrderHistory());
 	}
 
 	private void setupHistoryLayout() {
@@ -136,12 +141,13 @@ public class OrderHistory extends Composite {
 		historyComment.getNewCommentInput().setValue("");
 		items.removeAllComponents();
 		order.getHistory().forEach(historyItem -> {
-			Label l = new Label(formatMessage(historyItem));
-			l.addStyleName(ValoTheme.LABEL_SMALL);
-			l.setCaption(formatTimestamp(historyItem) + " by "
-					+ historyItem.getCreatedBy().getName());
-			l.setWidth("100%");
-			items.addComponent(l);
+			var historyItemLabel = new Label(formatMessage(historyItem));
+			historyItemLabel.addStyleName(ValoTheme.LABEL_SMALL);
+			historyItemLabel.setCaption(String.format("%s by %s",
+					formatTimestamp(historyItem),
+					historyItem.getCreatedBy().getName()));
+			historyItemLabel.setWidth("100%");
+			items.addComponent(historyItemLabel);
 		});
 	}
 
@@ -164,9 +170,10 @@ public class OrderHistory extends Composite {
 	private String buildHistoryAnnouncement() {
 		StringJoiner joiner = new StringJoiner(". ", "Order history. ", ".");
 		order.getHistory().forEach(
-				historyItem -> joiner.add(formatTimestamp(historyItem) + " by "
-						+ historyItem.getCreatedBy().getName() + ": "
-						+ formatMessage(historyItem)));
+				historyItem -> joiner.add(String.format("%s by %s: %s",
+						formatTimestamp(historyItem),
+						historyItem.getCreatedBy().getName(),
+						formatMessage(historyItem))));
 		return joiner.toString();
 	}
 

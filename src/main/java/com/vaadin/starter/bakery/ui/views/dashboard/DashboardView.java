@@ -17,7 +17,6 @@ import javax.annotation.PostConstruct;
 
 import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
 
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
@@ -63,7 +62,6 @@ public class DashboardView extends VerticalLayout implements View {
 
 	private static final String BOARD_ROW_PANELS = "board-row-panels";
 
-	@Nullable
 	protected Board board;
 
 	private final NavigationManager navigationManager;
@@ -88,17 +86,14 @@ public class DashboardView extends VerticalLayout implements View {
 			ChartType.PIE);
 	private final OrdersGrid dueGrid;
 
-	@Nullable
 	private ListSeries deliveriesThisMonthSeries;
-	@Nullable
 	private ListSeries deliveriesThisYearSeries;
-	@Nullable
 	private ListSeries[] salesPerYear;
 
-	@Nullable
 	private DataSeries deliveriesPerProductSeries;
 
 	@Autowired
+	@SuppressWarnings("java:S2637")
 	public DashboardView(NavigationManager navigationManager,
 			OrderService orderService, OrdersGrid dueGrid) {
 		this.navigationManager = navigationManager;
@@ -107,7 +102,6 @@ public class DashboardView extends VerticalLayout implements View {
 	}
 
 	@PostConstruct
-	@SuppressWarnings("null")
 	public void setup() {
 		setupDashboard();
 		setResponsive(true);
@@ -137,10 +131,10 @@ public class DashboardView extends VerticalLayout implements View {
 		dueGrid.setAccessibleNavigation(true);
 
 		dueGrid.addSelectionListener(
-				e -> selectedOrder(e.getFirstSelectedItem().get()));
+				selected -> selectedOrder(
+						selected.getFirstSelectedItem().get()));
 	}
 
-	@SuppressWarnings("null")
 	private void setupDashboard() {
 		setStyleName("dashboard-view");
 		setResponsive(true);
@@ -156,7 +150,7 @@ public class DashboardView extends VerticalLayout implements View {
 		setExpandRatio(board, 1.0F);
 	}
 
-	@SuppressWarnings("null")
+	@SuppressWarnings("java:S8688")
 	private void initYearlySalesGraph() {
 		yearlySalesGraph.setId("yearlySales");
 		yearlySalesGraph.setSizeFull();
@@ -189,6 +183,7 @@ public class DashboardView extends VerticalLayout implements View {
 
 	}
 
+	@SuppressWarnings("java:S8688")
 	private void initProductSplitMonthlyGraph() {
 		monthlyProductSplit.setId("monthlyProductSplit");
 		monthlyProductSplit.setSizeFull();
@@ -206,6 +201,7 @@ public class DashboardView extends VerticalLayout implements View {
 
 	}
 
+	@SuppressWarnings("java:S8688")
 	private void initDeliveriesGraphs() {
 		LocalDate today = LocalDate.now();
 
@@ -275,12 +271,12 @@ public class DashboardView extends VerticalLayout implements View {
 		}
 	}
 
+	@SuppressWarnings("java:S8688")
 	private DashboardData fetchData() {
 		return orderService.getDashboardData(MonthDay.now().getMonthValue(),
 				Year.now().getValue());
 	}
 
-	@SuppressWarnings("null")
 	private void updateGraphs(DashboardData data) {
 		if (deliveriesThisMonthSeries == null
 				|| deliveriesThisYearSeries == null
@@ -306,7 +302,7 @@ public class DashboardView extends VerticalLayout implements View {
 		updateMonthlyProductSplitAccessibilityAttributes();
 	}
 
-	@SuppressWarnings("null")
+	@SuppressWarnings("java:S8688")
 	private void updateDeliveriesThisMonthAccessibilityAttributes() {
 		if (deliveriesThisMonthSeries == null) {
 			throw new IllegalStateException("Graph not initialized");
@@ -324,7 +320,6 @@ public class DashboardView extends VerticalLayout implements View {
 				categories));
 	}
 
-	@SuppressWarnings("null")
 	private void updateDeliveriesThisYearAccessibilityAttributes() {
 		if (deliveriesThisYearSeries == null) {
 			throw new IllegalStateException("Graph not initialized");
@@ -335,6 +330,7 @@ public class DashboardView extends VerticalLayout implements View {
 				getMonthNames()));
 	}
 
+	@SuppressWarnings({ "null", "java:S1192" })
 	private void updateYearlySalesGraphAccessibilityAttributes() {
 		String ariaLabel = Arrays.stream(salesPerYear)
 				.filter(ListSeries::isVisible)
@@ -346,8 +342,8 @@ public class DashboardView extends VerticalLayout implements View {
 			ariaLabel = yearlySalesGraph.getConfiguration().getTitle()
 					.getText();
 		} else {
-			ariaLabel = yearlySalesGraph.getConfiguration().getTitle().getText()
-					+ ": " + ariaLabel;
+			ariaLabel = String.format("%s: %s", yearlySalesGraph
+					.getConfiguration().getTitle().getText(), ariaLabel);
 		}
 		yearlySalesGraph.setAriaLabel(ariaLabel);
 	}
@@ -357,14 +353,15 @@ public class DashboardView extends VerticalLayout implements View {
 			throw new IllegalStateException("Graph not initialized");
 		}
 		String ariaLabel = deliveriesPerProductSeries.getData().stream()
-				.map(data -> data.getName() + " " + data.getY())
+				.map(data -> String.format("%s %s", data.getName(),
+						data.getY()))
 				.collect(Collectors.joining(","));
 		if (ariaLabel.isEmpty()) {
 			ariaLabel = monthlyProductSplit.getConfiguration().getTitle()
 					.getText();
 		} else {
-			ariaLabel = monthlyProductSplit.getConfiguration().getTitle()
-					.getText() + ": " + ariaLabel;
+			ariaLabel = String.format("%s: %s", monthlyProductSplit
+					.getConfiguration().getTitle().getText(), ariaLabel);
 		}
 		monthlyProductSplit.setAriaLabel(ariaLabel);
 	}
@@ -373,7 +370,8 @@ public class DashboardView extends VerticalLayout implements View {
 			ListSeries series, String[] categories) {
 		String values = buildSeriesValues(seriesName, series.getData(),
 				categories);
-		return values.isEmpty() ? title : title + ": " + values;
+		return values.isEmpty() ? title
+				: String.format("%s: %s", title, values);
 	}
 
 	private String buildSeriesValues(String seriesName, Number[] data,
@@ -382,12 +380,14 @@ public class DashboardView extends VerticalLayout implements View {
 				Math.min(data.length, categories.length))
 				.mapToObj(index -> categories[index] + " " + data[index])
 				.collect(Collectors.joining(","));
-		return values.isEmpty() ? "" : seriesName + ": " + values;
+		return values.isEmpty() ? ""
+				: String.format("%s: %s", seriesName, values);
 	}
 
 	private void updateLabels(DeliveryStats deliveryStats) {
-		todayLabel.setContent(deliveryStats.getDeliveredToday() + "/"
-				+ deliveryStats.getDueToday());
+		todayLabel.setContent(
+				String.format("%d/%d", deliveryStats.getDeliveredToday(),
+						deliveryStats.getDueToday()));
 		notAvailableLabel.setContent(
 				Integer.toString(deliveryStats.getNotAvailableToday()));
 		notAvailableBox

@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -49,28 +48,23 @@ public class StorefrontView extends VerticalLayout implements View {
 
 	private static final String PARAMETER_INCLUDE_PAST = "includePast";
 
-	@Nullable
 	protected Panel searchPanel;
 
-	@Nullable
 	protected TextField searchField;
 
-	@Nullable
 	protected Button searchButton;
 
-	@Nullable
 	protected CheckBox includePast;
 
-	@Nullable
 	protected Button newOrder;
 
-	@Nullable
 	@Autowired
 	private OrdersGrid list;
 
 	private final NavigationManager navigationManager;
 
 	@Autowired
+	@SuppressWarnings("java:S2637")
 	public StorefrontView(NavigationManager navigationManager) {
 		this.navigationManager = navigationManager;
 	}

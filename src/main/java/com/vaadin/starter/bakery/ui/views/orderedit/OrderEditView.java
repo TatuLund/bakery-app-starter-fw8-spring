@@ -11,6 +11,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -60,6 +62,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @SpringView(name = "order")
 @SuppressWarnings({ "java:S2160", "java:S110", "java:S6813" })
+@NullMarked
 public class OrderEditView extends VerticalLayout implements View {
 
 	public enum Mode {
@@ -94,10 +97,12 @@ public class OrderEditView extends VerticalLayout implements View {
 	private boolean hasChanges;
 	private transient BeanFactory beanFactory;
 	private View oldView;
+	@Nullable
 	private Registration shortcutRegistration;
 	private NavigationManager navigationManager;
 
 	@Autowired
+	@SuppressWarnings("java:S2637")
 	public OrderEditView(OrderEditPresenter presenter, BeanFactory beanFactory,
 			DollarPriceConverter priceConverter,
 			NavigationManager navigationManager) {
@@ -114,13 +119,14 @@ public class OrderEditView extends VerticalLayout implements View {
 	}
 
 	@PostConstruct
+	@SuppressWarnings("java:S8688")
 	public void setup() {
 		initLayout();
 		presenter.init(this);
 
 		// We're limiting dueTime to even hours between 07:00 and 17:00
 		dueTime.setItems(
-				IntStream.range(7, 17).mapToObj(h -> LocalTime.of(h, 0)));
+				IntStream.range(7, 17).mapToObj(hour -> LocalTime.of(hour, 0)));
 
 		// Binder takes care of binding Vaadin fields defined as Java member
 		// fields in this class to properties in the Order bean
@@ -143,11 +149,12 @@ public class OrderEditView extends VerticalLayout implements View {
 		binder.bindInstanceFields(this);
 
 		// Track changes manually as we use setBean and nested binders
-		binder.addValueChangeListener(e -> hasChanges = true);
+		binder.addValueChangeListener(valueChanged -> hasChanges = true);
 
-		addItems.addClickListener(e -> orderForm.addEmptyOrderItem());
-		editDiscard.addClickListener(e -> presenter.editBackCancelPressed());
-		ok.addClickListener(e -> presenter.okPressed());
+		addItems.addClickListener(clicked -> orderForm.addEmptyOrderItem());
+		editDiscard
+				.addClickListener(clicked -> presenter.editBackCancelPressed());
+		ok.addClickListener(clicked -> presenter.okPressed());
 	}
 
 	private void initLayout() {
@@ -161,11 +168,11 @@ public class OrderEditView extends VerticalLayout implements View {
 	}
 
 	@Override
-	public void enter(ViewChangeEvent event) {
+	public void enter(ViewChangeEvent viewChange) {
 		// Save where we came from so that we can navigate back if the user
 		// cancels
-		oldView = event.getOldView();
-		String parametersString = event.getParameters();
+		oldView = viewChange.getOldView();
+		String parametersString = viewChange.getParameters();
 		if ("".equals(parametersString)) {
 			presenter.enterView(null);
 		} else {
@@ -192,6 +199,7 @@ public class OrderEditView extends VerticalLayout implements View {
 		orderForm.removeOrderItem(orderItem);
 	}
 
+	@Nullable
 	protected Order getOrder() {
 		return binder.getBean();
 	}
@@ -227,49 +235,63 @@ public class OrderEditView extends VerticalLayout implements View {
 		state.setVisible(mode == Mode.EDIT);
 
 		switch (mode) {
-		case REPORT -> {
-			editDiscard.removeClickShortcut();
-			editDiscard.focus();
-			editDiscard.setCaption("Edit");
-			editDiscard.setIcon(VaadinIcons.EDIT);
-			editDiscard
-					.setEnabled(getOrder().getState() != OrderState.DELIVERED);
-			Optional<OrderState> nextState = presenter
-					.getNextHappyPathState(getOrder().getState());
-			ok.removeClickShortcut();
-			ok.setCaption("Mark as "
-					+ nextState.map(OrderState::getDisplayName).orElse("?"));
-			ok.setVisible(nextState.isPresent());
-		}
-		case CONFIRMATION -> {
-			editDiscard.setCaption("Back");
-			editDiscard.setIcon(VaadinIcons.ANGLE_LEFT);
-			editDiscard.setEnabled(true);
-			ok.setCaption("Place order");
-			ok.setVisible(true);
-		}
-		case EDIT -> {
-			editDiscard.setCaption("Discard");
-			editDiscard.setIcon(VaadinIcons.CLOSE);
-			editDiscard.setEnabled(true);
-			editDiscard.setClickShortcut(KeyCode.Z, ModifierKey.CTRL);
-			ok.setClickShortcut(KeyCode.S, ModifierKey.CTRL);
-			if (getOrder() != null && !getOrder().isNew()) {
-				ok.setCaption("Save");
-			} else {
-				ok.setCaption("Review order");
-			}
-			ok.setVisible(true);
-			state.focus();
-		}
+		case REPORT -> reportState();
+		case CONFIRMATION -> confirmationState();
+		case EDIT -> editState();
 		default -> throw new IllegalArgumentException("Unknown mode " + mode);
 		}
 	}
 
+	private void editState() {
+		editDiscard.setCaption("Discard");
+		editDiscard.setIcon(VaadinIcons.CLOSE);
+		editDiscard.setEnabled(true);
+		editDiscard.setClickShortcut(KeyCode.Z, ModifierKey.CTRL);
+		ok.setClickShortcut(KeyCode.S, ModifierKey.CTRL);
+		var order = getOrder();
+		if (order != null && !order.isNew()) {
+			ok.setCaption("Save");
+		} else {
+			ok.setCaption("Review order");
+		}
+		ok.setVisible(true);
+		state.focus();
+	}
+
+	private void confirmationState() {
+		editDiscard.setCaption("Back");
+		editDiscard.setIcon(VaadinIcons.ANGLE_LEFT);
+		editDiscard.setEnabled(true);
+		ok.setCaption("Place order");
+		ok.setVisible(true);
+	}
+
+	@SuppressWarnings("null")
+	private void reportState() {
+		editDiscard.removeClickShortcut();
+		editDiscard.focus();
+		editDiscard.setCaption("Edit");
+		editDiscard.setIcon(VaadinIcons.EDIT);
+		editDiscard
+				.setEnabled(getOrder().getState() != OrderState.DELIVERED);
+		Optional<OrderState> nextState = presenter
+				.getNextHappyPathState(getOrder().getState());
+		ok.removeClickShortcut();
+		ok.setCaption("Mark as "
+				+ nextState.map(OrderState::getDisplayName).orElse("?"));
+		ok.setVisible(nextState.isPresent());
+	}
+
+	/**
+	 * Returns the current mode of this view.
+	 *
+	 * @return the current mode, enum value of {@link Mode}
+	 */
 	public Mode getMode() {
 		return mode;
 	}
 
+	@SuppressWarnings("null")
 	public Stream<HasValue<?>> validate() {
 		Stream<HasValue<?>> errorFields = binder.validate()
 				.getFieldValidationErrors().stream()
@@ -361,9 +383,11 @@ public class OrderEditView extends VerticalLayout implements View {
 
 	class OrderForm extends Composite implements HasAttributes<OrderForm> {
 
+		private static final String DUE_LABEL_ID = "dueLabel";
+		private static final String CUSTOMER_LABEL_ID = "customerLabel";
 		private HorizontalLayout reportHeader;
 		private Label stateLabel;
-		private CssLayout productInfoContainer;	
+		private CssLayout productInfoContainer;
 		private Label orderId;
 
 		OrderForm() {
@@ -410,40 +434,10 @@ public class OrderEditView extends VerticalLayout implements View {
 			dueLabel.setWidth("100%");
 			dueLabel.setContentMode(ContentMode.TEXT);
 			dueLabel.setValue("Due");
-			dueLabel.setId("dueLabel");
+			dueLabel.setId(DUE_LABEL_ID);
 			layout.addComponent(dueLabel);
 
-			HorizontalLayout dateTimeWrapper = new HorizontalLayout();
-			dateTimeWrapper.setStyleName("half");
-			dateTimeWrapper.setWidth("100%");
-			dateTimeWrapper.setMargin(false);
-
-			dueDate = new DateField();
-			dueDate.setLenient(true);
-			dueDate.setId("dueDate");
-			dueDate.setPlaceholder("Date");
-			dueDate.setWidth("180px");
-			AttributeExtension.of(dueDate).setAttribute(
-					AriaAttributes.DESCRIBEDBY,
-					"dueLabel");
-			AttributeExtension.of(dueDate).setAttribute(AriaAttributes.LABEL,
-					"Date");
-			dateTimeWrapper.addComponent(dueDate);
-			dateTimeWrapper.setComponentAlignment(dueDate, Alignment.TOP_LEFT);
-
-			dueTime = new ComboBox<>();
-			dueTime.setEmptySelectionAllowed(false);
-			dueTime.setId("dueTime");
-			dueTime.setTextInputAllowed(false);
-			dueTime.setWidth("6em");
-			AttributeExtension.of(dueTime).setAttribute(
-					AriaAttributes.DESCRIBEDBY,
-					"dueLabel");
-			AttributeExtension.of(dueTime).setAttribute(AriaAttributes.LABEL,
-					"Time");
-			dateTimeWrapper.addComponent(dueTime);
-			dateTimeWrapper.setComponentAlignment(dueTime, Alignment.TOP_LEFT);
-			dateTimeWrapper.setExpandRatio(dueTime, 1.0F);
+			HorizontalLayout dateTimeWrapper = buildDateTimeComponent();
 			layout.addComponent(dateTimeWrapper);
 
 			layout.addComponent(createOrderInfoLayout());
@@ -453,7 +447,7 @@ public class OrderEditView extends VerticalLayout implements View {
 			customerLabel.setWidth("100%");
 			customerLabel.setContentMode(ContentMode.TEXT);
 			customerLabel.setValue("Customer");
-			customerLabel.setId("customerLabel");
+			customerLabel.setId(CUSTOMER_LABEL_ID);
 			layout.addComponent(customerLabel);
 
 			fullName = new TextField();
@@ -462,7 +456,7 @@ public class OrderEditView extends VerticalLayout implements View {
 			fullName.setPlaceholder("Firstname Lastname");
 			fullName.setWidth("100%");
 			AttributeExtension.of(fullName).setAttribute(
-					AriaAttributes.DESCRIBEDBY, "customerLabel");
+					AriaAttributes.DESCRIBEDBY, CUSTOMER_LABEL_ID);
 			AttributeExtension.of(fullName).setAttribute(AriaAttributes.LABEL,
 					"Full name");
 			layout.addComponent(fullName);
@@ -474,7 +468,7 @@ public class OrderEditView extends VerticalLayout implements View {
 			phone.setWidth("100%");
 			AttributeExtension.of(phone).setAttribute(
 					AriaAttributes.DESCRIBEDBY,
-					"customerLabel");
+					CUSTOMER_LABEL_ID);
 			AttributeExtension.of(phone).setAttribute(AriaAttributes.LABEL,
 					"Phone number");
 			layout.addComponent(phone);
@@ -485,7 +479,7 @@ public class OrderEditView extends VerticalLayout implements View {
 			details.setWidth("100%");
 			AttributeExtension.of(details).setAttribute(
 					AriaAttributes.DESCRIBEDBY,
-					"customerLabel");
+					CUSTOMER_LABEL_ID);
 			AttributeExtension.of(details).setAttribute(AriaAttributes.LABEL,
 					"Additional details");
 			layout.addComponent(details);
@@ -535,6 +529,41 @@ public class OrderEditView extends VerticalLayout implements View {
 			layout.addComponent(createButtonsWrapper());
 		}
 
+		private HorizontalLayout buildDateTimeComponent() {
+			HorizontalLayout dateTimeWrapper = new HorizontalLayout();
+			dateTimeWrapper.setStyleName("half");
+			dateTimeWrapper.setWidth("100%");
+			dateTimeWrapper.setMargin(false);
+
+			dueDate = new DateField();
+			dueDate.setLenient(true);
+			dueDate.setId("dueDate");
+			dueDate.setPlaceholder("Date");
+			dueDate.setWidth("180px");
+			AttributeExtension.of(dueDate).setAttribute(
+					AriaAttributes.DESCRIBEDBY,
+					DUE_LABEL_ID);
+			AttributeExtension.of(dueDate).setAttribute(AriaAttributes.LABEL,
+					"Date");
+			dateTimeWrapper.addComponent(dueDate);
+			dateTimeWrapper.setComponentAlignment(dueDate, Alignment.TOP_LEFT);
+
+			dueTime = new ComboBox<>();
+			dueTime.setEmptySelectionAllowed(false);
+			dueTime.setId("dueTime");
+			dueTime.setTextInputAllowed(false);
+			dueTime.setWidth("6em");
+			AttributeExtension.of(dueTime).setAttribute(
+					AriaAttributes.DESCRIBEDBY,
+					DUE_LABEL_ID);
+			AttributeExtension.of(dueTime).setAttribute(AriaAttributes.LABEL,
+					"Time");
+			dateTimeWrapper.addComponent(dueTime);
+			dateTimeWrapper.setComponentAlignment(dueTime, Alignment.TOP_LEFT);
+			dateTimeWrapper.setExpandRatio(dueTime, 1.0F);
+			return dateTimeWrapper;
+		}
+
 		private HorizontalLayout createOrderInfoLayout() {
 			HorizontalLayout orderInfoLayout = new HorizontalLayout();
 			orderInfoLayout.setStyleName("half");
@@ -570,7 +599,7 @@ public class OrderEditView extends VerticalLayout implements View {
 			editDiscard.setId("edit-discard");
 			editDiscard.setCaptionAsHtml(true);
 			editDiscard.setCaption("Cancel");
-			editDiscard.addBlurListener(e -> {
+			editDiscard.addBlurListener(blurred -> {
 				if (mode != Mode.EDIT) {
 					dueDate.focus();
 				}
@@ -640,11 +669,17 @@ public class OrderEditView extends VerticalLayout implements View {
 			ProductInfo productInfo = createProductInfo(orderItem);
 			productInfoContainer.addComponent(productInfo);
 			productInfo.focus();
-			getOrder().getItems().add(orderItem);
+			var order = getOrder();
+			if (order != null) {
+				order.getItems().add(orderItem);
+			}
 		}
 
 		protected void removeOrderItem(OrderItem orderItem) {
-			getOrder().getItems().remove(orderItem);
+			var order = getOrder();
+			if (order != null) {
+				order.getItems().remove(orderItem);
+			}
 
 			for (Component c : productInfoContainer) {
 				if (c instanceof ProductInfo productInfo

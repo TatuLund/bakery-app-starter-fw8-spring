@@ -6,6 +6,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.annotation.PrototypeScope;
 import org.vaadin.spring.events.EventBus.ViewEventBus;
@@ -15,6 +17,7 @@ import com.vaadin.data.BindingValidationStatus;
 import com.vaadin.data.HasValue;
 import com.vaadin.data.ValueContext;
 import com.vaadin.data.converter.StringToIntegerConverter;
+import com.vaadin.event.selection.SingleSelectionEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.shared.ui.ContentMode;
@@ -39,6 +42,7 @@ import com.vaadin.ui.Notification.Type;
 @SpringComponent
 @PrototypeScope
 @SuppressWarnings({ "java:S110", "java:S2160", "java:S6813" })
+@NullMarked
 public class ProductInfo extends Composite
 		implements HasAttributes<ProductInfo> {
 
@@ -59,7 +63,8 @@ public class ProductInfo extends Composite
 
 	private final transient ViewEventBus viewEventBus;
 
-	private BeanValidationBinder<OrderItem> binder;
+	private BeanValidationBinder<OrderItem> binder = new BeanValidationBinder<>(
+			OrderItem.class);
 
 	// Use Label instead of TextArea in "report mode" for a better presentation
 	private Label readOnlyComment = new Label();
@@ -67,6 +72,7 @@ public class ProductInfo extends Composite
 	private boolean reportMode = false;
 
 	@Autowired
+	@SuppressWarnings("java:S2637")
 	public ProductInfo(DollarPriceConverter priceFormatter,
 			ViewEventBus viewEventBus) {
 		setRole(AriaRoles.GROUP);
@@ -80,27 +86,32 @@ public class ProductInfo extends Composite
 	@PostConstruct
 	public void setup() {
 		initLayout();
-		binder = new BeanValidationBinder<>(OrderItem.class);
 		binder.setRequiredConfigurator(null);
 		binder.forField(quantity)
 				.withConverter(new StringToIntegerConverter(-1,
 						"Please enter a number"))
 				.bind("quantity");
 		binder.bindInstanceFields(this);
-		quantity.addValueChangeListener(e -> announceLinePrice(e.getValue()));
-		binder.addValueChangeListener(e -> fireProductInfoChanged());
+		quantity.addValueChangeListener(
+				valueChanged -> announceLinePrice(valueChanged.getValue()));
+		binder.addValueChangeListener(valueChanged -> fireProductInfoChanged());
 
-		product.addSelectionListener(e -> {
-			Optional<Product> selectedProduct = e.getFirstSelectedItem();
-			int productPrice = selectedProduct.map(Product::getPrice).orElse(0);
-			updatePrice(productPrice);
-		});
+		product.addSelectionListener(this::onProductSelected);
 
 		readOnlyComment.setWidth("100%");
 		readOnlyComment.setId(comment.getId());
 		readOnlyComment.setStyleName(comment.getStyleName());
 
 		delete.addClickListener(e -> fireOrderItemDeleted());
+	}
+
+	@SuppressWarnings("null")
+	private void onProductSelected(
+			SingleSelectionEvent<Product> selectionEvent) {
+		Optional<Product> selectedProduct = selectionEvent
+				.getFirstSelectedItem();
+		int productPrice = selectedProduct.map(Product::getPrice).orElse(0);
+		updatePrice(productPrice);
 	}
 
 	private void initLayout() {
@@ -182,7 +193,7 @@ public class ProductInfo extends Composite
 				new ValueContext(Locale.US)));
 	}
 
-	private void announceLinePrice(String quantityValue) {
+	private void announceLinePrice(@Nullable String quantityValue) {
 		if (getItem().getProduct() == null || quantityValue == null
 				|| quantityValue.trim().isEmpty()) {
 			return;
@@ -194,7 +205,7 @@ public class ProductInfo extends Composite
 				Type.ASSISTIVE_NOTIFICATION));
 	}
 
-	private Optional<Integer> parseQuantity(String quantityValue) {
+	private Optional<Integer> parseQuantity(@Nullable String quantityValue) {
 		if (quantityValue == null || quantityValue.trim().isEmpty()) {
 			return Optional.empty();
 		}
@@ -256,6 +267,7 @@ public class ProductInfo extends Composite
 		return product.isEmpty();
 	}
 
+	@SuppressWarnings("null")
 	public Stream<HasValue<?>> validate() {
 		return binder.validate().getFieldValidationErrors().stream()
 				.map(BindingValidationStatus::getField);

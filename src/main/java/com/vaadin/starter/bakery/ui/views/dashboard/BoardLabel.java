@@ -1,7 +1,6 @@
 package com.vaadin.starter.bakery.ui.views.dashboard;
 
 import org.jspecify.annotations.NullMarked;
-import org.springframework.lang.Nullable;
 
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Label;
@@ -10,11 +9,11 @@ import com.vaadin.ui.Label;
 @SuppressWarnings("java:S2160")
 public class BoardLabel extends Label {
 
-	@Nullable
 	private String header;
-	@Nullable
+
 	private String content;
 
+	@SuppressWarnings("java:S2637")
 	public BoardLabel(String header, String content) {
 		super("", ContentMode.HTML);
 		addStyleName("board-box-label");
@@ -39,8 +38,7 @@ public class BoardLabel extends Label {
 	}
 
 	private void updateValue() {
-		setValue("<h1>" + content + "</h1>" //
-				+ "<h4>" + header + "</h4>");
+		setValue(String.format("<h1>%s</h1><h4>%s</h4>", content, header));
 	}
 
 }

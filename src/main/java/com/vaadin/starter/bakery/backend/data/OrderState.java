@@ -1,7 +1,11 @@
 package com.vaadin.starter.bakery.backend.data;
 
+import org.jspecify.annotations.NullMarked;
+import org.springframework.lang.Nullable;
+
 import com.vaadin.shared.util.SharedUtil;
 
+@NullMarked
 public enum OrderState {
 	NEW, CONFIRMED, READY, DELIVERED, PROBLEM, CANCELLED;
 
@@ -20,9 +24,10 @@ public enum OrderState {
 	 *
 	 * @return the enum value with a matching display name
 	 */
+	@Nullable
 	public static OrderState forDisplayName(String displayName) {
 		for (OrderState state : values()) {
-			if (displayName.toLowerCase().equals(state.getDisplayName().toLowerCase())) {
+			if (displayName.equalsIgnoreCase(state.getDisplayName())) {
 				return state;
 			}
 		}

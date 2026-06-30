@@ -88,6 +88,7 @@ public class OrderEditPresenter implements Serializable, HasLogger {
 	/**
 	 * Called when the user enters the view.
 	 */
+	@SuppressWarnings("java:S8688")
 	public void enterView(Long id) {
 		Order order;
 		if (id == null) {

@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.icons.VaadinIcons;
@@ -48,23 +47,14 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings({ "java:S2160", "java:S110" })
 public class MainView extends HorizontalLayout implements ViewDisplay {
 
-	@Nullable
 	protected Label activeViewName;
-	@Nullable
 	protected Button menuButton;
-	@Nullable
 	protected Navigation menu;
-	@Nullable
 	protected Button storefront;
-	@Nullable
 	protected Button dashboard;
-	@Nullable
 	protected Button users;
-	@Nullable
 	protected Button products;
-	@Nullable
 	protected Button logout;
-	@Nullable
 	protected VerticalLayout content;
 
 	private final Map<Class<? extends View>, Button> navigationButtons = new HashMap<>();
@@ -72,6 +62,7 @@ public class MainView extends HorizontalLayout implements ViewDisplay {
 	private final SecuredViewAccessControl viewAccessControl;
 
 	@Autowired
+	@SuppressWarnings("java:S2637")
 	public MainView(NavigationManager navigationManager,
 			SecuredViewAccessControl viewAccessControl) {
 		this.navigationManager = navigationManager;
@@ -86,7 +77,7 @@ public class MainView extends HorizontalLayout implements ViewDisplay {
 		attachNavigation(users, UserAdminView.class);
 		attachNavigation(products, ProductAdminView.class);
 
-		logout.addClickListener(e -> logout());
+		logout.addClickListener(clicked -> logout());
 	}
 
 	private void setupAppLayout() {
@@ -193,7 +184,7 @@ public class MainView extends HorizontalLayout implements ViewDisplay {
 		if (hasAccessToView) {
 			navigationButtons.put(targetView, navigationButton);
 			navigationButton.addClickListener(
-					e -> navigationManager.navigateTo(targetView));
+					clicked -> navigationManager.navigateTo(targetView));
 		}
 	}
 
